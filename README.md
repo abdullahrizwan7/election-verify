@@ -2,7 +2,8 @@
 
 **An AI-assisted platform for checking election information.** Citizens submit a news link, a forwarded
 message or an image. The system gathers evidence (source reputation, existing fact-checks, supporting and
-contradicting sources, image analysis), and a **human reviewer** decides and publishes the verdict.
+contradicting sources, image metadata and text in images), and a **human reviewer** decides and publishes
+the verdict.
 
 > The AI only suggests. Nothing is published without a person checking it.
 
@@ -15,32 +16,80 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000. Without any keys the app runs in **demo mode**: sample data is kept in memory
-and you sign in by picking a role on the sign-in page.
+Open http://localhost:3000. Without any keys the app runs in **demo mode**: sample data is kept in memory,
+you sign in by picking a role, and the checks use free built-in methods instead of AI.
 
 | Demo account | Can do |
 |---|---|
-| Citizen | Submit links, text and images. Follow their progress. |
-| Reviewer | Everything above, plus the review queue and publishing verdicts. |
-| Admin | Everything above, plus managing trusted sources. |
+| Citizen | Submit links, text and images. Follow their progress. Up to 10 per hour. |
+| Reviewer | Everything above, plus the review queue, publishing verdicts and re-running checks. |
+| Admin | Everything above, plus trusted sources, the activity log and the setup page. |
 
-**Suggested demo for class:** sign in as Citizen → submit a message → see the progress page →
-sign in as Reviewer → open *"Photo claims marked ballot papers…"* → read the AI suggestion and evidence →
-publish a verdict → open the public result page.
+**Suggested demo for class**
+
+1. Sign in as **Citizen** and submit a message or a news link. Watch the steps tick off live.
+2. Sign in as **Reviewer**. Open your item, or *"Photo claims marked ballot papers…"* from the sample data.
+3. Show the AI suggestion. Click a citation like `ev-5c` to jump to its evidence.
+4. Pick a verdict, write the public explanation, and publish.
+5. Open the public result page. Then, as **Admin**, show the activity log and the Setup page.
+
+---
+
+## How the checking pipeline works
+
+Each submission goes through these steps in the background. The result page shows them live.
+
+| Step | What it does | Free tool | Without a key |
+|---|---|---|---|
+| Read the content | Opens the link safely and extracts the article | `@mozilla/readability` + `jsdom` | Works |
+| Check the source | Trusted-sources list, domain age, HTTPS | RDAP (public WHOIS replacement) | Works |
+| Analyze the image | Camera metadata and text inside the image | `exifr` + `tesseract.js` | Works |
+| | Describes the image and spots oddities | Gemini API | Skipped |
+| Find the claims | Splits the content into checkable statements | Gemini API | Built-in rules |
+| Search fact-checks | Finds fact-checks already published elsewhere | Google Fact Check Tools API | Skipped |
+| Gather evidence | Finds news and official pages about each claim | Tavily search (+ Gemini for stance) | Skipped |
+| Prepare for review | Suggests a verdict with cited evidence | Gemini API | Built-in rules |
+
+Reviewers also get one-click **reverse image search** buttons (Google Lens, TinEye) to find older copies of
+a photo.
+
+**Where it runs:** with Inngest connected, every step is a background job with retries. Without it, the
+steps run right after the page responds (Next.js `after()`), which is fine for development and demos.
+
+### Safety measures worth explaining
+
+1. **Human in the loop.** The AI's verdict (`aiVerdict`) is stored apart from the reviewer's
+   (`finalVerdict`), and only the reviewer's is ever shown to the public.
+2. **Checked citations.** The AI summary cites evidence by ID. The review screen links each citation and
+   highlights in red any ID that doesn't exist, so invented sources stand out.
+3. **Prompt injection.** Submitted text is wrapped in `<content>` tags, and the AI is told never to follow
+   instructions inside it.
+4. **SSRF protection.** Before fetching a submitted link, and after every redirect, the server checks that
+   the address is on the public internet. That stops links like `http://169.254.169.254` from reaching
+   private systems. It also limits time (10 s), size (3 MB) and redirects (3). See `lib/pipeline/safe-fetch.ts`.
+5. **Privacy.** GPS locations found in photos are never shown, only the fact that one exists. Images are
+   stored in a private bucket with links that expire.
+6. **Abuse limits.** Sign-in is required to submit, citizens can send 10 items per hour, and duplicates are
+   detected with a SHA-256 fingerprint.
+7. **Server-side checks.** Every form is validated again on the server (zod), and every page and action
+   checks the role with `requireRole()`.
+8. **Audit log.** Submissions, verdicts, re-runs and source changes are recorded with who did them.
 
 ---
 
 ## Tech stack (all free)
 
-| Layer | Tool | Free tier |
-|---|---|---|
-| Framework | Next.js 16 (App Router, Server Actions, Cache Components) + TypeScript | Open source |
-| UI | Tailwind CSS 4 + shadcn/ui (Radix) + lucide icons | Open source |
-| Validation | zod | Open source |
-| Database | PostgreSQL + Prisma 7 | Supabase free tier, or local Postgres |
-| Login | Supabase Auth (email link + Google) | Free tier |
-| Image storage | Supabase Storage (private bucket, signed links) | Free tier |
-| Hosting | Vercel | Hobby plan |
+| Layer | Tool |
+|---|---|
+| Framework | Next.js 16 (App Router, Server Actions, Cache Components, `proxy.ts`) + TypeScript |
+| UI | Tailwind CSS 4, shadcn/ui (Radix), lucide icons |
+| Database | PostgreSQL + Prisma 7 (Supabase free tier, or local Postgres) |
+| Login and storage | Supabase Auth (email link + Google) and Supabase Storage |
+| Background jobs | Inngest (free plan) |
+| AI | Google Gemini API (free tier), behind a small swappable module in `lib/ai/` |
+| Evidence | Google Fact Check Tools API, Tavily, RDAP, Readability, exifr, tesseract.js |
+| Tests | Vitest (unit), Playwright (end-to-end) |
+| Hosting | Vercel (Hobby plan) |
 
 ---
 
@@ -49,97 +98,74 @@ publish a verdict → open the public result page.
 ```
 app/                          Pages (each folder = a URL)
 ├─ (public)/                  Pages anyone can see (the brackets don't appear in the URL)
-│  ├─ page.tsx                /            Home: hero, how it works, recent verdicts, rating guide
-│  ├─ submit/                 /submit      Submit form + Server Action that validates and saves
+│  ├─ page.tsx                /            Home
+│  ├─ submit/                 /submit      Form + Server Action (validate, limit, save, start checks)
 │  ├─ s/[id]/                 /s/:id       Live progress, then the published verdict and evidence
 │  └─ verified/               /verified    All published verdicts, filter by rating
 ├─ (auth)/                    Sign-in page and sign-in/out Server Actions
 ├─ auth/callback/route.ts     Where Supabase sends people back after signing in
-├─ review/                    /review      Reviewer queue and review workspace (Reviewer role)
-├─ admin/sources/             /admin/...   Trusted sources list (Admin role)
-└─ layout.tsx                 Header, footer and demo banner shared by every page
+├─ api/inngest/route.ts       Endpoint Inngest calls to run pipeline steps
+├─ review/                    Review queue and workspace (Reviewer role)
+├─ admin/                     Trusted sources, activity log, setup (Admin role)
+├─ error.tsx, not-found.tsx   Friendly error pages
+└─ layout.tsx                 Header, footer and demo banner
 
-components/
-├─ ui/                        shadcn/ui building blocks (button, card, table…)
-├─ layout/                    Header, footer, account menu, demo banner
-├─ home/  submit/  review/  admin/  auth/  evidence/   Components for each feature
-└─ verdict-badge.tsx …        Small shared pieces
+components/                   UI, grouped by feature (ui/ holds the shadcn building blocks)
 
 lib/
-├─ data/
-│  ├─ repository.ts           The list of data operations the app needs (an interface)
-│  ├─ demo-store.ts           …implemented in memory (demo mode)
-│  ├─ prisma-store.ts         …implemented with PostgreSQL through Prisma
-│  ├─ demo-data.ts            Sample submissions, sources and accounts (all made up)
-│  └─ index.ts                Picks a store. Pages import only from here.
+├─ pipeline/                  The verification pipeline
+│  ├─ steps.ts                The list of steps, in order. Start reading here.
+│  ├─ run.ts                  Runs the steps and records progress
+│  ├─ safe-fetch.ts           SSRF-safe link fetching
+│  ├─ extract-article.ts      Article text from a web page
+│  ├─ source-reputation.ts    Trusted-source match and domain age
+│  ├─ analyze-image.ts        Metadata and OCR
+│  ├─ search-factchecks.ts    Google Fact Check Tools
+│  ├─ find-web-evidence.ts    Tavily web search
+│  └─ rules.ts                Non-AI fallbacks (claims, stances, verdict)
+├─ ai/                        Gemini client and the four AI tasks
+├─ data/                      Data layer: one interface, a demo (in-memory) and a Prisma version
 ├─ auth.ts                    getCurrentUser(), requireRole()
-├─ supabase/                  Supabase clients for the server and the proxy
-├─ validators.ts              zod rules for every form (checked on the server)
-├─ labels.ts                  Verdict names, colours and descriptions
-├─ types.ts                   Shared TypeScript types
-└─ config.ts                  Reads environment variables, decides demo mode
+├─ validators.ts              zod rules for every form
+└─ config.ts                  Reads environment variables, decides what is switched on
 
-prisma/
-├─ schema.prisma              Database tables
-├─ migrations/                SQL history of the schema
-└─ seed.ts                    Loads the sample data into a real database
-
+inngest/                      Background job definition
+prisma/                       Schema, migrations and sample data seed
+tests/unit/, tests/e2e/       Vitest and Playwright tests
 proxy.ts                      Runs before each request (Next.js 16's new name for middleware)
 ```
 
 ---
 
-## How it works
+## Connect the real services (all free)
 
-```mermaid
-flowchart LR
-  U[Citizen] -->|link / text / image| S[Submit form]
-  S -->|Server Action: validate, hash, save| DB[(Database)]
-  DB --> P[Verification pipeline<br/>Day 3–5]
-  P -->|claims, evidence, AI suggestion| DB
-  R[Reviewer] -->|reads evidence, picks verdict| DB
-  DB --> PUB[Public result page]
-```
+Copy `.env.example` to `.env` (already done once) and fill in what you have. Restart `npm run dev` after
+changing it. **Admin → Setup** in the app shows what is connected.
 
-**Submission statuses:** Queued → Analyzing → Awaiting review → Published (or Failed).
+1. **Supabase** (database, login, image storage): create a project at [supabase.com](https://supabase.com).
+   - `DATABASE_URL`: click **Connect** and copy the **Session pooler** string (it works on every network).
+   - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`: Project Settings → API Keys.
+   - Storage → create a **private** bucket named `submissions`.
+   - Authentication → URL Configuration → add `http://localhost:3000/auth/callback`.
+   - Then run `npm run db:migrate` and `npm run db:seed`.
+2. **Gemini**: `GEMINI_API_KEY` from [Google AI Studio](https://aistudio.google.com/apikey).
+3. **Fact checks**: `GOOGLE_FACT_CHECK_API_KEY`. In Google Cloud, enable *Fact Check Tools API*, then create an API key.
+4. **Web search**: `TAVILY_API_KEY` from [tavily.com](https://app.tavily.com).
+5. **Admins**: `ADMIN_EMAILS` with your email.
+6. **Inngest** (optional locally): run `npx inngest-cli@latest dev` in a second terminal and set `INNGEST_DEV=1`.
 
-**Ratings:** Accurate, Misleading, Missing context, False, Unverified, Satire.
-
-### Design decisions worth explaining
-
-1. **Human in the loop.** The AI's verdict is stored separately (`aiVerdict`) from the reviewer's
-   (`finalVerdict`), and only the reviewer's is ever shown to the public.
-2. **Citations are checked.** The AI summary cites evidence by ID, like `[ev-5c]`. The review screen links
-   each one to its evidence card and highlights any ID that doesn't exist, so made-up sources stand out.
-3. **Repository pattern.** Pages talk to `lib/data`, never to the database directly. That is how the same
-   code runs on sample data or on PostgreSQL.
-4. **Security on the server.** Every form is validated again on the server with zod. Every page and
-   action checks the user's role with `requireRole()`. The proxy is only a quick first check.
-5. **Duplicates.** Each submission gets a SHA-256 fingerprint. If the same content was already
-   published, the user is sent straight to that result.
-6. **Fast pages.** With Cache Components, the static parts of each page load instantly and anything that
-   reads the database or the login cookie streams in inside a `<Suspense>` boundary with a skeleton.
+Free Supabase projects pause after a week without use. Open the dashboard before your presentation.
 
 ---
 
-## Connect the real services (free)
+## Deploy to Vercel (free)
 
-1. Create a free project at [supabase.com](https://supabase.com).
-2. Copy `.env.example` to `.env` and fill in:
-   - `DATABASE_URL`: Project Settings → Database → Connection string
-   - `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: Project Settings → API Keys
-   - `SUPABASE_SECRET_KEY`: same page. Server only, never share it.
-   - `ADMIN_EMAILS`: your email, so you become an admin on first sign-in
-3. In Supabase, create a **private** Storage bucket named `submissions`.
-4. Under Authentication → URL Configuration, add `http://localhost:3000/auth/callback` as a redirect URL.
-5. Create the tables and load the sample data:
-
-```bash
-npm run db:migrate
-npm run db:seed
-```
-
-Free Supabase projects pause after a week without use. Open the dashboard before your presentation.
+1. Push the code to GitHub.
+2. In Vercel, import the repository. The default settings work.
+3. Add the same environment variables in Project Settings → Environment Variables, plus
+   `NEXT_PUBLIC_SITE_URL` with your Vercel address and the two Inngest production keys.
+4. In Supabase, add `https://<your-app>.vercel.app/auth/callback` as a redirect URL.
+5. In Inngest, sync the app at `https://<your-app>.vercel.app/api/inngest`.
 
 ---
 
@@ -149,32 +175,21 @@ Free Supabase projects pause after a week without use. Open the dashboard before
 |---|---|
 | `npm run dev` | Start the development server |
 | `npm run build` / `npm start` | Production build / run it |
-| `npm run lint` | ESLint |
-| `npm run typecheck` | TypeScript check |
-| `npm run db:migrate` | Apply schema changes to the database |
-| `npm run db:seed` | Load the sample data |
-| `npm run db:studio` | Browse the database in the browser |
+| `npm test` | Unit tests (Vitest) |
+| `npm run test:e2e` | Browser tests (Playwright). First run `npx playwright install chromium` |
+| `npm run lint` / `npm run typecheck` | ESLint / TypeScript |
+| `npm run db:migrate` / `db:seed` / `db:studio` | Database schema, sample data, database browser |
 
 ---
 
-## Roadmap (one week, all free tools)
+## Project status
 
 | Day | Work | Status |
 |---|---|---|
-| 1 | Project setup, schema, login and roles, all pages with sample data | ✅ Done |
-| 2 | Real submissions with Supabase Storage, rate limiting | Form and Server Action done |
-| 3 | Pipeline part 1: read the article (`@mozilla/readability`), source reputation, domain age (RDAP), claim extraction | |
-| 4 | Pipeline part 2: [Google Fact Check Tools API](https://developers.google.com/fact-check/tools/api) (free), web evidence search, AI summary | |
-| 5 | Image analysis: metadata (`exifr`), text in images (`tesseract.js`), reverse image search links for reviewers | |
-| 6 | Polish the reviewer workspace, audit log page | |
-| 7 | Tests (Vitest + Playwright), deploy to Vercel, demo data | |
-
-**Free choices for the pipeline**
-
-- **Background jobs:** [Inngest](https://www.inngest.com) free plan. Each step retries on its own.
-- **AI (claims and summaries):** a provider with a free tier, such as the Google Gemini API or Groq, or a local
-  model with Ollama. Check the current free limits and data-use terms before you start.
-- **Web search:** Tavily's free monthly credits.
-- **OCR:** `tesseract.js`, which runs on your own server.
-- **Reverse image search:** buttons that open the image in Google Lens or TinEye for the reviewer.
-  Fully automatic reverse search needs a paid API.
+| 1 | Setup, schema, login and roles, all pages | ✅ Done |
+| 2 | Submissions, image upload, hourly limit, duplicate check | ✅ Done |
+| 3 | Pipeline: safe link reading, article extraction, source reputation, claims | ✅ Done |
+| 4 | Fact-check search, web evidence, AI suggestion with citations | ✅ Done (needs free keys) |
+| 5 | Image metadata, OCR, AI image notes, reverse image search links | ✅ Done |
+| 6 | Re-run, activity log, setup page, error pages | ✅ Done |
+| 7 | Unit and browser tests | ✅ Done. Deploying needs your accounts. |
