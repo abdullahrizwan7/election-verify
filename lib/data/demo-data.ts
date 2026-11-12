@@ -49,11 +49,17 @@ const ALL_DONE: PipelineSteps = {
   synthesize: "done",
 };
 
+/** A date some days back, at a fixed hour (for items from earlier days). */
 function daysAgo(days: number, hour = 10): Date {
   const date = new Date();
   date.setDate(date.getDate() - days);
   date.setHours(hour, 0, 0, 0);
   return date;
+}
+
+/** A time a few hours before now (for items from today, so they're never in the future). */
+function hoursAgo(hours: number): Date {
+  return new Date(Date.now() - hours * 60 * 60 * 1000);
 }
 
 function evidence(item: Partial<Evidence> & Pick<Evidence, "id" | "kind" | "title">): Evidence {
@@ -212,7 +218,7 @@ export const DEMO_SUBMISSIONS: (SubmissionDetail & { userId: string | null; cont
       "Text in the photo includes the word 'SPECIMEN' [ev-5c], and the papers look unmarked [ev-5d]. A news report describes a voter-education drive that handed out specimen ballots in the same district [ev-5e]. The election office says it is still looking into a report from Station 14 [ev-5f]. No earlier copy of the photo was found [ev-5a]. Suggested verdict: Misleading, unless the investigation finds real ballots.",
     finalVerdict: null,
     publicNote: null,
-    createdAt: daysAgo(0, 8),
+    createdAt: hoursAgo(5),
     publishedAt: null,
     userId: DEMO_USERS.citizen.id,
     contentHash: "demo-5",
@@ -226,7 +232,7 @@ export const DEMO_SUBMISSIONS: (SubmissionDetail & { userId: string | null; cont
       evidence({ id: "ev-5c", claimId: "cl-5a", kind: "OCR_TEXT", title: "Text found in the image", stance: "REFUTES", snippet: "“SPECIMEN”, “DISTRICT 7”, “NOT VALID FOR VOTING” (partly hidden)" }),
       evidence({ id: "ev-5d", claimId: "cl-5a", kind: "AI_IMAGE_NOTES", title: "AI observations (not proof)", snippet: "The papers look unmarked. The ballot layout has no serial-number box, unlike the official sample ballot." }),
       evidence({ id: "ev-5e", claimId: "cl-5a", kind: "WEB_SOURCE", title: "Voter-education drive hands out 5,000 specimen ballots", url: "https://dailyledger.example/2026/11/specimen-ballots-district-7", publisher: "The Daily Ledger", stance: "REFUTES", snippet: "Volunteers used specimen ballots to show first-time voters how to mark a ballot.", publishedAt: daysAgo(5) }),
-      evidence({ id: "ev-5f", claimId: "cl-5a", kind: "WEB_SOURCE", title: "Statement on a report from Station 14", url: "https://elections.gov.example/statements/station-14", publisher: "National Election Commission", stance: "NEUTRAL", snippet: "The district office has received a report and is checking it. Real ballots are stored in sealed boxes.", publishedAt: daysAgo(0) }),
+      evidence({ id: "ev-5f", claimId: "cl-5a", kind: "WEB_SOURCE", title: "Statement on a report from Station 14", url: "https://elections.gov.example/statements/station-14", publisher: "National Election Commission", stance: "NEUTRAL", snippet: "The district office has received a report and is checking it. Real ballots are stored in sealed boxes.", publishedAt: hoursAgo(2) }),
     ],
     reviews: [],
   },
@@ -246,7 +252,7 @@ export const DEMO_SUBMISSIONS: (SubmissionDetail & { userId: string | null; cont
       "The website is unknown and was registered 12 days ago [ev-6a]. The official voter guide says one valid photo ID is enough [ev-6b], and a news outlet quotes the commission saying there are no new ID rules [ev-6c]. No existing fact-check was found.",
     finalVerdict: null,
     publicNote: null,
-    createdAt: daysAgo(0, 9),
+    createdAt: hoursAgo(3),
     publishedAt: null,
     userId: DEMO_USERS.citizen.id,
     contentHash: "demo-6",
@@ -273,7 +279,7 @@ export const DEMO_SUBMISSIONS: (SubmissionDetail & { userId: string | null; cont
     aiSummary: null,
     finalVerdict: null,
     publicNote: null,
-    createdAt: daysAgo(0, 10),
+    createdAt: hoursAgo(1.5),
     publishedAt: null,
     userId: DEMO_USERS.citizen.id,
     contentHash: "demo-7",
@@ -296,7 +302,7 @@ export const DEMO_SUBMISSIONS: (SubmissionDetail & { userId: string | null; cont
     aiSummary: null,
     finalVerdict: null,
     publicNote: null,
-    createdAt: daysAgo(0, 11),
+    createdAt: hoursAgo(0.3),
     publishedAt: null,
     userId: null,
     contentHash: "demo-8",

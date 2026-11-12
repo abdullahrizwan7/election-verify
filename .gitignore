@@ -46,3 +46,8 @@ next-env.d.ts
 # local tool files
 .claude/settings.local.json
 .claude/.cc-writes
+
+# test output
+/test-results/
+/playwright-report/
+/blob-report/
