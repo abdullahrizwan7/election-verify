@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "prod",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "NEXT_TELEMETRY_DISABLED=1 npm run build && npm run start -- -p 3100"],
+      "port": 3100
+    },
+    {
+      "name": "dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "-p", "3101"],
+      "port": 3101
+    }
+  ]
+}

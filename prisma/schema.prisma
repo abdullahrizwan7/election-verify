@@ -1,0 +1,169 @@
+// ElectionVerify database schema
+// Docs: https://pris.ly/d/prisma-schema
+//
+// Flow: a citizen creates a Submission -> the pipeline adds Claims and Evidence
+// -> a reviewer writes a Review -> the Submission is PUBLISHED with a final verdict.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  REVIEWER
+  ADMIN
+}
+
+enum InputType {
+  URL
+  TEXT
+  IMAGE
+}
+
+enum Status {
+  QUEUED
+  PROCESSING
+  NEEDS_REVIEW
+  PUBLISHED
+  FAILED
+}
+
+enum Verdict {
+  ACCURATE
+  MISLEADING
+  FALSE
+  MISSING_CONTEXT
+  UNVERIFIED
+  SATIRE
+}
+
+enum EvidenceKind {
+  SOURCE_INFO
+  FACT_CHECK
+  WEB_SOURCE
+  IMAGE_MATCH
+  IMAGE_METADATA
+  OCR_TEXT
+  AI_IMAGE_NOTES
+}
+
+enum Stance {
+  SUPPORTS
+  REFUTES
+  NEUTRAL
+}
+
+enum SourceType {
+  OFFICIAL
+  NEWS
+  FACT_CHECKER
+  SATIRE
+  KNOWN_MISINFO
+}
+
+/// One row per signed-in person. `id` is the same id as the Supabase auth user.
+model Profile {
+  id          String       @id @db.Uuid
+  email       String       @unique
+  name        String?
+  role        Role         @default(USER)
+  createdAt   DateTime     @default(now())
+  submissions Submission[]
+  reviews     Review[]
+}
+
+/// Something a citizen wants checked: a link, a piece of text or an image.
+model Submission {
+  id           String     @id @default(cuid())
+  type         InputType
+  url          String?
+  text         String? /// pasted text, or the article text extracted from the URL
+  imagePath    String? /// path inside the Supabase Storage bucket
+  title        String?
+  contentHash  String /// sha256 of the normalized input, used to find duplicates
+  status       Status     @default(QUEUED)
+  steps        Json       @default("{}") /// pipeline progress, e.g. { "extract": "done" }
+  error        String?
+  aiVerdict    Verdict? /// suggestion only, never shown to the public
+  aiConfidence Float?
+  aiSummary    String?
+  finalVerdict Verdict? /// set by a human reviewer
+  publicNote   String?
+  userId       String?    @db.Uuid
+  user         Profile?   @relation(fields: [userId], references: [id])
+  claims       Claim[]
+  evidence     Evidence[]
+  reviews      Review[]
+  createdAt    DateTime   @default(now())
+  publishedAt  DateTime?
+
+  @@index([status, createdAt])
+  @@index([contentHash])
+}
+
+/// A single checkable statement found in a submission.
+model Claim {
+  id           String     @id @default(cuid())
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  text         String
+  position     Int        @default(0)
+  evidence     Evidence[]
+}
+
+/// One piece of supporting or contradicting information found by the pipeline.
+model Evidence {
+  id           String       @id @default(cuid())
+  submissionId String
+  submission   Submission   @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  claimId      String?
+  claim        Claim?       @relation(fields: [claimId], references: [id])
+  kind         EvidenceKind
+  title        String
+  url          String?
+  publisher    String?
+  rating       String? /// e.g. "False" from a fact-checker
+  stance       Stance?
+  snippet      String?
+  publishedAt  DateTime?
+  data         Json? /// raw API response, for reviewers
+  createdAt    DateTime     @default(now())
+}
+
+/// A human reviewer's decision. The latest review sets the public verdict.
+model Review {
+  id           String     @id @default(cuid())
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  reviewerId   String     @db.Uuid
+  reviewer     Profile    @relation(fields: [reviewerId], references: [id])
+  verdict      Verdict
+  publicNote   String
+  internalNote String?
+  createdAt    DateTime   @default(now())
+}
+
+/// Known websites and how much we trust them.
+model Source {
+  domain    String     @id
+  name      String
+  type      SourceType
+  trust     Int /// 0-100
+  notes     String?
+  createdAt DateTime   @default(now())
+}
+
+/// Who did what, and when. Never updated or deleted.
+model AuditLog {
+  id           String   @id @default(cuid())
+  actorId      String?
+  action       String /// e.g. "submission.created", "review.published"
+  submissionId String?
+  meta         Json?
+  createdAt    DateTime @default(now())
+}
