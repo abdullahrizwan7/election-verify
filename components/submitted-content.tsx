@@ -37,10 +37,24 @@ export function SubmittedContent({ submission }: { submission: SubmissionDetail 
           </div>
         )}
 
-        {submission.text && (
-          <blockquote className="rounded-lg border-l-4 border-primary/40 bg-muted/50 p-4 text-sm whitespace-pre-line">
-            {submission.text}
-          </blockquote>
+        {submission.text && submission.type === "URL" ? (
+          // Articles can be long, so show the start and let people expand the rest.
+          <details className="group rounded-lg border bg-muted/30 text-sm">
+            <summary className="cursor-pointer list-none p-4">
+              <span className="mb-2 block text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                Article text we read · {submission.text.split(/\s+/).length.toLocaleString()} words
+              </span>
+              <span className="line-clamp-4 group-open:hidden">{submission.text}</span>
+              <span className="mt-2 block text-xs font-medium text-primary group-open:hidden">Show full text</span>
+            </summary>
+            <div className="max-h-[32rem] overflow-y-auto px-4 pb-4 whitespace-pre-line">{submission.text}</div>
+          </details>
+        ) : (
+          submission.text && (
+            <blockquote className="rounded-lg border-l-4 border-primary/40 bg-muted/50 p-4 text-sm whitespace-pre-line">
+              {submission.text}
+            </blockquote>
+          )
         )}
       </CardContent>
     </Card>

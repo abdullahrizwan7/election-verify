@@ -79,7 +79,13 @@ export function ImageDropzone({ invalid }: { invalid?: boolean }) {
           <img src={preview.url} alt="Preview of the chosen image" className="mx-auto max-h-72 object-contain" />
           <div className="flex items-center justify-between gap-3 border-t bg-background px-3 py-2 text-sm">
             <span className="truncate">
-              {preview.name} <span className="text-muted-foreground">· {(preview.size / 1024 / 1024).toFixed(1)} MB</span>
+              {preview.name}{" "}
+              <span className="text-muted-foreground">
+                ·{" "}
+                {preview.size < 1024 * 1024
+                  ? `${Math.max(1, Math.round(preview.size / 1024))} KB`
+                  : `${(preview.size / 1024 / 1024).toFixed(1)} MB`}
+              </span>
             </span>
             <Button type="button" variant="ghost" size="sm" onClick={clear}>
               <X aria-hidden /> Remove

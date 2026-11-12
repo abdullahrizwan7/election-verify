@@ -2,8 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink, RotateCcw } from "lucide-react";
+import { rerunPipelineAction } from "@/app/review/[id]/actions";
+import { AutoRefresh } from "@/components/auto-refresh";
 import { ClaimsList } from "@/components/claims-list";
+import { ReverseImageSearch } from "@/components/review/reverse-image-search";
 import { EVIDENCE_GROUPS, EvidenceList } from "@/components/evidence/evidence-list";
 import { PipelineProgress } from "@/components/pipeline-progress";
 import { AiSuggestion } from "@/components/review/ai-suggestion";
@@ -44,6 +47,7 @@ async function Workspace({ params }: { params: Params }) {
   if (!submission) notFound();
 
   const ready = submission.status === "NEEDS_REVIEW" || submission.status === "PUBLISHED";
+  const running = submission.status === "QUEUED" || submission.status === "PROCESSING";
 
   return (
     <div className="space-y-6">
@@ -66,6 +70,7 @@ async function Workspace({ params }: { params: Params }) {
         {/* Left: the content and all evidence */}
         <div className="space-y-6">
           <SubmittedContent submission={submission} />
+          {submission.imageUrl && <ReverseImageSearch imageUrl={submission.imageUrl} />}
 
           <Card>
             <CardHeader>
@@ -124,9 +129,25 @@ async function Workspace({ params }: { params: Params }) {
             <CardHeader>
               <CardTitle className="text-base">Pipeline</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-3">
+              {running && <AutoRefresh />}
               <PipelineProgress steps={submission.steps} compact />
-              {submission.error && <p className="mt-3 text-sm text-destructive">{submission.error}</p>}
+              {submission.error && <p className="text-sm text-destructive">{submission.error}</p>}
+              <p className="text-xs text-muted-foreground">
+                A skipped step didn’t apply to this item, or its free API key isn’t connected yet. See{" "}
+                <Link href="/admin/setup" className="underline">
+                  Setup
+                </Link>
+                .
+              </p>
+              {(submission.status === "FAILED" || submission.status === "NEEDS_REVIEW") && (
+                <form action={rerunPipelineAction}>
+                  <input type="hidden" name="submissionId" value={submission.id} />
+                  <Button type="submit" variant="outline" size="sm" className="w-full">
+                    <RotateCcw aria-hidden /> Run the checks again
+                  </Button>
+                </form>
+              )}
             </CardContent>
           </Card>
         </aside>

@@ -2,8 +2,10 @@
 
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth";
-import { getSubmission, logAction, publishReview } from "@/lib/data";
-import type { Verdict } from "@/lib/types";
+import { logAction, publishReview, readSubmission, replaceClaims, replaceEvidence, updateSubmission } from "@/lib/data";
+import { EVIDENCE_KINDS } from "@/lib/labels";
+import { startPipeline } from "@/lib/pipeline/run";
+import type { EvidenceKind, Verdict } from "@/lib/types";
 import { fieldErrors, reviewSchema } from "@/lib/validators";
 
 export type ReviewState = { errors?: Record<string, string> };
@@ -16,7 +18,7 @@ export async function publishReviewAction(_prev: ReviewState, formData: FormData
   const parsed = reviewSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { errors: fieldErrors(parsed.error) };
 
-  const submission = await getSubmission(parsed.data.submissionId);
+  const submission = await readSubmission(parsed.data.submissionId);
   if (!submission) return { errors: { form: "This submission no longer exists." } };
   if (submission.status !== "NEEDS_REVIEW" && submission.status !== "PUBLISHED") {
     return { errors: { form: "The evidence isn't ready yet. Wait until the analysis finishes." } };
@@ -37,4 +39,31 @@ export async function publishReviewAction(_prev: ReviewState, formData: FormData
   });
 
   redirect("/review?notice=published");
+}
+
+/** Clears the old results and runs the whole check again (for failed or unclear items). */
+export async function rerunPipelineAction(formData: FormData): Promise<void> {
+  const submissionId = String(formData.get("submissionId") ?? "");
+  const reviewer = await requireRole("REVIEWER", `/review/${submissionId}`);
+
+  const submission = await readSubmission(submissionId);
+  // Published items keep their verdict, and running items are left alone.
+  if (!submission || (submission.status !== "FAILED" && submission.status !== "NEEDS_REVIEW")) {
+    redirect(`/review/${submissionId}`);
+  }
+
+  await replaceClaims(submissionId, []);
+  await replaceEvidence(submissionId, Object.keys(EVIDENCE_KINDS) as EvidenceKind[], []);
+  await updateSubmission(submissionId, {
+    status: "QUEUED",
+    steps: {},
+    error: null,
+    aiVerdict: null,
+    aiConfidence: null,
+    aiSummary: null,
+  });
+  await logAction({ actorId: reviewer.id, action: "pipeline.rerun", submissionId });
+  await startPipeline(submissionId);
+
+  redirect(`/review/${submissionId}`);
 }

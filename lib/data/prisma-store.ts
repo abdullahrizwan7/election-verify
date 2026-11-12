@@ -123,6 +123,59 @@ export const prismaStore: Repository = {
     return row ? toSummary(row) : null;
   },
 
+  async countSubmissionsSince(userId, since) {
+    return getPrisma().submission.count({ where: { userId, createdAt: { gte: since } } });
+  },
+
+  async getPipelineInput(id) {
+    const row = await getPrisma().submission.findUnique({
+      where: { id },
+      select: { id: true, type: true, url: true, text: true, imagePath: true, title: true, status: true, steps: true },
+    });
+    if (!row) return null;
+    return { ...row, title: row.title ?? "Untitled submission", steps: (row.steps ?? {}) as PipelineSteps };
+  },
+
+  async updateSubmission(id, patch) {
+    await getPrisma().submission.update({ where: { id }, data: patch });
+  },
+
+  async replaceClaims(id, texts) {
+    const prisma = getPrisma();
+    const [, , created] = await prisma.$transaction([
+      prisma.evidence.updateMany({ where: { submissionId: id, claimId: { not: null } }, data: { claimId: null } }),
+      prisma.claim.deleteMany({ where: { submissionId: id } }),
+      prisma.claim.createManyAndReturn({
+        data: texts.map((text, position) => ({ submissionId: id, text, position })),
+        select: { id: true, text: true },
+      }),
+    ]);
+    return created;
+  },
+
+  async replaceEvidence(id, kinds, items) {
+    const prisma = getPrisma();
+    const [, created] = await prisma.$transaction([
+      prisma.evidence.deleteMany({ where: { submissionId: id, kind: { in: kinds } } }),
+      prisma.evidence.createManyAndReturn({
+        data: items.map((item) => ({ ...item, submissionId: id })),
+        select: {
+          id: true,
+          claimId: true,
+          kind: true,
+          title: true,
+          url: true,
+          publisher: true,
+          rating: true,
+          stance: true,
+          snippet: true,
+          publishedAt: true,
+        },
+      }),
+    ]);
+    return created;
+  },
+
   async createSubmission(input) {
     const row = await getPrisma().submission.create({
       data: {
@@ -170,6 +223,13 @@ export const prismaStore: Repository = {
     });
   },
 
+  async findSource(domain) {
+    return getPrisma().source.findUnique({
+      where: { domain },
+      select: { domain: true, name: true, type: true, trust: true, notes: true },
+    });
+  },
+
   async saveSource(source) {
     await getPrisma().source.upsert({
       where: { domain: source.domain },
@@ -204,5 +264,24 @@ export const prismaStore: Repository = {
         meta: entry.meta as Prisma.InputJsonValue | undefined,
       },
     });
+  },
+
+  async listActivity(limit) {
+    const prisma = getPrisma();
+    const rows = await prisma.auditLog.findMany({ orderBy: { createdAt: "desc" }, take: limit });
+    const actorIds = [...new Set(rows.map((r) => r.actorId).filter((id): id is string => Boolean(id)))];
+    const actors = await prisma.profile.findMany({ where: { id: { in: actorIds } }, select: { id: true, name: true, email: true } });
+    const nameOf = (id: string | null) => {
+      const actor = actors.find((a) => a.id === id);
+      return actor ? (actor.name ?? actor.email) : null;
+    };
+    return rows.map((r) => ({
+      id: r.id,
+      actorName: nameOf(r.actorId),
+      action: r.action,
+      submissionId: r.submissionId,
+      meta: (r.meta ?? null) as Record<string, unknown> | null,
+      createdAt: r.createdAt,
+    }));
   },
 };

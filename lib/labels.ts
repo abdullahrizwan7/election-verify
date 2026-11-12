@@ -109,6 +109,15 @@ export const SOURCE_TYPES: Record<SourceType, { label: string; className: string
   KNOWN_MISINFO: { label: "Known misinformation", className: "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200" },
 };
 
+/** How each audit-log action is described on the activity page. */
+export const ACTIONS: Record<string, string> = {
+  "submission.created": "Submitted an item",
+  "review.published": "Published a verdict",
+  "pipeline.rerun": "Ran the checks again",
+  "source.saved": "Saved a trusted source",
+  "user.signed_in": "Signed in",
+};
+
 export const ROLES: Record<Role, string> = {
   USER: "Citizen",
   REVIEWER: "Reviewer",

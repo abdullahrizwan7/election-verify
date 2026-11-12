@@ -2,9 +2,11 @@
 
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
+import { SUBMISSIONS_PER_HOUR } from "@/lib/config";
 import { hashFile, hashText, normalizeText, normalizeUrl } from "@/lib/content-hash";
-import { createSubmission, findPublishedByHash, logAction } from "@/lib/data";
+import { countSubmissionsSince, createSubmission, findPublishedByHash, logAction } from "@/lib/data";
 import { domainOf } from "@/lib/format";
+import { startPipeline } from "@/lib/pipeline/run";
 import { saveImage } from "@/lib/storage";
 import type { NewSubmission } from "@/lib/types";
 import { fieldErrors, submissionSchema } from "@/lib/validators";
@@ -21,16 +23,28 @@ export async function createSubmissionAction(_prev: SubmitState, formData: FormD
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/submit");
 
-  // 2. Validate on the server, even though the browser already checked.
   const values = {
     url: String(formData.get("url") ?? ""),
     text: String(formData.get("text") ?? ""),
     caption: String(formData.get("caption") ?? ""),
   };
+
+  // 2. Limit how much one person can send, so nobody can flood the reviewers.
+  if (user.role === "USER") {
+    const lastHour = await countSubmissionsSince(user.id, new Date(Date.now() - 60 * 60 * 1000));
+    if (lastHour >= SUBMISSIONS_PER_HOUR) {
+      return {
+        errors: { form: `You've sent ${SUBMISSIONS_PER_HOUR} items in the last hour. Please wait a little and try again.` },
+        values,
+      };
+    }
+  }
+
+  // 3. Validate on the server, even though the browser already checked.
   const parsed = submissionSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { errors: fieldErrors(parsed.error), values };
 
-  // 3. Build the record and a fingerprint of the content.
+  // 4. Build the record and a fingerprint of the content.
   const input = parsed.data;
   let submission: NewSubmission;
 
@@ -57,14 +71,14 @@ export async function createSubmissionAction(_prev: SubmitState, formData: FormD
     };
   }
 
-  // 4. Already checked? Send them straight to the published result.
+  // 5. Already checked? Send them straight to the published result.
   const existing = await findPublishedByHash(submission.contentHash);
   if (existing) redirect(`/s/${existing.id}?notice=existing`);
 
+  // 6. Save it, start the checks in the background, and show the progress page.
   const { id } = await createSubmission(submission);
   await logAction({ actorId: user.id, action: "submission.created", submissionId: id, meta: { type: submission.type } });
-
-  // Day 3: send the "submission/created" event to Inngest here to start the pipeline.
+  await startPipeline(id);
 
   redirect(`/s/${id}?notice=submitted`);
 }

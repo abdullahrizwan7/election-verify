@@ -76,13 +76,15 @@ function EvidenceItem({ item, claimNumber, showId }: { item: Evidence; claimNumb
         )}
       </p>
 
-      {item.snippet && <p className="mt-1 text-sm text-muted-foreground">{item.snippet}</p>}
+      {item.snippet && <p className="mt-1 text-sm whitespace-pre-line text-muted-foreground">{item.snippet}</p>}
 
       <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
         {(item.publisher || item.url) && <span>{item.publisher ?? domainOf(item.url)}</span>}
         {item.publishedAt && <span>· {formatDate(item.publishedAt)}</span>}
         {item.rating && (
-          <span className="rounded-md bg-muted px-1.5 py-0.5 font-medium text-foreground">Rated: {item.rating}</span>
+          <span className="rounded-md bg-muted px-1.5 py-0.5 font-medium text-foreground">
+            {item.kind === "SOURCE_INFO" ? "Category" : "Rated"}: {item.rating}
+          </span>
         )}
       </div>
     </li>

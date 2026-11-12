@@ -1,14 +1,16 @@
 import "server-only";
 import { DEMO_SOURCES, DEMO_SUBMISSIONS, DEMO_USERS } from "@/lib/data/demo-data";
 import type { Repository } from "@/lib/data/repository";
-import type { AppUser, Source, SubmissionDetail, SubmissionSummary } from "@/lib/types";
+import type { ActivityEntry, AppUser, Source, SubmissionDetail, SubmissionSummary } from "@/lib/types";
 
 type StoredSubmission = SubmissionDetail & { userId: string | null; contentHash: string };
+type StoredActivity = Omit<ActivityEntry, "actorName"> & { actorId: string | null };
 
 interface DemoState {
   submissions: StoredSubmission[];
   sources: Source[];
   profiles: AppUser[];
+  activity: StoredActivity[];
 }
 
 /**
@@ -23,10 +25,19 @@ function state(): DemoState {
       submissions: structuredClone(DEMO_SUBMISSIONS),
       sources: structuredClone(DEMO_SOURCES),
       profiles: structuredClone(Object.values(DEMO_USERS)),
+      activity: [],
     };
   }
   return globalForDemo.demoState;
 }
+
+function find(id: string): StoredSubmission {
+  const submission = state().submissions.find((s) => s.id === id);
+  if (!submission) throw new Error(`Submission ${id} not found`);
+  return submission;
+}
+
+const newId = (prefix: string) => `${prefix}-${crypto.randomUUID().slice(0, 8)}`;
 
 function toSummary(s: StoredSubmission): SubmissionSummary {
   return {
@@ -85,8 +96,12 @@ export const demoStore: Repository = {
     return found ? toSummary(found) : null;
   },
 
+  async countSubmissionsSince(userId, since) {
+    return state().submissions.filter((s) => s.userId === userId && s.createdAt >= since).length;
+  },
+
   async createSubmission(input) {
-    const id = `sub-${crypto.randomUUID().slice(0, 8)}`;
+    const id = newId("sub");
     state().submissions.push({
       id,
       type: input.type,
@@ -114,12 +129,11 @@ export const demoStore: Repository = {
   },
 
   async publishReview(input) {
-    const submission = state().submissions.find((s) => s.id === input.submissionId);
-    if (!submission) throw new Error("Submission not found");
+    const submission = find(input.submissionId);
     const reviewer = state().profiles.find((p) => p.id === input.reviewerId);
     const now = new Date();
-    submission.reviews.push({
-      id: `rv-${crypto.randomUUID().slice(0, 8)}`,
+    submission.reviews.unshift({
+      id: newId("rv"),
       reviewerName: reviewer?.name ?? reviewer?.email ?? "Reviewer",
       verdict: input.verdict,
       publicNote: input.publicNote,
@@ -132,8 +146,47 @@ export const demoStore: Repository = {
     submission.publishedAt = now;
   },
 
+  async getPipelineInput(id) {
+    const s = state().submissions.find((item) => item.id === id);
+    if (!s) return null;
+    return {
+      id: s.id,
+      type: s.type,
+      url: s.url,
+      text: s.text,
+      imagePath: s.imageUrl, // demo mode keeps the image itself (data URL) or a /public path here
+      title: s.title,
+      status: s.status,
+      steps: { ...s.steps },
+    };
+  },
+
+  async updateSubmission(id, patch) {
+    Object.assign(find(id), patch);
+  },
+
+  async replaceClaims(id, texts) {
+    const submission = find(id);
+    submission.claims = texts.map((text) => ({ id: newId("cl"), text }));
+    // Evidence that pointed at the old claims no longer has a claim.
+    const claimIds = new Set(submission.claims.map((c) => c.id));
+    for (const e of submission.evidence) if (e.claimId && !claimIds.has(e.claimId)) e.claimId = null;
+    return structuredClone(submission.claims);
+  },
+
+  async replaceEvidence(id, kinds, items) {
+    const submission = find(id);
+    const created = items.map((item) => ({ ...item, id: newId("ev") }));
+    submission.evidence = [...submission.evidence.filter((e) => !kinds.includes(e.kind)), ...created];
+    return structuredClone(created);
+  },
+
   async listSources() {
     return [...state().sources].sort((a, b) => b.trust - a.trust);
+  },
+
+  async findSource(domain) {
+    return state().sources.find((s) => s.domain === domain) ?? null;
   },
 
   async saveSource(source) {
@@ -156,8 +209,23 @@ export const demoStore: Repository = {
   },
 
   async logAction(entry) {
-    if (process.env.NODE_ENV === "development") {
-      console.log("[audit]", entry.action, entry.submissionId ?? "", entry.actorId ?? "anonymous");
-    }
+    state().activity.unshift({
+      id: newId("log"),
+      actorId: entry.actorId,
+      action: entry.action,
+      submissionId: entry.submissionId ?? null,
+      meta: entry.meta ?? null,
+      createdAt: new Date(),
+    });
+  },
+
+  async listActivity(limit) {
+    const profiles = state().profiles;
+    return state()
+      .activity.slice(0, limit)
+      .map(({ actorId, ...entry }) => {
+        const actor = profiles.find((p) => p.id === actorId);
+        return { ...entry, actorName: actor ? (actor.name ?? actor.email) : null };
+      });
   },
 };

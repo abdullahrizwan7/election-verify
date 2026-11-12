@@ -60,7 +60,7 @@ export function UserMenu({ user, isAdmin }: { user: AppUser; isAdmin: boolean })
           {isAdmin && (
             <DropdownMenuItem asChild>
               <Link href="/admin/sources">
-                <Database aria-hidden /> Trusted sources
+                <Database aria-hidden /> Admin
               </Link>
             </DropdownMenuItem>
           )}

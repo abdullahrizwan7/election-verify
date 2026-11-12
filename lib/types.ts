@@ -125,6 +125,41 @@ export interface NewSubmission {
   userId: string | null;
 }
 
+export type NewEvidence = Omit<Evidence, "id">;
+
+/** The raw fields the verification pipeline needs. */
+export interface PipelineInput {
+  id: string;
+  type: InputType;
+  url: string | null;
+  text: string | null;
+  imagePath: string | null;
+  title: string;
+  status: Status;
+  steps: PipelineSteps;
+}
+
+/** Fields the pipeline is allowed to change on a submission. */
+export type SubmissionPatch = Partial<{
+  status: Status;
+  steps: PipelineSteps;
+  error: string | null;
+  title: string;
+  text: string | null;
+  aiVerdict: Verdict | null;
+  aiConfidence: number | null;
+  aiSummary: string | null;
+}>;
+
+export interface ActivityEntry {
+  id: string;
+  actorName: string | null;
+  action: string;
+  submissionId: string | null;
+  meta: Record<string, unknown> | null;
+  createdAt: Date;
+}
+
 export interface NewReview {
   submissionId: string;
   reviewerId: string;

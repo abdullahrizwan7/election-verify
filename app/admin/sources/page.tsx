@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { AdminNav } from "@/components/admin/admin-nav";
 import { SourceForm } from "@/components/admin/source-form";
 import { TableSkeleton } from "@/components/skeletons";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,12 +16,13 @@ export default function SourcesPage() {
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-10">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Trusted sources</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Admin</h1>
         <p className="mt-1 text-muted-foreground">
-          The pipeline uses this list to label where evidence comes from. Official and fact-checker sources carry the
-          most weight.
+          The pipeline uses the trusted sources list to label where evidence comes from. Official and fact-checker
+          sources carry the most weight.
         </p>
       </div>
+      <AdminNav current="/admin/sources" />
       <Suspense fallback={<TableSkeleton rows={8} />}>
         <SourcesManager />
       </Suspense>

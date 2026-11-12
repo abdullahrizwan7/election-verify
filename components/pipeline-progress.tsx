@@ -7,7 +7,7 @@ const STATE_ICON: Record<StepState, { icon: typeof Circle; className: string; la
   pending: { icon: Circle, className: "text-muted-foreground/50", label: "Waiting" },
   running: { icon: Loader2, className: "animate-spin text-primary", label: "In progress" },
   done: { icon: CheckCircle2, className: "text-emerald-600", label: "Done" },
-  skipped: { icon: CircleSlash, className: "text-muted-foreground/60", label: "Not needed" },
+  skipped: { icon: CircleSlash, className: "text-muted-foreground/60", label: "Skipped" },
   failed: { icon: XCircle, className: "text-destructive", label: "Failed" },
 };
 
