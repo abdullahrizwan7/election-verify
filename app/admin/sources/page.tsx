@@ -16,7 +16,9 @@ export default function SourcesPage() {
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-10">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Admin</h1>
+        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+          <span className="text-gradient">Admin</span>
+        </h1>
         <p className="mt-1 text-muted-foreground">
           The pipeline uses the trusted sources list to label where evidence comes from. Official and fact-checker
           sources carry the most weight.

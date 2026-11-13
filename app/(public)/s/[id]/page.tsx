@@ -129,18 +129,25 @@ async function Result({ params, searchParams }: Props) {
 
 function VerdictPanel({ submission }: { submission: SubmissionDetail }) {
   const verdict = submission.finalVerdict!;
+  const rgb = VERDICTS[verdict].rgb;
   return (
-    <section className="rounded-2xl border bg-card p-6 shadow-sm">
-      <div className="flex flex-wrap items-center gap-3">
+    <section
+      className="relative overflow-hidden rounded-2xl border bg-card p-6 backdrop-blur-xl"
+      style={{ boxShadow: `0 0 0 1px rgb(${rgb} / 0.35), 0 30px 80px -30px rgb(${rgb} / 0.7)` }}
+    >
+      {/* Verdict-colored light along the top and in the corner */}
+      <div aria-hidden className="absolute inset-x-8 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, rgb(${rgb}), transparent)` }} />
+      <div aria-hidden className="pointer-events-none absolute -top-24 -left-24 size-64 rounded-full blur-3xl" style={{ background: `rgb(${rgb} / 0.18)` }} />
+      <div className="relative flex flex-wrap items-center gap-3">
         <VerdictBadge verdict={verdict} size="lg" />
         <span className="text-sm text-muted-foreground">{VERDICTS[verdict].description}</span>
       </div>
-      {submission.publicNote && <p className="mt-4 max-w-3xl text-lg leading-relaxed text-pretty">{submission.publicNote}</p>}
-      <p className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+      {submission.publicNote && <p className="relative mt-4 max-w-3xl text-lg leading-relaxed text-pretty">{submission.publicNote}</p>}
+      <p className="relative mt-4 flex items-center gap-2 text-sm text-muted-foreground">
         <UserCheck className="size-4" aria-hidden />
         Reviewed by a human on {formatDate(submission.publishedAt)}
       </p>
-      <div className="mt-5 border-t pt-4">
+      <div className="relative mt-5 border-t pt-4">
         <ShareButtons
           path={`/s/${submission.id}`}
           text={`Fact-check: “${submission.title}” is rated ${VERDICTS[verdict].label.toUpperCase()}.`}
@@ -154,9 +161,11 @@ function ProgressPanel({ submission }: { submission: SubmissionDetail }) {
   const stillRunning = submission.status === "QUEUED" || submission.status === "PROCESSING";
 
   return (
-    <section className="grid gap-6 rounded-2xl border bg-card p-6 shadow-sm md:grid-cols-[1fr_1.2fr]">
+    <section className="border-gradient relative grid gap-6 overflow-hidden rounded-2xl p-6 md:grid-cols-[1fr_1.2fr]">
+      <div aria-hidden className="bg-grid pointer-events-none absolute inset-0 opacity-50" />
+      <div aria-hidden className="pointer-events-none absolute -top-20 -right-20 size-60 rounded-full bg-glow/15 blur-3xl" />
       {stillRunning && <AutoRefresh />}
-      <div className="space-y-3">
+      <div className="relative space-y-3">
         {submission.status === "FAILED" ? (
           <>
             <AlertTriangle className="size-6 text-destructive" aria-hidden />
@@ -186,7 +195,9 @@ function ProgressPanel({ submission }: { submission: SubmissionDetail }) {
           </>
         )}
       </div>
-      <PipelineProgress steps={submission.steps} />
+      <div className="relative">
+        <PipelineProgress steps={submission.steps} />
+      </div>
     </section>
   );
 }

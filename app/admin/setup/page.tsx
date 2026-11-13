@@ -12,7 +12,9 @@ export default function SetupPage() {
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-10">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Admin</h1>
+        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+          <span className="text-gradient">Admin</span>
+        </h1>
         <p className="mt-1 text-muted-foreground">
           Which free services are connected. Every service is optional: the app works without it and gets more
           complete with it. Keys go in the <code className="rounded bg-muted px-1">.env</code> file and are never shown

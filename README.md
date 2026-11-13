@@ -85,6 +85,20 @@ steps run right after the page responds (Next.js `after()`), which is fine for d
 
 ---
 
+## Design
+
+A dark "mission control" look by default, with a light theme one click away (sun/moon button).
+
+- **3D hero:** a turning WebGL globe ([`cobe`](https://github.com/shuding/cobe), about 5 KB) with a result card
+  and evidence chips floating at different depths. The scene leans towards the mouse (`components/home/hero-scene.tsx`).
+- **3D tilt cards** with a light that follows the pointer (`components/fx/tilt-card.tsx`).
+- **Glass panels**, gradient headings, glowing accents, an aurora background and a faint grid (`app/globals.css`).
+- **Motion:** sections fade in on scroll, numbers count up, the running pipeline step has a scanning light.
+- **Respectful:** every animation stops for people who turn off motion in their device settings, the globe
+  pauses when it's off screen, and touch screens get still cards.
+
+---
+
 ## Tech stack (all free)
 
 | Layer | Tool |

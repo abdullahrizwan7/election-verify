@@ -26,7 +26,7 @@ const ACCOUNTS = [
 /** Shown instead of real login while Supabase keys are not set. */
 export function DemoLoginPanel({ next }: { next: string }) {
   return (
-    <Card>
+    <Card className="glow">
       <CardHeader>
         <CardTitle className="text-xl">Choose a demo account</CardTitle>
         <CardDescription>
@@ -40,9 +40,9 @@ export function DemoLoginPanel({ next }: { next: string }) {
             <input type="hidden" name="next" value={next} />
             <button
               type="submit"
-              className="flex w-full items-start gap-3 rounded-lg border p-3 text-left transition hover:border-primary/40 hover:bg-muted/50 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+              className="flex w-full items-start gap-3 rounded-lg border bg-card/50 p-3 text-left transition hover:border-glow/50 hover:bg-glow/10 hover:shadow-[0_0_24px_-8px] hover:shadow-glow/60 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
             >
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-glow/20 to-glow-2/20 text-glow ring-1 ring-glow/25">
                 <Icon className="size-4" aria-hidden />
               </span>
               <span>

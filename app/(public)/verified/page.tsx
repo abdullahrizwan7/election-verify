@@ -19,7 +19,9 @@ export default function VerifiedPage({ searchParams }: { searchParams: SearchPar
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-10">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Verified claims</h1>
+        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+          <span className="text-gradient">Verified claims</span>
+        </h1>
         <p className="mt-1 text-muted-foreground">Election claims our reviewers have checked, newest first.</p>
       </div>
       <Suspense fallback={<CardGridSkeleton count={6} />}>

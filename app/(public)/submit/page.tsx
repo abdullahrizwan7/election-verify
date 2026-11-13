@@ -22,7 +22,9 @@ export default function SubmitPage() {
     <main className="mx-auto grid max-w-6xl gap-8 px-4 py-10 lg:grid-cols-[1fr_320px]">
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Submit a claim</h1>
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+            <span className="text-gradient">Submit a claim</span>
+          </h1>
           <p className="mt-1 text-muted-foreground">
             Not sure if something about the election is true? Send it to us and we’ll check it.
           </p>

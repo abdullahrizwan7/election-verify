@@ -18,7 +18,9 @@ export default function MySubmissionsPage() {
     <main className="mx-auto max-w-4xl space-y-6 px-4 py-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">My submissions</h1>
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+            <span className="text-gradient">My submissions</span>
+          </h1>
           <p className="mt-1 text-muted-foreground">Everything you sent us, and where each one is.</p>
         </div>
         <Button asChild>

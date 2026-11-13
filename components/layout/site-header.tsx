@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b bg-background/60 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4 md:gap-6">
         <MobileNav />
         <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">

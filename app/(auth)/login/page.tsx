@@ -46,7 +46,7 @@ async function LoginContent({ searchParams }: { searchParams: SearchParams }) {
       )}
 
       {hasSupabase ? (
-        <Card>
+        <Card className="glow">
           <CardHeader>
             <CardTitle className="text-xl">Sign in</CardTitle>
             <CardDescription>We’ll email you a link. No password needed.</CardDescription>

@@ -12,43 +12,49 @@ import type {
 /** Text and colors for each verdict. Used by badges, filters and the ratings legend. */
 export const VERDICTS: Record<
   Verdict,
-  { label: string; description: string; className: string; dotClassName: string }
+  { label: string; description: string; className: string; dotClassName: string; rgb: string }
 > = {
   ACCURATE: {
     label: "Accurate",
     description: "Supported by official records or several reliable sources.",
     className: "bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-900",
     dotClassName: "bg-emerald-500",
+    rgb: "16 185 129", // for glows
   },
   MISLEADING: {
     label: "Misleading",
     description: "Contains some truth but is presented in a way that misleads.",
     className: "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950 dark:text-amber-200 dark:border-amber-900",
     dotClassName: "bg-amber-500",
+    rgb: "245 158 11", // for glows
   },
   MISSING_CONTEXT: {
     label: "Missing context",
     description: "Accurate on its own, but leaves out facts that change the meaning.",
     className: "bg-orange-50 text-orange-800 border-orange-200 dark:bg-orange-950 dark:text-orange-200 dark:border-orange-900",
     dotClassName: "bg-orange-500",
+    rgb: "249 115 22", // for glows
   },
   FALSE: {
     label: "False",
     description: "Contradicted by official records or reliable evidence.",
     className: "bg-red-50 text-red-800 border-red-200 dark:bg-red-950 dark:text-red-200 dark:border-red-900",
     dotClassName: "bg-red-500",
+    rgb: "239 68 68", // for glows
   },
   UNVERIFIED: {
     label: "Unverified",
     description: "Not enough evidence yet to confirm or reject it.",
     className: "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700",
     dotClassName: "bg-slate-400",
+    rgb: "148 163 184", // for glows
   },
   SATIRE: {
     label: "Satire",
     description: "Comes from a humor or parody source and is not meant as fact.",
     className: "bg-violet-50 text-violet-800 border-violet-200 dark:bg-violet-950 dark:text-violet-200 dark:border-violet-900",
     dotClassName: "bg-violet-500",
+    rgb: "139 92 246", // for glows
   },
 };
 
