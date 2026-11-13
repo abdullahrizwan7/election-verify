@@ -4,7 +4,7 @@ import { hasDatabase } from "@/lib/config";
 import { demoStore } from "@/lib/data/demo-store";
 import { prismaStore } from "@/lib/data/prisma-store";
 import type { Repository } from "@/lib/data/repository";
-import type { Status, Verdict } from "@/lib/types";
+import type { ReviewSort, Status, Verdict } from "@/lib/types";
 
 /**
  * The data access layer. Pages, Server Actions and the pipeline import from here only.
@@ -16,14 +16,19 @@ import type { Status, Verdict } from "@/lib/types";
 const store: Repository = hasDatabase ? prismaStore : demoStore;
 
 // ── Reads for pages ──────────────────────────────────────────────────
-export async function listPublished(filter?: { verdict?: Verdict }) {
+export async function listPublished(filter?: { verdict?: Verdict; query?: string }) {
   await connection();
   return store.listPublished(filter);
 }
 
-export async function listForReview(filter?: { status?: Status }) {
+export async function listForReview(filter?: { status?: Status; sort?: ReviewSort }) {
   await connection();
   return store.listForReview(filter);
+}
+
+export async function listByUser(userId: string) {
+  await connection();
+  return store.listByUser(userId);
 }
 
 export async function getStats() {
@@ -51,6 +56,11 @@ export async function listActivity(limit = 100) {
 export const readSubmission: Repository["getSubmission"] = (id) => store.getSubmission(id);
 export const readSources: Repository["listSources"] = () => store.listSources();
 export const findPublishedByHash: Repository["findPublishedByHash"] = (hash) => store.findPublishedByHash(hash);
+export const findOpenByHash: Repository["findOpenByHash"] = (hash) => store.findOpenByHash(hash);
+export const addReport: Repository["addReport"] = (id) => store.addReport(id);
+export const addEvidence: Repository["addEvidence"] = (id, item) => store.addEvidence(id, item);
+export const listImageFingerprints: Repository["listImageFingerprints"] = (excludeId) =>
+  store.listImageFingerprints(excludeId);
 export const countSubmissionsSince: Repository["countSubmissionsSince"] = (userId, since) =>
   store.countSubmissionsSince(userId, since);
 export const createSubmission: Repository["createSubmission"] = (input) => store.createSubmission(input);

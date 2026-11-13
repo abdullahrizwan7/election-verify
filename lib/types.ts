@@ -21,7 +21,8 @@ export type EvidenceKind =
   | "IMAGE_MATCH"
   | "IMAGE_METADATA"
   | "OCR_TEXT"
-  | "AI_IMAGE_NOTES";
+  | "AI_IMAGE_NOTES"
+  | "MANUAL";
 export type Stance = "SUPPORTS" | "REFUTES" | "NEUTRAL";
 export type SourceType = "OFFICIAL" | "NEWS" | "FACT_CHECKER" | "SATIRE" | "KNOWN_MISINFO";
 
@@ -82,6 +83,7 @@ export interface SubmissionSummary {
   aiConfidence: number | null;
   finalVerdict: Verdict | null;
   publicNote: string | null;
+  reportCount: number;
   createdAt: Date;
   publishedAt: Date | null;
 }
@@ -120,10 +122,23 @@ export interface NewSubmission {
   url?: string;
   text?: string;
   imagePath?: string;
+  imageHash?: string;
   title: string;
   contentHash: string;
   userId: string | null;
 }
+
+/** A submitted image whose fingerprint we can compare with new uploads. */
+export interface ImageFingerprint {
+  id: string;
+  title: string;
+  status: Status;
+  finalVerdict: Verdict | null;
+  imageHash: string;
+  createdAt: Date;
+}
+
+export type ReviewSort = "newest" | "oldest" | "reports";
 
 export type NewEvidence = Omit<Evidence, "id">;
 
@@ -134,6 +149,7 @@ export interface PipelineInput {
   url: string | null;
   text: string | null;
   imagePath: string | null;
+  imageHash: string | null;
   title: string;
   status: Status;
   steps: PipelineSteps;
@@ -149,6 +165,7 @@ export type SubmissionPatch = Partial<{
   aiVerdict: Verdict | null;
   aiConfidence: number | null;
   aiSummary: string | null;
+  imageHash: string | null;
 }>;
 
 export interface ActivityEntry {

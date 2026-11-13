@@ -34,6 +34,7 @@ async function main() {
         imagePath: s.imageUrl, // demo images live in /public/demo
         title: s.title,
         contentHash: s.contentHash,
+        reportCount: s.reportCount,
         status: s.status,
         steps: s.steps,
         error: s.error,

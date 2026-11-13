@@ -3,7 +3,7 @@ import { DEMO_SOURCES, DEMO_SUBMISSIONS, DEMO_USERS } from "@/lib/data/demo-data
 import type { Repository } from "@/lib/data/repository";
 import type { ActivityEntry, AppUser, Source, SubmissionDetail, SubmissionSummary } from "@/lib/types";
 
-type StoredSubmission = SubmissionDetail & { userId: string | null; contentHash: string };
+type StoredSubmission = SubmissionDetail & { userId: string | null; contentHash: string; imageHash?: string | null };
 type StoredActivity = Omit<ActivityEntry, "actorName"> & { actorId: string | null };
 
 interface DemoState {
@@ -38,6 +38,7 @@ function find(id: string): StoredSubmission {
 }
 
 const newId = (prefix: string) => `${prefix}-${crypto.randomUUID().slice(0, 8)}`;
+const OPEN_STATUSES = new Set(["QUEUED", "PROCESSING", "NEEDS_REVIEW"]);
 
 function toSummary(s: StoredSubmission): SubmissionSummary {
   return {
@@ -50,6 +51,7 @@ function toSummary(s: StoredSubmission): SubmissionSummary {
     aiConfidence: s.aiConfidence,
     finalVerdict: s.finalVerdict,
     publicNote: s.publicNote,
+    reportCount: s.reportCount,
     createdAt: s.createdAt,
     publishedAt: s.publishedAt,
   };
@@ -60,18 +62,27 @@ const newestFirst = (a: { createdAt: Date }, b: { createdAt: Date }) =>
 
 export const demoStore: Repository = {
   async listPublished(filter) {
+    const query = filter?.query?.trim().toLowerCase();
     return state()
       .submissions.filter((s) => s.status === "PUBLISHED")
       .filter((s) => !filter?.verdict || s.finalVerdict === filter.verdict)
+      .filter((s) => !query || [s.title, s.text, s.publicNote].some((field) => field?.toLowerCase().includes(query)))
       .sort((a, b) => (b.publishedAt?.getTime() ?? 0) - (a.publishedAt?.getTime() ?? 0))
       .map(toSummary);
   },
 
   async listForReview(filter) {
-    return state()
-      .submissions.filter((s) => (filter?.status ? s.status === filter.status : s.status !== "PUBLISHED"))
-      .sort(newestFirst)
-      .map(toSummary);
+    const items = state().submissions.filter((s) =>
+      filter?.status ? s.status === filter.status : s.status !== "PUBLISHED",
+    );
+    if (filter?.sort === "oldest") items.sort((a, b) => -newestFirst(a, b));
+    else if (filter?.sort === "reports") items.sort((a, b) => b.reportCount - a.reportCount || newestFirst(a, b));
+    else items.sort(newestFirst);
+    return items.map(toSummary);
+  },
+
+  async listByUser(userId) {
+    return state().submissions.filter((s) => s.userId === userId).sort(newestFirst).map(toSummary);
   },
 
   async getStats() {
@@ -96,6 +107,15 @@ export const demoStore: Repository = {
     return found ? toSummary(found) : null;
   },
 
+  async findOpenByHash(contentHash) {
+    const found = state().submissions.find((s) => s.contentHash === contentHash && OPEN_STATUSES.has(s.status));
+    return found ? toSummary(found) : null;
+  },
+
+  async addReport(id) {
+    find(id).reportCount += 1;
+  },
+
   async countSubmissionsSince(userId, since) {
     return state().submissions.filter((s) => s.userId === userId && s.createdAt >= since).length;
   },
@@ -109,6 +129,7 @@ export const demoStore: Repository = {
       url: input.url ?? null,
       text: input.text ?? null,
       imageUrl: input.imagePath ?? null,
+      imageHash: input.imageHash ?? null,
       status: "QUEUED",
       steps: {},
       error: null,
@@ -117,6 +138,7 @@ export const demoStore: Repository = {
       aiSummary: null,
       finalVerdict: null,
       publicNote: null,
+      reportCount: 1,
       createdAt: new Date(),
       publishedAt: null,
       userId: input.userId,
@@ -146,6 +168,12 @@ export const demoStore: Repository = {
     submission.publishedAt = now;
   },
 
+  async addEvidence(id, item) {
+    const created = { ...item, id: newId("ev") };
+    find(id).evidence.push(created);
+    return structuredClone(created);
+  },
+
   async getPipelineInput(id) {
     const s = state().submissions.find((item) => item.id === id);
     if (!s) return null;
@@ -155,6 +183,7 @@ export const demoStore: Repository = {
       url: s.url,
       text: s.text,
       imagePath: s.imageUrl, // demo mode keeps the image itself (data URL) or a /public path here
+      imageHash: s.imageHash ?? null,
       title: s.title,
       status: s.status,
       steps: { ...s.steps },
@@ -179,6 +208,19 @@ export const demoStore: Repository = {
     const created = items.map((item) => ({ ...item, id: newId("ev") }));
     submission.evidence = [...submission.evidence.filter((e) => !kinds.includes(e.kind)), ...created];
     return structuredClone(created);
+  },
+
+  async listImageFingerprints(excludeId) {
+    return state()
+      .submissions.filter((s) => s.id !== excludeId && s.imageHash)
+      .map((s) => ({
+        id: s.id,
+        title: s.title,
+        status: s.status,
+        finalVerdict: s.finalVerdict,
+        imageHash: s.imageHash!,
+        createdAt: s.createdAt,
+      }));
   },
 
   async listSources() {

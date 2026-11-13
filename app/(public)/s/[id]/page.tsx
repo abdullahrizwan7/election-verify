@@ -7,6 +7,7 @@ import { AutoRefresh } from "@/components/auto-refresh";
 import { ClaimsList } from "@/components/claims-list";
 import { EVIDENCE_GROUPS, EvidenceList } from "@/components/evidence/evidence-list";
 import { PipelineProgress } from "@/components/pipeline-progress";
+import { ShareButtons } from "@/components/share-buttons";
 import { DetailSkeleton } from "@/components/skeletons";
 import { StatusBadge } from "@/components/status-badge";
 import { SubmittedContent } from "@/components/submitted-content";
@@ -19,7 +20,19 @@ import { formatDate } from "@/lib/format";
 import { VERDICTS } from "@/lib/labels";
 import type { SubmissionDetail } from "@/lib/types";
 
-export const metadata: Metadata = { title: "Verification result" };
+/** The page title and link preview show the verdict, e.g. "False: Polling stations will close at 2 PM". */
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const submission = await getSubmission(id);
+  if (!submission) return { title: "Result not found" };
+
+  const published = submission.status === "PUBLISHED" && submission.finalVerdict;
+  const title = published ? `${VERDICTS[submission.finalVerdict!].label}: ${submission.title}` : submission.title;
+  const description = published
+    ? (submission.publicNote ?? VERDICTS[submission.finalVerdict!].description)
+    : "This claim is being checked. A human reviewer publishes every verdict.";
+  return { title, description, openGraph: { title, description, type: "article" }, twitter: { card: "summary_large_image" } };
+}
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -57,6 +70,13 @@ async function Result({ params, searchParams }: Props) {
           <AlertDescription>Keep this page open or bookmark it. It updates as each step finishes.</AlertDescription>
         </Alert>
       )}
+      {notice === "reported" && (
+        <Alert>
+          <Info aria-hidden />
+          <AlertTitle>Someone already sent this. Thank you for reporting it too.</AlertTitle>
+          <AlertDescription>We’re already checking it. The verdict will appear on this page.</AlertDescription>
+        </Alert>
+      )}
       {notice === "existing" && (
         <Alert>
           <Info aria-hidden />
@@ -66,7 +86,12 @@ async function Result({ params, searchParams }: Props) {
       )}
 
       <div className="space-y-2">
-        <StatusBadge status={submission.status} />
+        <div className="flex flex-wrap items-center gap-2">
+          <StatusBadge status={submission.status} />
+          {submission.reportCount > 1 && (
+            <span className="text-xs text-muted-foreground">Sent to us {submission.reportCount} times</span>
+          )}
+        </div>
         <h1 className="text-2xl font-semibold tracking-tight text-pretty md:text-3xl">{submission.title}</h1>
       </div>
 
@@ -115,6 +140,12 @@ function VerdictPanel({ submission }: { submission: SubmissionDetail }) {
         <UserCheck className="size-4" aria-hidden />
         Reviewed by a human on {formatDate(submission.publishedAt)}
       </p>
+      <div className="mt-5 border-t pt-4">
+        <ShareButtons
+          path={`/s/${submission.id}`}
+          text={`Fact-check: “${submission.title}” is rated ${VERDICTS[verdict].label.toUpperCase()}.`}
+        />
+      </div>
     </section>
   );
 }

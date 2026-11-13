@@ -1,12 +1,22 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth";
-import { logAction, publishReview, readSubmission, replaceClaims, replaceEvidence, updateSubmission } from "@/lib/data";
+import {
+  addEvidence,
+  logAction,
+  publishReview,
+  readSubmission,
+  replaceClaims,
+  replaceEvidence,
+  updateSubmission,
+} from "@/lib/data";
+import { domainOf } from "@/lib/format";
 import { EVIDENCE_KINDS } from "@/lib/labels";
 import { startPipeline } from "@/lib/pipeline/run";
 import type { EvidenceKind, Verdict } from "@/lib/types";
-import { fieldErrors, reviewSchema } from "@/lib/validators";
+import { fieldErrors, manualEvidenceSchema, reviewSchema } from "@/lib/validators";
 
 export type ReviewState = { errors?: Record<string, string> };
 
@@ -66,4 +76,36 @@ export async function rerunPipelineAction(formData: FormData): Promise<void> {
   await startPipeline(submissionId);
 
   redirect(`/review/${submissionId}`);
+}
+
+export type EvidenceState = { errors?: Record<string, string>; saved?: boolean };
+
+/** A reviewer adds evidence they found themselves. It is labelled as added by a reviewer. */
+export async function addEvidenceAction(_prev: EvidenceState, formData: FormData): Promise<EvidenceState> {
+  const submissionId = String(formData.get("submissionId") ?? "");
+  const reviewer = await requireRole("REVIEWER", `/review/${submissionId}`);
+
+  const parsed = manualEvidenceSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { errors: fieldErrors(parsed.error) };
+
+  const submission = await readSubmission(submissionId);
+  if (!submission) return { errors: { form: "This submission no longer exists." } };
+  const claimId = submission.claims.some((c) => c.id === parsed.data.claimId) ? parsed.data.claimId! : null;
+  const url = parsed.data.url || null;
+
+  await addEvidence(submissionId, {
+    claimId,
+    kind: "MANUAL",
+    title: parsed.data.title,
+    url,
+    publisher: `${domainOf(url) ?? "Reviewer note"} · added by ${reviewer.name ?? reviewer.email}`,
+    rating: null,
+    stance: parsed.data.stance,
+    snippet: parsed.data.note || null,
+    publishedAt: null,
+  });
+  await logAction({ actorId: reviewer.id, action: "evidence.added", submissionId, meta: { stance: parsed.data.stance } });
+
+  revalidatePath(`/review/${submissionId}`);
+  return { saved: true };
 }

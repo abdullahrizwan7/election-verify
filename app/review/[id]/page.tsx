@@ -6,6 +6,7 @@ import { ArrowLeft, ExternalLink, RotateCcw } from "lucide-react";
 import { rerunPipelineAction } from "@/app/review/[id]/actions";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { ClaimsList } from "@/components/claims-list";
+import { AddEvidenceForm } from "@/components/review/add-evidence-form";
 import { ReverseImageSearch } from "@/components/review/reverse-image-search";
 import { EVIDENCE_GROUPS, EvidenceList } from "@/components/evidence/evidence-list";
 import { PipelineProgress } from "@/components/pipeline-progress";
@@ -55,7 +56,10 @@ async function Workspace({ params }: { params: Params }) {
         <div className="space-y-2">
           <StatusBadge status={submission.status} />
           <h1 className="text-2xl font-semibold tracking-tight text-pretty">{submission.title}</h1>
-          <p className="text-sm text-muted-foreground">Submitted {formatDateTime(submission.createdAt)}</p>
+          <p className="text-sm text-muted-foreground">
+            Submitted {formatDateTime(submission.createdAt)}
+            {submission.reportCount > 1 && ` · sent to us ${submission.reportCount} times`}
+          </p>
         </div>
         {submission.status === "PUBLISHED" && (
           <Button variant="outline" asChild>
@@ -94,6 +98,10 @@ async function Workspace({ params }: { params: Params }) {
               </CardContent>
             </Card>
           ))}
+
+          {submission.status !== "QUEUED" && submission.status !== "PROCESSING" && (
+            <AddEvidenceForm submissionId={submission.id} claims={submission.claims} />
+          )}
         </div>
 
         {/* Right: AI suggestion and the decision form stay in view */}

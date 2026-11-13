@@ -39,7 +39,14 @@ export function ReviewQueueTable({ items }: { items: SubmissionSummary[] }) {
                   <InputTypeIcon type={item.type} />
                   <div className="min-w-0">
                     <p className="truncate font-medium">{item.title}</p>
-                    {item.url && <p className="truncate text-xs text-muted-foreground">{domainOf(item.url)}</p>}
+                    <p className="flex gap-2 truncate text-xs text-muted-foreground">
+                      {item.url && <span className="truncate">{domainOf(item.url)}</span>}
+                      {item.reportCount > 1 && (
+                        <span className="shrink-0 font-medium text-amber-700 dark:text-amber-300">
+                          Reported {item.reportCount}×
+                        </span>
+                      )}
+                    </p>
                   </div>
                 </div>
               </TableCell>

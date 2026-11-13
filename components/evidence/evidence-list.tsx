@@ -7,7 +7,7 @@ import type { Claim, Evidence, EvidenceKind } from "@/lib/types";
 /** Evidence is grouped into these sections, in this order. */
 export const EVIDENCE_GROUPS: { id: string; title: string; icon: typeof Globe; kinds: EvidenceKind[] }[] = [
   { id: "fact-checks", title: "Existing fact-checks", icon: ShieldCheck, kinds: ["FACT_CHECK"] },
-  { id: "sources", title: "Supporting and contradicting sources", icon: Globe, kinds: ["WEB_SOURCE"] },
+  { id: "sources", title: "Supporting and contradicting sources", icon: Globe, kinds: ["WEB_SOURCE", "MANUAL"] },
   { id: "source-info", title: "About the source", icon: Info, kinds: ["SOURCE_INFO"] },
   { id: "image", title: "Image analysis", icon: ImageIcon, kinds: ["IMAGE_MATCH", "IMAGE_METADATA", "OCR_TEXT", "AI_IMAGE_NOTES"] },
 ];

@@ -93,6 +93,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, string> = {
   IMAGE_METADATA: "Image metadata",
   OCR_TEXT: "Text found in the image",
   AI_IMAGE_NOTES: "AI image observations",
+  MANUAL: "Added by a reviewer",
 };
 
 export const STANCES: Record<Stance, { label: string; className: string }> = {
@@ -114,6 +115,8 @@ export const ACTIONS: Record<string, string> = {
   "submission.created": "Submitted an item",
   "review.published": "Published a verdict",
   "pipeline.rerun": "Ran the checks again",
+  "evidence.added": "Added evidence",
+  "submission.reported_again": "Sent content that was already submitted",
   "source.saved": "Saved a trusted source",
   "user.signed_in": "Signed in",
 };

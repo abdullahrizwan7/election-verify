@@ -16,6 +16,7 @@ export function SiteFooter() {
           <ul className="space-y-1">
             <li><Link className="hover:text-foreground" href="/verified">Verified claims</Link></li>
             <li><Link className="hover:text-foreground" href="/submit">Submit a claim</Link></li>
+            <li><Link className="hover:text-foreground" href="/about">Our method</Link></li>
             <li><Link className="hover:text-foreground" href="/#ratings">How we rate claims</Link></li>
           </ul>
         </div>

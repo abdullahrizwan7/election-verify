@@ -5,10 +5,12 @@ import type {
   DashboardStats,
   Evidence,
   EvidenceKind,
+  ImageFingerprint,
   NewEvidence,
   NewReview,
   NewSubmission,
   PipelineInput,
+  ReviewSort,
   Source,
   Status,
   SubmissionDetail,
@@ -28,14 +30,21 @@ import type {
  */
 export interface Repository {
   // Pages
-  listPublished(filter?: { verdict?: Verdict }): Promise<SubmissionSummary[]>;
-  listForReview(filter?: { status?: Status }): Promise<SubmissionSummary[]>;
+  /** `query` searches the title, text and public explanation. */
+  listPublished(filter?: { verdict?: Verdict; query?: string }): Promise<SubmissionSummary[]>;
+  listForReview(filter?: { status?: Status; sort?: ReviewSort }): Promise<SubmissionSummary[]>;
+  listByUser(userId: string): Promise<SubmissionSummary[]>;
   getStats(): Promise<DashboardStats>;
   getSubmission(id: string): Promise<SubmissionDetail | null>;
   findPublishedByHash(contentHash: string): Promise<SubmissionSummary | null>;
+  /** A submission with the same content that is still being checked. */
+  findOpenByHash(contentHash: string): Promise<SubmissionSummary | null>;
+  /** Someone sent the same content again: count it instead of checking it twice. */
+  addReport(id: string): Promise<void>;
   countSubmissionsSince(userId: string, since: Date): Promise<number>;
   createSubmission(input: NewSubmission): Promise<{ id: string }>;
   publishReview(input: NewReview): Promise<void>;
+  addEvidence(id: string, item: NewEvidence): Promise<Evidence>;
 
   // Verification pipeline
   getPipelineInput(id: string): Promise<PipelineInput | null>;
@@ -44,6 +53,8 @@ export interface Repository {
   replaceClaims(id: string, texts: string[]): Promise<Claim[]>;
   /** Deletes the submission's evidence of these kinds and saves the new items. */
   replaceEvidence(id: string, kinds: EvidenceKind[], items: NewEvidence[]): Promise<Evidence[]>;
+  /** Fingerprints of other submitted images, to find re-saved copies. */
+  listImageFingerprints(excludeId: string): Promise<ImageFingerprint[]>;
 
   // Sources
   listSources(): Promise<Source[]>;

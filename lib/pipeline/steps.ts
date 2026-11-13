@@ -5,6 +5,7 @@ import { services } from "@/lib/config";
 import {
   findSource,
   getPipelineInput,
+  listImageFingerprints,
   readSources,
   readSubmission,
   replaceClaims,
@@ -21,6 +22,7 @@ import {
 import { StepError } from "@/lib/pipeline/errors";
 import { extractArticle } from "@/lib/pipeline/extract-article";
 import { findWebEvidence } from "@/lib/pipeline/find-web-evidence";
+import { buildSimilarImageEvidence, findSimilarImages, imageFingerprint } from "@/lib/pipeline/image-hash";
 import { extractClaimsHeuristic, ruleBasedSuggestion } from "@/lib/pipeline/rules";
 import { searchFactChecks } from "@/lib/pipeline/search-factchecks";
 import {
@@ -97,6 +99,14 @@ export const PIPELINE: PipelineStep[] = [
       if (!ANALYZABLE_TYPES.includes(image.mimeType)) return "skipped";
 
       const items: NewEvidence[] = [buildMetadataEvidence(await readMetadata(image.bytes))];
+
+      // Has the same picture been sent to us before (maybe resized or with another caption)?
+      const fingerprint = input.imageHash ?? (await imageFingerprint(image.bytes));
+      if (fingerprint) {
+        if (!input.imageHash) await updateSubmission(id, { imageHash: fingerprint });
+        items.push(...buildSimilarImageEvidence(findSimilarImages(fingerprint, await listImageFingerprints(id))));
+      }
+
       const text = await readTextInImage(image.bytes).catch((error) => {
         console.error("[pipeline] OCR failed", error);
         return "";
@@ -120,7 +130,7 @@ export const PIPELINE: PipelineStep[] = [
         }
       }
 
-      await replaceEvidence(id, ["IMAGE_METADATA", "OCR_TEXT", "AI_IMAGE_NOTES"], items);
+      await replaceEvidence(id, ["IMAGE_METADATA", "OCR_TEXT", "AI_IMAGE_NOTES", "IMAGE_MATCH"], items);
       return "done";
     },
   },

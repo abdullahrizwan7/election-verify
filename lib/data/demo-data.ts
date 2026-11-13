@@ -97,6 +97,7 @@ export const DEMO_SUBMISSIONS: (SubmissionDetail & { userId: string | null; cont
     publishedAt: daysAgo(6, 15),
     userId: DEMO_USERS.citizen.id,
     contentHash: "demo-1",
+    reportCount: 23,
     claims: [
       { id: "cl-1a", text: "Polling stations will close at 2 PM on election day." },
       { id: "cl-1b", text: "The Election Commission changed the voting hours this year." },
@@ -131,6 +132,7 @@ export const DEMO_SUBMISSIONS: (SubmissionDetail & { userId: string | null; cont
     publishedAt: daysAgo(4, 13),
     userId: DEMO_USERS.citizen.id,
     contentHash: "demo-2",
+    reportCount: 3,
     claims: [{ id: "cl-2a", text: "The voter registration deadline has been extended to 30 November." }],
     evidence: [
       evidence({ id: "ev-2a", kind: "SOURCE_INFO", title: "elections.gov.example is an official source", url: "https://elections.gov.example", publisher: "National Election Commission", snippet: "Listed as Official · trust 95/100 · domain registered in 2004 · uses HTTPS" }),
@@ -162,6 +164,7 @@ export const DEMO_SUBMISSIONS: (SubmissionDetail & { userId: string | null; cont
     publishedAt: daysAgo(3, 12),
     userId: DEMO_USERS.citizen.id,
     contentHash: "demo-3",
+    reportCount: 11,
     claims: [{ id: "cl-3a", text: "The photo shows the crowd at yesterday's rally in Riverton." }],
     evidence: [
       evidence({ id: "ev-3a", claimId: "cl-3a", kind: "IMAGE_MATCH", title: "Same photo published in August 2022", url: "https://citywire.example/sport/2022/cup-final-fans", publisher: "City Wire News", stance: "REFUTES", snippet: "Earliest copy found: 14 Aug 2022, in an article titled 'Fans celebrate cup final win'.", publishedAt: new Date("2022-08-14") }),
@@ -193,6 +196,7 @@ export const DEMO_SUBMISSIONS: (SubmissionDetail & { userId: string | null; cont
     publishedAt: daysAgo(2, 16),
     userId: null,
     contentHash: "demo-4",
+    reportCount: 2,
     claims: [{ id: "cl-4a", text: "A candidate promised free Wi-Fi on the Moon by 2027." }],
     evidence: [
       evidence({ id: "ev-4a", kind: "SOURCE_INFO", title: "ballotboxgazette.example is a satire website", url: "https://ballotboxgazette.example", publisher: "The Ballot Box Gazette", snippet: "Listed as Satire · trust 20/100 · domain registered in 2019" }),
@@ -222,6 +226,7 @@ export const DEMO_SUBMISSIONS: (SubmissionDetail & { userId: string | null; cont
     publishedAt: null,
     userId: DEMO_USERS.citizen.id,
     contentHash: "demo-5",
+    reportCount: 14,
     claims: [
       { id: "cl-5a", text: "Marked ballot papers were dumped in a river near Station 14." },
       { id: "cl-5b", text: "The election is rigged." },
@@ -256,6 +261,7 @@ export const DEMO_SUBMISSIONS: (SubmissionDetail & { userId: string | null; cont
     publishedAt: null,
     userId: DEMO_USERS.citizen.id,
     contentHash: "demo-6",
+    reportCount: 6,
     claims: [{ id: "cl-6a", text: "Voters must show two government ID documents at the polling station." }],
     evidence: [
       evidence({ id: "ev-6a", kind: "SOURCE_INFO", title: "vote-alert-today.example is an unknown website", url: "https://vote-alert-today.example", snippet: "Not in our source list · domain registered 12 days ago · no author names or contact page" }),
@@ -283,6 +289,7 @@ export const DEMO_SUBMISSIONS: (SubmissionDetail & { userId: string | null; cont
     publishedAt: null,
     userId: DEMO_USERS.citizen.id,
     contentHash: "demo-7",
+    reportCount: 4,
     claims: [{ id: "cl-7a", text: "The livestream of the vote count has been cancelled." }],
     evidence: [],
     reviews: [],
@@ -306,6 +313,7 @@ export const DEMO_SUBMISSIONS: (SubmissionDetail & { userId: string | null; cont
     publishedAt: null,
     userId: null,
     contentHash: "demo-8",
+    reportCount: 1,
     claims: [],
     evidence: [],
     reviews: [],
@@ -329,6 +337,7 @@ export const DEMO_SUBMISSIONS: (SubmissionDetail & { userId: string | null; cont
     publishedAt: null,
     userId: null,
     contentHash: "demo-9",
+    reportCount: 2,
     claims: [],
     evidence: [],
     reviews: [],

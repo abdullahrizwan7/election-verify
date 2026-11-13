@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ClipboardCheck, Database, LogOut, Send } from "lucide-react";
+import { ClipboardCheck, Database, Inbox, LogOut, Send } from "lucide-react";
 import { signOut } from "@/app/(auth)/actions";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -48,6 +48,11 @@ export function UserMenu({ user, isAdmin }: { user: AppUser; isAdmin: boolean })
           <DropdownMenuItem asChild>
             <Link href="/submit">
               <Send aria-hidden /> Submit a claim
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/my">
+              <Inbox aria-hidden /> My submissions
             </Link>
           </DropdownMenuItem>
           {isReviewer && (

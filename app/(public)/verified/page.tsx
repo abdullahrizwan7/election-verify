@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
+import { Search } from "lucide-react";
 import { CardGridSkeleton } from "@/components/skeletons";
 import { SubmissionCard } from "@/components/submission-card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { listPublished } from "@/lib/data";
 import { VERDICT_ORDER, VERDICTS } from "@/lib/labels";
 import { cn } from "@/lib/utils";
@@ -10,7 +13,7 @@ import type { Verdict } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Verified claims" };
 
-type SearchParams = Promise<{ verdict?: string }>;
+type SearchParams = Promise<{ verdict?: string; q?: string }>;
 
 export default function VerifiedPage({ searchParams }: { searchParams: SearchParams }) {
   return (
@@ -26,30 +29,61 @@ export default function VerifiedPage({ searchParams }: { searchParams: SearchPar
   );
 }
 
+function hrefFor(verdict: Verdict | undefined, query: string) {
+  const params = new URLSearchParams();
+  if (verdict) params.set("verdict", verdict);
+  if (query) params.set("q", query);
+  const qs = params.toString();
+  return qs ? `/verified?${qs}` : "/verified";
+}
+
 async function FilteredResults({ searchParams }: { searchParams: SearchParams }) {
-  const { verdict: raw } = await searchParams;
+  const { verdict: raw, q = "" } = await searchParams;
   const verdict = VERDICT_ORDER.includes(raw as Verdict) ? (raw as Verdict) : undefined;
-  const items = await listPublished({ verdict });
+  const query = q.trim().slice(0, 100);
+  const items = await listPublished({ verdict, query });
 
   return (
     <div className="space-y-6">
+      {/* A plain GET form: the search is part of the URL, so results can be shared. */}
+      <form action="/verified" className="flex max-w-xl gap-2" role="search">
+        {verdict && <input type="hidden" name="verdict" value={verdict} />}
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+          <Input name="q" defaultValue={query} placeholder="Search, e.g. polling hours, voter ID, ballots" className="pl-8" aria-label="Search verified claims" />
+        </div>
+        <Button type="submit" variant="outline">
+          Search
+        </Button>
+      </form>
+
       <nav className="flex flex-wrap gap-2" aria-label="Filter by rating">
-        <FilterChip href="/verified" active={!verdict} label="All" />
+        <FilterChip href={hrefFor(undefined, query)} active={!verdict} label="All" />
         {VERDICT_ORDER.map((v) => (
-          <FilterChip key={v} href={`/verified?verdict=${v}`} active={verdict === v} label={VERDICTS[v].label} dot={VERDICTS[v].dotClassName} />
+          <FilterChip key={v} href={hrefFor(v, query)} active={verdict === v} label={VERDICTS[v].label} dot={VERDICTS[v].dotClassName} />
         ))}
       </nav>
 
       {items.length === 0 ? (
         <p className="rounded-xl border border-dashed p-10 text-center text-muted-foreground">
-          No published claims with this rating yet.
+          {query ? `No published claims match “${query}”.` : "No published claims with this rating yet."}{" "}
+          <Link href="/submit" className="text-primary hover:underline">
+            Send it to us to check.
+          </Link>
         </p>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item) => (
-            <SubmissionCard key={item.id} submission={item} />
-          ))}
-        </div>
+        <>
+          {query && (
+            <p className="text-sm text-muted-foreground">
+              {items.length} result{items.length === 1 ? "" : "s"} for “{query}”
+            </p>
+          )}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {items.map((item) => (
+              <SubmissionCard key={item.id} submission={item} />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

@@ -17,6 +17,7 @@ const summarySelect = {
   aiConfidence: true,
   finalVerdict: true,
   publicNote: true,
+  reportCount: true,
   createdAt: true,
   publishedAt: true,
 } satisfies Prisma.SubmissionSelect;
@@ -34,6 +35,7 @@ function toSummary(row: SummaryRow): SubmissionSummary {
     aiConfidence: row.aiConfidence,
     finalVerdict: row.finalVerdict,
     publicNote: row.publicNote,
+    reportCount: row.reportCount,
     createdAt: row.createdAt,
     publishedAt: row.publishedAt,
   };
@@ -41,8 +43,14 @@ function toSummary(row: SummaryRow): SubmissionSummary {
 
 export const prismaStore: Repository = {
   async listPublished(filter) {
+    const query = filter?.query?.trim();
+    const contains = { contains: query, mode: "insensitive" as const };
     const rows = await getPrisma().submission.findMany({
-      where: { status: "PUBLISHED", ...(filter?.verdict ? { finalVerdict: filter.verdict } : {}) },
+      where: {
+        status: "PUBLISHED",
+        ...(filter?.verdict ? { finalVerdict: filter.verdict } : {}),
+        ...(query ? { OR: [{ title: contains }, { text: contains }, { publicNote: contains }] } : {}),
+      },
       orderBy: { publishedAt: "desc" },
       select: summarySelect,
       take: 60,
@@ -53,6 +61,21 @@ export const prismaStore: Repository = {
   async listForReview(filter) {
     const rows = await getPrisma().submission.findMany({
       where: filter?.status ? { status: filter.status } : { status: { not: "PUBLISHED" } },
+      orderBy:
+        filter?.sort === "oldest"
+          ? { createdAt: "asc" }
+          : filter?.sort === "reports"
+            ? [{ reportCount: "desc" }, { createdAt: "desc" }]
+            : { createdAt: "desc" },
+      select: summarySelect,
+      take: 100,
+    });
+    return rows.map(toSummary);
+  },
+
+  async listByUser(userId) {
+    const rows = await getPrisma().submission.findMany({
+      where: { userId },
       orderBy: { createdAt: "desc" },
       select: summarySelect,
       take: 100,
@@ -123,6 +146,46 @@ export const prismaStore: Repository = {
     return row ? toSummary(row) : null;
   },
 
+  async findOpenByHash(contentHash) {
+    const row = await getPrisma().submission.findFirst({
+      where: { contentHash, status: { in: ["QUEUED", "PROCESSING", "NEEDS_REVIEW"] } },
+      select: summarySelect,
+    });
+    return row ? toSummary(row) : null;
+  },
+
+  async addReport(id) {
+    await getPrisma().submission.update({ where: { id }, data: { reportCount: { increment: 1 } } });
+  },
+
+  async addEvidence(id, item) {
+    return getPrisma().evidence.create({
+      data: { ...item, submissionId: id },
+      select: {
+        id: true,
+        claimId: true,
+        kind: true,
+        title: true,
+        url: true,
+        publisher: true,
+        rating: true,
+        stance: true,
+        snippet: true,
+        publishedAt: true,
+      },
+    });
+  },
+
+  async listImageFingerprints(excludeId) {
+    const rows = await getPrisma().submission.findMany({
+      where: { id: { not: excludeId }, imageHash: { not: null } },
+      select: { id: true, title: true, status: true, finalVerdict: true, imageHash: true, createdAt: true },
+      orderBy: { createdAt: "desc" },
+      take: 2000,
+    });
+    return rows.map((r) => ({ ...r, title: r.title ?? "Uploaded image", imageHash: r.imageHash! }));
+  },
+
   async countSubmissionsSince(userId, since) {
     return getPrisma().submission.count({ where: { userId, createdAt: { gte: since } } });
   },
@@ -130,7 +193,17 @@ export const prismaStore: Repository = {
   async getPipelineInput(id) {
     const row = await getPrisma().submission.findUnique({
       where: { id },
-      select: { id: true, type: true, url: true, text: true, imagePath: true, title: true, status: true, steps: true },
+      select: {
+        id: true,
+        type: true,
+        url: true,
+        text: true,
+        imagePath: true,
+        imageHash: true,
+        title: true,
+        status: true,
+        steps: true,
+      },
     });
     if (!row) return null;
     return { ...row, title: row.title ?? "Untitled submission", steps: (row.steps ?? {}) as PipelineSteps };
@@ -183,6 +256,7 @@ export const prismaStore: Repository = {
         url: input.url,
         text: input.text,
         imagePath: input.imagePath,
+        imageHash: input.imageHash,
         title: input.title,
         contentHash: input.contentHash,
         userId: input.userId,

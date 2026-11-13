@@ -2,33 +2,34 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { ShieldCheck } from "lucide-react";
 import { HeaderAccount } from "@/components/layout/header-account";
+import { MobileNav } from "@/components/layout/mobile-nav";
+import { NAV_LINKS } from "@/components/layout/nav-links";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-6 px-4">
+      <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4 md:gap-6">
+        <MobileNav />
         <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
           <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <ShieldCheck className="size-4" aria-hidden />
           </span>
-          ElectionVerify
+          <span className="hidden min-[400px]:inline">ElectionVerify</span>
         </Link>
 
         <nav className="hidden items-center gap-1 text-sm md:flex" aria-label="Main">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/verified">Verified claims</Link>
-          </Button>
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/#how-it-works">How it works</Link>
-          </Button>
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/#ratings">Our ratings</Link>
-          </Button>
+          {NAV_LINKS.map((link) => (
+            <Button key={link.href} variant="ghost" size="sm" asChild>
+              <Link href={link.href}>{link.label}</Link>
+            </Button>
+          ))}
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
+          <ThemeToggle />
           <Button size="sm" asChild>
             <Link href="/submit">Submit a claim</Link>
           </Button>

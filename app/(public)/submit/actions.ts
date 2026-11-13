@@ -4,8 +4,16 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { SUBMISSIONS_PER_HOUR } from "@/lib/config";
 import { hashFile, hashText, normalizeText, normalizeUrl } from "@/lib/content-hash";
-import { countSubmissionsSince, createSubmission, findPublishedByHash, logAction } from "@/lib/data";
+import {
+  addReport,
+  countSubmissionsSince,
+  createSubmission,
+  findOpenByHash,
+  findPublishedByHash,
+  logAction,
+} from "@/lib/data";
 import { domainOf } from "@/lib/format";
+import { imageFingerprint } from "@/lib/pipeline/image-hash";
 import { startPipeline } from "@/lib/pipeline/run";
 import { saveImage } from "@/lib/storage";
 import type { NewSubmission } from "@/lib/types";
@@ -64,16 +72,28 @@ export async function createSubmissionAction(_prev: SubmitState, formData: FormD
     submission = {
       type: "IMAGE",
       text: input.caption || undefined,
-      imagePath: await saveImage(input.image),
       title: input.caption ? shorten(input.caption) : "Uploaded image",
       contentHash: await hashFile(input.image),
+      // A fingerprint of how the picture looks, to find resized copies later.
+      imageHash: (await imageFingerprint(Buffer.from(await input.image.arrayBuffer()))) ?? undefined,
       userId: user.id,
     };
   }
 
   // 5. Already checked? Send them straight to the published result.
-  const existing = await findPublishedByHash(submission.contentHash);
-  if (existing) redirect(`/s/${existing.id}?notice=existing`);
+  const published = await findPublishedByHash(submission.contentHash);
+  if (published) redirect(`/s/${published.id}?notice=existing`);
+
+  // Still being checked? Count the extra report instead of checking it twice.
+  const open = await findOpenByHash(submission.contentHash);
+  if (open) {
+    await addReport(open.id);
+    await logAction({ actorId: user.id, action: "submission.reported_again", submissionId: open.id });
+    redirect(`/s/${open.id}?notice=reported`);
+  }
+
+  // Only store the image once we know it's new.
+  if (input.type === "IMAGE") submission.imagePath = await saveImage(input.image);
 
   // 6. Save it, start the checks in the background, and show the progress page.
   const { id } = await createSubmission(submission);

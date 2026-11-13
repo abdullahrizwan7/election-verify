@@ -63,7 +63,7 @@ export function ruleBasedSuggestion(evidence: Evidence[]): RuleSuggestion {
   const factChecks = evidence.filter((e) => e.kind === "FACT_CHECK");
   const refutingChecks = factChecks.filter((e) => e.stance === "REFUTES");
   const supportingChecks = factChecks.filter((e) => e.stance === "SUPPORTS");
-  const web = evidence.filter((e) => e.kind === "WEB_SOURCE" || e.kind === "IMAGE_MATCH");
+  const web = evidence.filter((e) => e.kind === "WEB_SOURCE" || e.kind === "IMAGE_MATCH" || e.kind === "MANUAL");
   const refuting = web.filter((e) => e.stance === "REFUTES");
   const supporting = web.filter((e) => e.stance === "SUPPORTS");
 

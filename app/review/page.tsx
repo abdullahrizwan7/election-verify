@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { requireRole } from "@/lib/auth";
 import { getStats, listForReview } from "@/lib/data";
 import { cn } from "@/lib/utils";
-import type { Status } from "@/lib/types";
+import type { ReviewSort, Status } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Review queue" };
 
@@ -23,7 +23,22 @@ const FILTERS: { label: string; status?: Status }[] = [
   { label: "Published", status: "PUBLISHED" },
 ];
 
-type SearchParams = Promise<{ status?: string; notice?: string }>;
+const SORTS: { label: string; value: ReviewSort }[] = [
+  { label: "Newest", value: "newest" },
+  { label: "Oldest", value: "oldest" },
+  { label: "Most reported", value: "reports" },
+];
+
+type SearchParams = Promise<{ status?: string; sort?: string; notice?: string }>;
+
+/** Builds a queue link that keeps the other filter. */
+function queueHref(status: Status | undefined, sort: ReviewSort) {
+  const params = new URLSearchParams();
+  if (status) params.set("status", status);
+  if (sort !== "newest") params.set("sort", sort);
+  const query = params.toString();
+  return query ? `/review?${query}` : "/review";
+}
 
 export default function ReviewPage({ searchParams }: { searchParams: SearchParams }) {
   return (
@@ -52,9 +67,10 @@ export default function ReviewPage({ searchParams }: { searchParams: SearchParam
 
 async function ReviewDashboard({ searchParams }: { searchParams: SearchParams }) {
   await requireRole("REVIEWER", "/review");
-  const { status: raw, notice } = await searchParams;
+  const { status: raw, sort: rawSort, notice } = await searchParams;
   const status = FILTERS.find((f) => f.status === raw)?.status;
-  const [stats, items] = await Promise.all([getStats(), listForReview({ status })]);
+  const sort = SORTS.find((s) => s.value === rawSort)?.value ?? "newest";
+  const [stats, items] = await Promise.all([getStats(), listForReview({ status, sort })]);
 
   const cards = [
     { label: "Needs review", value: stats.needsReview, icon: ClipboardCheck, className: "text-amber-600" },
@@ -87,24 +103,42 @@ async function ReviewDashboard({ searchParams }: { searchParams: SearchParams })
         ))}
       </div>
 
-      <nav className="flex flex-wrap gap-2" aria-label="Filter by status">
-        {FILTERS.map((filter) => {
-          const active = filter.status === status;
-          return (
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <nav className="flex flex-wrap gap-2" aria-label="Filter by status">
+          {FILTERS.map((filter) => {
+            const active = filter.status === status;
+            return (
+              <Link
+                key={filter.label}
+                href={queueHref(filter.status, sort)}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "rounded-full border px-3 py-1 text-sm transition",
+                  active ? "border-primary bg-primary text-primary-foreground" : "hover:bg-muted",
+                )}
+              >
+                {filter.label}
+              </Link>
+            );
+          })}
+        </nav>
+        <nav className="flex items-center gap-1 text-sm" aria-label="Sort">
+          <span className="mr-1 text-muted-foreground">Sort:</span>
+          {SORTS.map((option) => (
             <Link
-              key={filter.label}
-              href={filter.status ? `/review?status=${filter.status}` : "/review"}
-              aria-current={active ? "page" : undefined}
+              key={option.value}
+              href={queueHref(status, option.value)}
+              aria-current={option.value === sort ? "true" : undefined}
               className={cn(
-                "rounded-full border px-3 py-1 text-sm transition",
-                active ? "border-primary bg-primary text-primary-foreground" : "hover:bg-muted",
+                "rounded-md px-2 py-1 transition",
+                option.value === sort ? "bg-muted font-medium" : "text-muted-foreground hover:text-foreground",
               )}
             >
-              {filter.label}
+              {option.label}
             </Link>
-          );
-        })}
-      </nav>
+          ))}
+        </nav>
+      </div>
 
       <ReviewQueueTable items={items} />
     </div>

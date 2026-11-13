@@ -51,7 +51,15 @@ Each submission goes through these steps in the background. The result page show
 | Prepare for review | Suggests a verdict with cited evidence | Gemini API | Built-in rules |
 
 Reviewers also get one-click **reverse image search** buttons (Google Lens, TinEye) to find older copies of
-a photo.
+a photo, and can **add evidence they found themselves** (for example a call to the election office).
+
+**Duplicates:** the exact same content sent again is counted as an extra report ("Reported 14×") instead of
+being checked twice, and the review queue can sort by most reported. Images also get a **perceptual
+fingerprint** (`lib/pipeline/image-hash.ts`), so a photo that was resized or re-compressed by WhatsApp is
+recognised, and reviewers see the earlier submission and its verdict.
+
+**For the public:** search and filter verified claims, a "My submissions" page, share buttons
+(WhatsApp, copy link), and link previews with the verdict drawn on the image.
 
 **Where it runs:** with Inngest connected, every step is a background job with retries. Without it, the
 steps run right after the page responds (Next.js `after()`), which is fine for development and demos.
@@ -140,12 +148,13 @@ proxy.ts                      Runs before each request (Next.js 16's new name fo
 ## Connect the real services (all free)
 
 Copy `.env.example` to `.env` (already done once) and fill in what you have. Restart `npm run dev` after
-changing it. **Admin → Setup** in the app shows what is connected.
+changing it. **Admin → Setup** in the app shows what is connected, and **`npm run check:services`** tests
+every key with one tiny real request and says exactly what is wrong if one fails.
 
 1. **Supabase** (database, login, image storage): create a project at [supabase.com](https://supabase.com).
    - `DATABASE_URL`: click **Connect** and copy the **Session pooler** string (it works on every network).
    - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`: Project Settings → API Keys.
-   - Storage → create a **private** bucket named `submissions`.
+   - Run `npm run setup:supabase` to create the private `submissions` bucket for images.
    - Authentication → URL Configuration → add `http://localhost:3000/auth/callback`.
    - Then run `npm run db:migrate` and `npm run db:seed`.
 2. **Gemini**: `GEMINI_API_KEY` from [Google AI Studio](https://aistudio.google.com/apikey).
@@ -179,6 +188,11 @@ Free Supabase projects pause after a week without use. Open the dashboard before
 | `npm run test:e2e` | Browser tests (Playwright). First run `npx playwright install chromium` |
 | `npm run lint` / `npm run typecheck` | ESLint / TypeScript |
 | `npm run db:migrate` / `db:seed` / `db:studio` | Database schema, sample data, database browser |
+| `npm run check:services` | Test every API key in `.env` |
+| `npm run setup:supabase` | Create the private image bucket in Supabase |
+
+GitHub runs lint, types, unit tests, the build and the browser tests on every push
+(`.github/workflows/ci.yml`).
 
 ---
 
@@ -191,5 +205,5 @@ Free Supabase projects pause after a week without use. Open the dashboard before
 | 3 | Pipeline: safe link reading, article extraction, source reputation, claims | ✅ Done |
 | 4 | Fact-check search, web evidence, AI suggestion with citations | ✅ Done (needs free keys) |
 | 5 | Image metadata, OCR, AI image notes, reverse image search links | ✅ Done |
-| 6 | Re-run, activity log, setup page, error pages | ✅ Done |
-| 7 | Unit and browser tests | ✅ Done. Deploying needs your accounts. |
+| 6 | Re-run, reviewer evidence, duplicate reports, queue sorting, activity log, setup page | ✅ Done |
+| 7 | Tests (68 unit, 8 browser), CI, sitemap, security headers, method page, key checker | ✅ Done. Deploying needs your accounts. |

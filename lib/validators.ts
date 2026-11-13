@@ -54,6 +54,16 @@ export const reviewSchema = z.object({
   internalNote: optionalText(2000),
 });
 
+/** Evidence a reviewer found by hand (a link, a phone call to an official, a document). */
+export const manualEvidenceSchema = z.object({
+  submissionId: z.string().min(1),
+  title: z.string().trim().min(5, { error: "Describe the evidence in a few words." }).max(200),
+  url: z.union([z.literal(""), z.httpUrl({ error: "Enter a full link that starts with http:// or https://" })]).optional(),
+  note: optionalText(1000),
+  stance: z.enum(["SUPPORTS", "REFUTES", "NEUTRAL"], { error: "Choose whether it supports or contradicts the claim." }),
+  claimId: z.string().optional(),
+});
+
 export const sourceSchema = z.object({
   domain: z
     .string()

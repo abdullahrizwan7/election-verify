@@ -50,6 +50,7 @@ enum EvidenceKind {
   IMAGE_METADATA
   OCR_TEXT
   AI_IMAGE_NOTES
+  MANUAL
 }
 
 enum Stance {
@@ -86,6 +87,8 @@ model Submission {
   imagePath    String? /// path inside the Supabase Storage bucket
   title        String?
   contentHash  String /// sha256 of the normalized input, used to find duplicates
+  imageHash    String? /// perceptual hash of the image, finds re-saved or resized copies
+  reportCount  Int        @default(1) /// how many times people sent this same content
   status       Status     @default(QUEUED)
   steps        Json       @default("{}") /// pipeline progress, e.g. { "extract": "done" }
   error        String?
