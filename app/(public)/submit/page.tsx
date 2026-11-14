@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { CheckCircle2, LogIn } from "lucide-react";
 import { SubmitForm } from "@/components/submit/submit-form";
+import { T } from "@/components/i18n";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,13 +24,15 @@ export default function SubmitPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            <span className="text-gradient">Submit a claim</span>
+            <span className="text-gradient">
+              <T k="submit.title" />
+            </span>
           </h1>
           <p className="mt-1 text-muted-foreground">
-            Not sure if something about the election is true? Send it to us and we’ll check it.
+            <T k="submit.subtitle" />
           </p>
         </div>
-        <Card>
+        <Card data-tour="submit-form">
           <CardContent className="pt-6">
             <Suspense fallback={<Skeleton className="h-80 w-full rounded-lg" />}>
               <SubmitGate />

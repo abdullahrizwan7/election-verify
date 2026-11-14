@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { Loader2, Megaphone } from "lucide-react";
 import { publishReviewAction, type ReviewState } from "@/app/review/[id]/actions";
+import { isTyping } from "@/components/command-palette";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -28,10 +29,30 @@ export function VerdictForm({
   disabled: boolean;
 }) {
   const [state, formAction, pending] = useActionState(publishReviewAction, initialState);
+  const [verdict, setVerdict] = useState<string>(current ?? suggested ?? "");
+  const formRef = useRef<HTMLFormElement>(null);
   const errors = state.errors ?? {};
 
+  // Shortcuts: 1–6 pick a verdict, Ctrl/⌘ + Enter publishes.
+  useEffect(() => {
+    if (disabled) return;
+    function onKey(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+        event.preventDefault();
+        formRef.current?.requestSubmit();
+        return;
+      }
+      const index = Number(event.key) - 1;
+      if (!isTyping(event.target) && !event.metaKey && !event.ctrlKey && index >= 0 && index < VERDICT_ORDER.length) {
+        setVerdict(VERDICT_ORDER[index]);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [disabled]);
+
   return (
-    <Card>
+    <Card data-tour="verdict-form">
       <CardHeader>
         <CardTitle className="text-base">{current ? "Update the verdict" : "Your verdict"}</CardTitle>
         <CardDescription>
@@ -39,24 +60,27 @@ export function VerdictForm({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={formAction} className="space-y-5">
+        <form ref={formRef} action={formAction} className="space-y-5">
           <input type="hidden" name="submissionId" value={submissionId} />
 
           <fieldset disabled={disabled || pending} className="space-y-5">
-            <RadioGroup name="verdict" defaultValue={current ?? suggested ?? undefined} className="grid grid-cols-2 gap-2">
-              {VERDICT_ORDER.map((verdict) => (
+            <RadioGroup name="verdict" value={verdict} onValueChange={setVerdict} className="grid grid-cols-2 gap-2">
+              {VERDICT_ORDER.map((option, index) => (
                 <Label
-                  key={verdict}
-                  htmlFor={`verdict-${verdict}`}
+                  key={option}
+                  htmlFor={`verdict-${option}`}
                   className={cn(
                     "flex cursor-pointer items-center gap-2 rounded-lg border p-2.5 text-sm font-normal transition hover:bg-muted/50",
                     "has-[[aria-checked=true]]:border-primary has-[[aria-checked=true]]:bg-primary/5",
                   )}
                 >
-                  <RadioGroupItem id={`verdict-${verdict}`} value={verdict} />
-                  <span className={cn("size-2 rounded-full", VERDICTS[verdict].dotClassName)} aria-hidden />
-                  {VERDICTS[verdict].label}
-                  {verdict === suggested && <span className="ml-auto text-[10px] text-muted-foreground uppercase">AI</span>}
+                  <RadioGroupItem id={`verdict-${option}`} value={option} />
+                  <span className={cn("size-2 rounded-full", VERDICTS[option].dotClassName)} aria-hidden />
+                  {VERDICTS[option].label}
+                  <span className="ml-auto flex items-center gap-1 text-[10px] text-muted-foreground uppercase">
+                    {option === suggested && "AI"}
+                    <kbd className="rounded border px-1 font-mono">{index + 1}</kbd>
+                  </span>
                 </Label>
               ))}
             </RadioGroup>
@@ -86,6 +110,9 @@ export function VerdictForm({
 
             {errors.form && <p className="text-sm text-destructive">{errors.form}</p>}
 
+            <p className="text-xs text-muted-foreground">
+              Shortcut: <kbd className="rounded border bg-muted px-1 font-mono">Ctrl/⌘ + Enter</kbd> publishes.
+            </p>
             <Button type="submit" className="h-9 w-full">
               {pending ? <Loader2 className="animate-spin" aria-hidden /> : <Megaphone aria-hidden />}
               {current ? "Update published verdict" : "Publish verdict"}

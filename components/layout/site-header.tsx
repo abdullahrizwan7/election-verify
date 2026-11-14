@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { ShieldCheck } from "lucide-react";
+import { CommandPalette } from "@/components/command-palette";
 import { HeaderAccount } from "@/components/layout/header-account";
+import { LanguageSwitcher, T } from "@/components/i18n";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { NAV_LINKS } from "@/components/layout/nav-links";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -23,15 +25,21 @@ export function SiteHeader() {
         <nav className="hidden items-center gap-1 text-sm md:flex" aria-label="Main">
           {NAV_LINKS.map((link) => (
             <Button key={link.href} variant="ghost" size="sm" asChild>
-              <Link href={link.href}>{link.label}</Link>
+              <Link href={link.href}>
+                <T k={link.key} />
+              </Link>
             </Button>
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+          <CommandPalette />
+          <LanguageSwitcher />
           <ThemeToggle />
           <Button size="sm" asChild>
-            <Link href="/submit">Submit a claim</Link>
+            <Link href="/submit">
+              <T k="nav.submit" />
+            </Link>
           </Button>
           {/* Reads the login cookie, so it loads separately from the rest of the page. */}
           <Suspense fallback={<Skeleton className="h-8 w-20 rounded-lg" />}>

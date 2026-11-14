@@ -68,6 +68,7 @@ export function buildSimilarImageEvidence(matches: ReturnType<typeof findSimilar
       stance: "NEUTRAL",
       snippet: `${similarity}% similar · sent on ${formatDate(match.createdAt)} · ${verdict}. Check whether the caption makes the same claim.`,
       publishedAt: null,
+      data: { compareSubmissionId: match.id, compareLabel: `Sent on ${formatDate(match.createdAt)}` },
     };
   });
 }

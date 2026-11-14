@@ -5,7 +5,11 @@ import { Suspense } from "react";
 import { AlertTriangle, ArrowLeft, Clock, Info, UserCheck } from "lucide-react";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { ClaimsList } from "@/components/claims-list";
+import { T } from "@/components/i18n";
+import { EvidenceBoard } from "@/components/evidence/evidence-board";
 import { EVIDENCE_GROUPS, EvidenceList } from "@/components/evidence/evidence-list";
+import { ForensicsViewer } from "@/components/evidence/forensics-viewer";
+import { PipelineMap } from "@/components/pipeline-map";
 import { PipelineProgress } from "@/components/pipeline-progress";
 import { ShareButtons } from "@/components/share-buttons";
 import { DetailSkeleton } from "@/components/skeletons";
@@ -13,7 +17,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { SubmittedContent } from "@/components/submitted-content";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { VerdictBadge } from "@/components/verdict-badge";
 import { getSubmission } from "@/lib/data";
 import { formatDate } from "@/lib/format";
@@ -97,15 +101,30 @@ async function Result({ params, searchParams }: Props) {
 
       {isPublished ? <VerdictPanel submission={submission} /> : <ProgressPanel submission={submission} />}
 
+      {isPublished && submission.evidence.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Evidence map</CardTitle>
+            <CardDescription>How each piece of evidence relates to the claims. Click a card to read it.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <EvidenceBoard title={submission.title} claims={submission.claims} evidence={submission.evidence} />
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <div className="space-y-6">
           <SubmittedContent submission={submission} />
+          {isPublished && submission.imageUrl && <ForensicsViewer imageUrl={submission.imageUrl} evidence={submission.evidence} />}
           {isPublished && <EvidenceSections submission={submission} />}
         </div>
         <aside className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Claims we checked</CardTitle>
+              <CardTitle className="text-base">
+                <T k="result.claims" />
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <ClaimsList claims={submission.claims} />
@@ -132,6 +151,7 @@ function VerdictPanel({ submission }: { submission: SubmissionDetail }) {
   const rgb = VERDICTS[verdict].rgb;
   return (
     <section
+      data-tour="verdict-panel"
       className="relative overflow-hidden rounded-2xl border bg-card p-6 backdrop-blur-xl"
       style={{ boxShadow: `0 0 0 1px rgb(${rgb} / 0.35), 0 30px 80px -30px rgb(${rgb} / 0.7)` }}
     >
@@ -145,11 +165,12 @@ function VerdictPanel({ submission }: { submission: SubmissionDetail }) {
       {submission.publicNote && <p className="relative mt-4 max-w-3xl text-lg leading-relaxed text-pretty">{submission.publicNote}</p>}
       <p className="relative mt-4 flex items-center gap-2 text-sm text-muted-foreground">
         <UserCheck className="size-4" aria-hidden />
-        Reviewed by a human on {formatDate(submission.publishedAt)}
+        <T k="result.reviewed" /> {formatDate(submission.publishedAt)}
       </p>
       <div className="relative mt-5 border-t pt-4">
         <ShareButtons
           path={`/s/${submission.id}`}
+          downloadPath={`/s/${submission.id}/card`}
           text={`Fact-check: “${submission.title}” is rated ${VERDICTS[verdict].label.toUpperCase()}.`}
         />
       </div>
@@ -161,10 +182,11 @@ function ProgressPanel({ submission }: { submission: SubmissionDetail }) {
   const stillRunning = submission.status === "QUEUED" || submission.status === "PROCESSING";
 
   return (
-    <section className="border-gradient relative grid gap-6 overflow-hidden rounded-2xl p-6 md:grid-cols-[1fr_1.2fr]">
+    <section className="border-gradient relative grid gap-6 overflow-hidden rounded-2xl p-6 md:grid-cols-[1fr_1.2fr]" data-tour="pipeline">
       <div aria-hidden className="bg-grid pointer-events-none absolute inset-0 opacity-50" />
       <div aria-hidden className="pointer-events-none absolute -top-20 -right-20 size-60 rounded-full bg-glow/15 blur-3xl" />
       {stillRunning && <AutoRefresh />}
+      <PipelineMap steps={submission.steps} className="relative mb-2 md:col-span-2" />
       <div className="relative space-y-3">
         {submission.status === "FAILED" ? (
           <>
@@ -178,7 +200,9 @@ function ProgressPanel({ submission }: { submission: SubmissionDetail }) {
         ) : submission.status === "NEEDS_REVIEW" ? (
           <>
             <UserCheck className="size-6 text-amber-600" aria-hidden />
-            <h2 className="text-lg font-medium">Evidence collected, waiting for a reviewer</h2>
+            <h2 className="text-lg font-medium">
+              <T k="result.waiting" />
+            </h2>
             <p className="text-sm text-muted-foreground">
               A trained reviewer will read the evidence and publish the verdict here. We never publish an AI verdict
               without a human check.
@@ -187,7 +211,9 @@ function ProgressPanel({ submission }: { submission: SubmissionDetail }) {
         ) : (
           <>
             <Clock className="size-6 text-primary" aria-hidden />
-            <h2 className="text-lg font-medium">We’re checking this now</h2>
+            <h2 className="text-lg font-medium">
+              <T k="result.checking" />
+            </h2>
             <p className="text-sm text-muted-foreground">
               This usually takes about a minute. The list updates on its own. After that, a human reviewer checks the
               result before it is published.

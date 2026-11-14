@@ -53,6 +53,10 @@
   --animate-shine: shine 3.5s ease-in-out infinite;
   --animate-scan: scan 1.6s ease-in-out infinite;
   --animate-pulse-ring: pulse-ring 2s ease-out infinite;
+  --animate-packet: packet 1.2s ease-in-out infinite;
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-scan-y: scan-y 3.2s ease-in-out infinite;
+  --animate-gauge: gauge 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 /* Light theme: clean and bright, with the same blue accent. */
@@ -148,6 +152,11 @@
   }
   html {
     @apply font-sans;
+    /* Hindi and Urdu letters fall back to these fonts automatically. */
+    font-family: var(--font-sans), var(--font-devanagari), var(--font-naskh), ui-sans-serif, system-ui, sans-serif;
+  }
+  :lang(ur) {
+    line-height: 1.9;
   }
 }
 
@@ -197,6 +206,42 @@
   100% { transform: translateX(250%); }
 }
 
+@keyframes packet {
+  0% { left: 0%; opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+
+@keyframes gauge {
+  from { stroke-dashoffset: var(--gauge-from); }
+  to { stroke-dashoffset: var(--gauge-to); }
+}
+
+/* Page changes fade and lift in (React <ViewTransition> in app/layout.tsx). */
+::view-transition-old(.page-fade) {
+  animation: 140ms ease-out both page-out;
+}
+::view-transition-new(.page-fade) {
+  animation: 320ms cubic-bezier(0.2, 0.7, 0.2, 1) both page-in;
+}
+@keyframes page-out {
+  to { opacity: 0; }
+}
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(10px); }
+}
+
+@keyframes scan-y {
+  0% { top: -15%; }
+  100% { top: 105%; }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
 @keyframes pulse-ring {
   0% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--glow) 60%, transparent); }
   100% { box-shadow: 0 0 0 10px transparent; }
@@ -224,5 +269,10 @@
   [data-reveal] {
     opacity: 1;
     transform: none;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }

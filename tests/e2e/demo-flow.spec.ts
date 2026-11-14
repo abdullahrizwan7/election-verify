@@ -38,8 +38,8 @@ test("a citizen submits a message and a reviewer publishes the verdict", async (
 
   // 5. Anyone can now see the published result
   await page.goto(`/s/${id}`);
-  await expect(page.getByText("Reviewed by a human on")).toBeVisible();
-  await expect(page.getByText("The official schedule says polls are open until 5 PM.")).toBeVisible();
+  await expect(page.getByRole("main").getByText("Reviewed by a human on")).toBeVisible();
+  await expect(page.getByRole("main").getByText("The official schedule says polls are open until 5 PM.")).toBeVisible();
 });
 
 test("signed-out visitors are sent to sign in before the review queue", async ({ page }) => {
@@ -88,9 +88,10 @@ test("sending the same message twice counts a second report instead of a second 
 
 test("search finds published verdicts", async ({ page }) => {
   await page.goto("/verified?q=polling");
-  await expect(page.getByText("Forwarded message: polling stations will close at 2 PM")).toBeVisible();
+  await expect(page.getByRole("main").getByText("Forwarded message: polling stations will close at 2 PM").first()).toBeVisible();
   await page.goto("/verified?q=zzzz-nothing-matches");
-  await expect(page.getByText(/No published claims match/)).toBeVisible();
+  // Next.js keeps a hidden copy of the previous page, so look only in the visible main area.
+  await expect(page.getByRole("main").getByText(/No published claims match/)).toBeVisible();
 });
 
 test("a reviewer can add evidence they found", async ({ page }) => {
@@ -98,7 +99,8 @@ test("a reviewer can add evidence they found", async ({ page }) => {
   await signInAs(page, "Reviewer", "/review/voter-id-rule");
   await page.getByLabel("What is it?").fill(title);
   await page.getByRole("button", { name: "Add evidence" }).click();
-  await expect(page.getByText(title)).toBeVisible();
+  // The title also appears on the evidence board, so look in the evidence list.
+  await expect(page.locator('[id^="evidence-"]').getByText(title)).toBeVisible();
   await expect(page.getByText(/added by Demo Reviewer/).first()).toBeVisible();
 });
 

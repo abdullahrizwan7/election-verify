@@ -97,6 +97,25 @@ A dark "mission control" look by default, with a light theme one click away (sun
 - **Respectful:** every animation stops for people who turn off motion in their device settings, the globe
   pauses when it's off screen, and touch screens get still cards.
 
+### Presentation features
+
+- **Presenter mode:** click “Watch the guided demo” on the home page (or Ctrl/⌘ + K → Start presenter mode).
+  A 12-step tour walks through the citizen, reviewer, public and admin views, switching demo accounts
+  and spotlighting each feature. Use → / ← to move and Esc to exit.
+- **Analytics dashboard** (`/review/analytics`): claims per day, verdicts, median review time, and an
+  AI-vs-reviewer agreement grid. Demo mode adds clearly labelled sample history.
+- **Animated pipeline map**, interactive **evidence board** (React Flow), and **image forensics**
+  (word boxes on the image, metadata readout, comparison slider).
+- **Command palette** (Ctrl/⌘ + K) and **keyboard shortcuts** (press ? to see them).
+- **Hindi and Urdu**: the language button in the header translates the public pages.
+- **Installable app** (add to home screen), offline page, downloadable verdict images.
+
+### Workflow PDF
+
+`docs/ElectionVerify-Workflow.pdf` is a 13-page, slide-style overview of how the project works and how
+each user uses it, with real screenshots. To rebuild it after changes, start the app and run
+`npm run docs:pdf` (it uses Playwright to take the screenshots).
+
 ---
 
 ## Tech stack (all free)

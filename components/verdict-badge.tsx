@@ -1,4 +1,6 @@
 import { cn } from "@/lib/utils";
+import { T } from "@/components/i18n";
+import type { MessageKey } from "@/lib/i18n/dictionaries";
 import { VERDICTS } from "@/lib/labels";
 import type { Verdict } from "@/lib/types";
 
@@ -22,7 +24,7 @@ export function VerdictBadge({
       )}
     >
       <span className={cn("rounded-full", size === "lg" ? "size-2" : "size-1.5", meta.dotClassName)} aria-hidden />
-      {meta.label}
+      <T k={`verdict.${verdict}` as MessageKey} />
     </span>
   );
 }

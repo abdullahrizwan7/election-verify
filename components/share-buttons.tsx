@@ -1,11 +1,11 @@
 "use client";
 
-import { Link2, MessageCircle, Share2 } from "lucide-react";
+import { Download, Link2, MessageCircle, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 /** Lets people pass a verdict on to the group chat the rumour came from. */
-export function ShareButtons({ path, text }: { path: string; text: string }) {
+export function ShareButtons({ path, text, downloadPath }: { path: string; text: string; downloadPath?: string }) {
   // The full address is only known in the browser, so it's built when a button is clicked.
   const fullUrl = () => new URL(path, window.location.origin).toString();
 
@@ -42,6 +42,13 @@ export function ShareButtons({ path, text }: { path: string; text: string }) {
       <Button variant="outline" size="sm" onClick={shareMore}>
         <Share2 aria-hidden /> More
       </Button>
+      {downloadPath && (
+        <Button variant="outline" size="sm" asChild>
+          <a href={downloadPath} download>
+            <Download aria-hidden /> Download image
+          </a>
+        </Button>
+      )}
     </div>
   );
 }

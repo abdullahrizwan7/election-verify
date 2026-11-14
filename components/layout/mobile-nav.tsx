@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Menu, ShieldCheck } from "lucide-react";
 import { NAV_LINKS } from "@/components/layout/nav-links";
+import { T } from "@/components/i18n";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
@@ -31,7 +32,7 @@ export function MobileNav() {
           {[...NAV_LINKS, ...EXTRA_LINKS].map((link) => (
             <SheetClose asChild key={link.href}>
               <Link href={link.href} className="rounded-lg px-3 py-2.5 text-sm hover:bg-muted">
-                {link.label}
+                {"key" in link ? <T k={link.key} /> : link.label}
               </Link>
             </SheetClose>
           ))}

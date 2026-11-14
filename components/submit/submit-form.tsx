@@ -1,9 +1,11 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { FileText, ImageIcon, Link2, Loader2, Send } from "lucide-react";
 import { createSubmissionAction, type SubmitState } from "@/app/(public)/submit/actions";
 import { ImageDropzone } from "@/components/submit/image-dropzone";
+import { T } from "@/components/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +15,9 @@ import type { InputType } from "@/lib/types";
 
 const initialState: SubmitState = {};
 const TEXT_LIMIT = 5000;
+/** A typical rumour, filled in by presenter mode (?prefill=demo). */
+const DEMO_MESSAGE =
+  "FORWARDED MANY TIMES: Election day has been moved to Sunday this year because of the holiday. Polling stations will be closed on Saturday. Share with everyone in your family!";
 
 function FieldError({ message }: { message?: string }) {
   return message ? <p className="text-sm text-destructive">{message}</p> : null;
@@ -20,8 +25,10 @@ function FieldError({ message }: { message?: string }) {
 
 export function SubmitForm() {
   const [state, formAction, pending] = useActionState(createSubmissionAction, initialState);
-  const [type, setType] = useState<InputType>("URL");
-  const [textLength, setTextLength] = useState(state.values?.text?.length ?? 0);
+  const prefill = useSearchParams().get("prefill") === "demo";
+  const [type, setType] = useState<InputType>(prefill ? "TEXT" : "URL");
+  const defaultText = state.values?.text ?? (prefill ? DEMO_MESSAGE : undefined);
+  const [textLength, setTextLength] = useState(defaultText?.length ?? 0);
   const errors = state.errors ?? {};
 
   return (
@@ -32,13 +39,13 @@ export function SubmitForm() {
       <Tabs value={type} onValueChange={(value) => setType(value as InputType)}>
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="URL">
-            <Link2 aria-hidden /> Link
+            <Link2 aria-hidden /> <T k="submit.link" />
           </TabsTrigger>
           <TabsTrigger value="TEXT">
-            <FileText aria-hidden /> Text
+            <FileText aria-hidden /> <T k="submit.text" />
           </TabsTrigger>
           <TabsTrigger value="IMAGE">
-            <ImageIcon aria-hidden /> Image
+            <ImageIcon aria-hidden /> <T k="submit.image" />
           </TabsTrigger>
         </TabsList>
 
@@ -74,7 +81,7 @@ export function SubmitForm() {
             maxLength={TEXT_LIMIT}
             minLength={20}
             placeholder="Paste the forwarded message or post exactly as you received it."
-            defaultValue={state.values?.text}
+            defaultValue={defaultText}
             onChange={(event) => setTextLength(event.target.value.length)}
             aria-invalid={Boolean(errors.text)}
             required
@@ -113,7 +120,7 @@ export function SubmitForm() {
         </p>
         <Button type="submit" disabled={pending} className="h-9 px-4">
           {pending ? <Loader2 className="animate-spin" aria-hidden /> : <Send aria-hidden />}
-          {pending ? "Sending…" : "Submit for checking"}
+          {pending ? "Sending…" : <T k="submit.button" />}
         </Button>
       </div>
     </form>

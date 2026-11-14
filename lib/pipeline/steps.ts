@@ -107,11 +107,11 @@ export const PIPELINE: PipelineStep[] = [
         items.push(...buildSimilarImageEvidence(findSimilarImages(fingerprint, await listImageFingerprints(id))));
       }
 
-      const text = await readTextInImage(image.bytes).catch((error) => {
+      const ocr = await readTextInImage(image.bytes).catch((error) => {
         console.error("[pipeline] OCR failed", error);
-        return "";
+        return { text: "", words: [], width: 0, height: 0 };
       });
-      items.push(buildOcrEvidence(text));
+      items.push(buildOcrEvidence(ocr));
 
       if (isAiConfigured()) {
         const notes = await aiDescribeImage(image, input.text).catch(() => "");

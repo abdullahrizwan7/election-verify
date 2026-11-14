@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { InputTypeIcon } from "@/components/input-type-icon";
+import { T } from "@/components/i18n";
 import { VerdictBadge } from "@/components/verdict-badge";
 import { domainOf, formatDate } from "@/lib/format";
 import { VERDICTS } from "@/lib/labels";
@@ -37,7 +38,7 @@ export function SubmissionCard({ submission }: { submission: SubmissionSummary }
       </div>
       {submission.publicNote && <p className="line-clamp-3 text-sm text-muted-foreground">{submission.publicNote}</p>}
       <span className="mt-auto inline-flex items-center gap-1 text-sm font-medium text-primary">
-        See the evidence
+        <T k="card.evidence" />
         <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" aria-hidden />
       </span>
     </Link>

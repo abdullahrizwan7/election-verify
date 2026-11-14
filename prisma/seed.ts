@@ -54,7 +54,7 @@ async function main() {
 
     // Evidence is created after claims so `claimId` can point at them.
     await prisma.evidence.createMany({
-      data: s.evidence.map((e) => ({ ...e, submissionId: s.id })),
+      data: s.evidence.map((e) => ({ ...e, data: (e.data ?? undefined) as object | undefined, submissionId: s.id })),
     });
 
     for (const review of s.reviews) {

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ClipboardCheck, Database, Inbox, LogOut, Send } from "lucide-react";
+import { BarChart3, ClipboardCheck, Database, Inbox, LogOut, Send } from "lucide-react";
 import { signOut } from "@/app/(auth)/actions";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -56,11 +56,18 @@ export function UserMenu({ user, isAdmin }: { user: AppUser; isAdmin: boolean })
             </Link>
           </DropdownMenuItem>
           {isReviewer && (
-            <DropdownMenuItem asChild>
-              <Link href="/review">
-                <ClipboardCheck aria-hidden /> Review queue
-              </Link>
-            </DropdownMenuItem>
+            <>
+              <DropdownMenuItem asChild>
+                <Link href="/review">
+                  <ClipboardCheck aria-hidden /> Review queue
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/review/analytics">
+                  <BarChart3 aria-hidden /> Analytics
+                </Link>
+              </DropdownMenuItem>
+            </>
           )}
           {isAdmin && (
             <DropdownMenuItem asChild>

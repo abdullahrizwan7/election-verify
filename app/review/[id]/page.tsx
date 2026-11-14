@@ -8,7 +8,10 @@ import { AutoRefresh } from "@/components/auto-refresh";
 import { ClaimsList } from "@/components/claims-list";
 import { AddEvidenceForm } from "@/components/review/add-evidence-form";
 import { ReverseImageSearch } from "@/components/review/reverse-image-search";
+import { EvidenceBoard } from "@/components/evidence/evidence-board";
 import { EVIDENCE_GROUPS, EvidenceList } from "@/components/evidence/evidence-list";
+import { ForensicsViewer } from "@/components/evidence/forensics-viewer";
+import { PipelineMap } from "@/components/pipeline-map";
 import { PipelineProgress } from "@/components/pipeline-progress";
 import { AiSuggestion } from "@/components/review/ai-suggestion";
 import { VerdictForm } from "@/components/review/verdict-form";
@@ -16,7 +19,7 @@ import { DetailSkeleton } from "@/components/skeletons";
 import { StatusBadge } from "@/components/status-badge";
 import { SubmittedContent } from "@/components/submitted-content";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { VerdictBadge } from "@/components/verdict-badge";
 import { requireRole } from "@/lib/auth";
 import { getSubmission } from "@/lib/data";
@@ -70,10 +73,28 @@ async function Workspace({ params }: { params: Params }) {
         )}
       </div>
 
+      {submission.evidence.length > 0 && (
+        <Card data-tour="evidence-board">
+          <CardHeader>
+            <CardTitle className="text-base">Evidence board</CardTitle>
+            <CardDescription>Drag to rearrange, scroll to zoom, click a card to jump to it.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <EvidenceBoard title={submission.title} claims={submission.claims} evidence={submission.evidence} />
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
         {/* Left: the content and all evidence */}
         <div className="space-y-6">
+          <Card className="hidden md:flex">
+            <CardContent>
+              <PipelineMap steps={submission.steps} />
+            </CardContent>
+          </Card>
           <SubmittedContent submission={submission} />
+          {submission.imageUrl && <ForensicsViewer imageUrl={submission.imageUrl} evidence={submission.evidence} />}
           {submission.imageUrl && <ReverseImageSearch imageUrl={submission.imageUrl} />}
 
           <Card>
@@ -84,6 +105,7 @@ async function Workspace({ params }: { params: Params }) {
               <ClaimsList claims={submission.claims} />
             </CardContent>
           </Card>
+
 
           {EVIDENCE_GROUPS.map(({ id: groupId, title, icon: Icon, kinds }) => (
             <Card key={groupId}>

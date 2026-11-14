@@ -1,5 +1,6 @@
 import { ExternalLink } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { T } from "@/components/i18n";
 import { domainOf, formatDateTime } from "@/lib/format";
 import { INPUT_TYPES } from "@/lib/labels";
 import type { SubmissionDetail } from "@/lib/types";
@@ -9,7 +10,9 @@ export function SubmittedContent({ submission }: { submission: SubmissionDetail 
   return (
     <Card>
       <CardHeader className="flex-row items-center justify-between">
-        <CardTitle className="text-base">What was submitted</CardTitle>
+        <CardTitle className="text-base">
+          <T k="result.submitted" />
+        </CardTitle>
         <span className="text-xs text-muted-foreground">
           {INPUT_TYPES[submission.type]} · {formatDateTime(submission.createdAt)}
         </span>

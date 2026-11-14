@@ -1,9 +1,10 @@
 import "server-only";
+import { computeAnalytics } from "@/lib/analytics";
 import { getPrisma } from "@/lib/db";
 import type { Repository } from "@/lib/data/repository";
 import type { Prisma } from "@/lib/generated/prisma/client";
 import { getImageUrl } from "@/lib/storage";
-import type { PipelineSteps, SubmissionDetail, SubmissionSummary } from "@/lib/types";
+import type { EvidenceData, PipelineSteps, SubmissionDetail, SubmissionSummary } from "@/lib/types";
 
 /** Columns needed for list views. Keeps queries small. */
 const summarySelect = {
@@ -95,6 +96,23 @@ export const prismaStore: Repository = {
     };
   },
 
+  async getAnalytics(rangeDays) {
+    const since = new Date(Date.now() - (rangeDays + 1) * 86_400_000);
+    const [records, top] = await Promise.all([
+      getPrisma().submission.findMany({
+        where: { OR: [{ createdAt: { gte: since } }, { publishedAt: { gte: since } }] },
+        select: { type: true, status: true, aiVerdict: true, finalVerdict: true, createdAt: true, publishedAt: true },
+      }),
+      getPrisma().submission.findMany({
+        orderBy: { reportCount: "desc" },
+        take: 5,
+        select: { id: true, title: true, reportCount: true, status: true, finalVerdict: true },
+      }),
+    ]);
+    const topReported = top.map((t) => ({ ...t, title: t.title ?? "Untitled submission" }));
+    return computeAnalytics(records, { rangeDays, topReported });
+  },
+
   async getSubmission(id) {
     const row = await getPrisma().submission.findUnique({
       where: { id },
@@ -125,6 +143,7 @@ export const prismaStore: Repository = {
         stance: e.stance,
         snippet: e.snippet,
         publishedAt: e.publishedAt,
+        data: (e.data ?? null) as EvidenceData | null,
       })),
       reviews: row.reviews.map((r) => ({
         id: r.id,
@@ -135,6 +154,15 @@ export const prismaStore: Repository = {
         createdAt: r.createdAt,
       })),
     };
+    // Fill in the image of an earlier copy, for the side-by-side comparison.
+    const compareIds = detail.evidence.map((e) => e.data?.compareSubmissionId).filter((v): v is string => Boolean(v));
+    if (compareIds.length) {
+      const others = await getPrisma().submission.findMany({ where: { id: { in: compareIds } }, select: { id: true, imagePath: true } });
+      for (const e of detail.evidence) {
+        const other = others.find((o) => o.id === e.data?.compareSubmissionId);
+        if (other?.imagePath && e.data) e.data.compareImageUrl = (await getImageUrl(other.imagePath)) ?? undefined;
+      }
+    }
     return detail;
   },
 
@@ -159,8 +187,8 @@ export const prismaStore: Repository = {
   },
 
   async addEvidence(id, item) {
-    return getPrisma().evidence.create({
-      data: { ...item, submissionId: id },
+    const created = await getPrisma().evidence.create({
+      data: { ...item, data: (item.data ?? undefined) as Prisma.InputJsonValue | undefined, submissionId: id },
       select: {
         id: true,
         claimId: true,
@@ -172,8 +200,10 @@ export const prismaStore: Repository = {
         stance: true,
         snippet: true,
         publishedAt: true,
+        data: true,
       },
     });
+    return { ...created, data: (created.data ?? null) as EvidenceData | null };
   },
 
   async listImageFingerprints(excludeId) {
@@ -231,7 +261,7 @@ export const prismaStore: Repository = {
     const [, created] = await prisma.$transaction([
       prisma.evidence.deleteMany({ where: { submissionId: id, kind: { in: kinds } } }),
       prisma.evidence.createManyAndReturn({
-        data: items.map((item) => ({ ...item, submissionId: id })),
+        data: items.map((item) => ({ ...item, data: (item.data ?? undefined) as Prisma.InputJsonValue | undefined, submissionId: id })),
         select: {
           id: true,
           claimId: true,
@@ -243,10 +273,11 @@ export const prismaStore: Repository = {
           stance: true,
           snippet: true,
           publishedAt: true,
+          data: true,
         },
       }),
     ]);
-    return created;
+    return created.map((e) => ({ ...e, data: (e.data ?? null) as EvidenceData | null }));
   },
 
   async createSubmission(input) {

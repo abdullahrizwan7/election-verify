@@ -36,6 +36,11 @@ export async function getStats() {
   return store.getStats();
 }
 
+export async function getAnalytics(rangeDays: number) {
+  await connection();
+  return store.getAnalytics(rangeDays);
+}
+
 export async function getSubmission(id: string) {
   await connection();
   return store.getSubmission(id);
@@ -55,6 +60,8 @@ export async function listActivity(limit = 100) {
 /** Same as getSubmission, for code that runs outside page rendering (pipeline, actions). */
 export const readSubmission: Repository["getSubmission"] = (id) => store.getSubmission(id);
 export const readSources: Repository["listSources"] = () => store.listSources();
+/** Published verdicts matching a search, for the command palette's API route. */
+export const searchPublished = (query: string) => store.listPublished({ query });
 export const findPublishedByHash: Repository["findPublishedByHash"] = (hash) => store.findPublishedByHash(hash);
 export const findOpenByHash: Repository["findOpenByHash"] = (hash) => store.findOpenByHash(hash);
 export const addReport: Repository["addReport"] = (id) => store.addReport(id);

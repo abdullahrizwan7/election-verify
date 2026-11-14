@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import { Sparkles, TriangleAlert } from "lucide-react";
-import { ConfidenceMeter } from "@/components/review/confidence-meter";
+import { ConfidenceGauge } from "@/components/review/confidence-gauge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { VerdictBadge } from "@/components/verdict-badge";
 import type { Evidence, SubmissionDetail } from "@/lib/types";
@@ -25,7 +25,7 @@ export function AiSuggestion({ submission }: { submission: SubmissionDetail }) {
   }
 
   return (
-    <Card className="border-primary/30 bg-primary/[0.03]">
+    <Card className="border-primary/30 bg-primary/[0.03]" data-tour="ai-suggestion">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <Sparkles className="size-4 text-primary" aria-hidden /> AI suggestion
@@ -33,9 +33,12 @@ export function AiSuggestion({ submission }: { submission: SubmissionDetail }) {
         <CardDescription>A starting point for you, not a decision. It is never shown to the public.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <VerdictBadge verdict={submission.aiVerdict} size="lg" />
-          <ConfidenceMeter value={submission.aiConfidence} />
+        <div className="flex items-center justify-between gap-3">
+          <div className="space-y-1.5">
+            <p className="text-xs text-muted-foreground">Suggested verdict</p>
+            <VerdictBadge verdict={submission.aiVerdict} size="lg" />
+          </div>
+          <ConfidenceGauge value={submission.aiConfidence} />
         </div>
         {submission.aiSummary && (
           <p className="text-sm leading-relaxed">

@@ -1,5 +1,7 @@
 import "server-only";
+import { computeAnalytics } from "@/lib/analytics";
 import { DEMO_SOURCES, DEMO_SUBMISSIONS, DEMO_USERS } from "@/lib/data/demo-data";
+import { generateSampleHistory } from "@/lib/data/sample-history";
 import type { Repository } from "@/lib/data/repository";
 import type { ActivityEntry, AppUser, Source, SubmissionDetail, SubmissionSummary } from "@/lib/types";
 
@@ -97,9 +99,27 @@ export const demoStore: Repository = {
     };
   },
 
+  async getAnalytics(rangeDays) {
+    const submissions = state().submissions;
+    const topReported = [...submissions]
+      .sort((a, b) => b.reportCount - a.reportCount)
+      .slice(0, 5)
+      .map((s) => ({ id: s.id, title: s.title, reportCount: s.reportCount, status: s.status, finalVerdict: s.finalVerdict }));
+    // Real demo submissions plus generated history, so the charts have something to show.
+    return computeAnalytics([...generateSampleHistory(), ...submissions], { rangeDays, isSample: true, topReported });
+  },
+
   async getSubmission(id) {
     const found = state().submissions.find((s) => s.id === id);
-    return found ? structuredClone(found) : null;
+    if (!found) return null;
+    const copy = structuredClone(found);
+    // Fill in the image of an earlier copy, for the side-by-side comparison.
+    for (const e of copy.evidence) {
+      if (e.data?.compareSubmissionId) {
+        e.data.compareImageUrl = state().submissions.find((s) => s.id === e.data!.compareSubmissionId)?.imageUrl ?? undefined;
+      }
+    }
+    return copy;
   },
 
   async findPublishedByHash(contentHash) {

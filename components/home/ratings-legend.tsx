@@ -1,5 +1,7 @@
 import { Reveal } from "@/components/fx/reveal";
 import { TiltCard } from "@/components/fx/tilt-card";
+import { T } from "@/components/i18n";
+import type { MessageKey } from "@/lib/i18n/dictionaries";
 import { VerdictBadge } from "@/components/verdict-badge";
 import { VERDICT_ORDER, VERDICTS } from "@/lib/labels";
 
@@ -8,9 +10,15 @@ export function RatingsLegend() {
     <section id="ratings" className="scroll-mt-20 border-y bg-card/30 backdrop-blur">
       <div className="mx-auto max-w-6xl px-4 py-20">
         <Reveal>
-          <p className="text-sm font-medium tracking-widest text-glow uppercase">Ratings</p>
-          <h2 className="mt-1 text-3xl font-semibold tracking-tight">How we rate claims</h2>
-          <p className="mt-1 text-muted-foreground">Every published result uses one of these six ratings.</p>
+          <p className="text-sm font-medium tracking-widest text-glow uppercase">
+            <T k="ratings.eyebrow" />
+          </p>
+          <h2 className="mt-1 text-3xl font-semibold tracking-tight">
+            <T k="ratings.title" />
+          </h2>
+          <p className="mt-1 text-muted-foreground">
+            <T k="ratings.subtitle" />
+          </p>
         </Reveal>
         <dl className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {VERDICT_ORDER.map((verdict, index) => (
@@ -29,7 +37,9 @@ export function RatingsLegend() {
                   <dt>
                     <VerdictBadge verdict={verdict} size="lg" />
                   </dt>
-                  <dd className="mt-3 text-sm text-muted-foreground">{VERDICTS[verdict].description}</dd>
+                  <dd className="mt-3 text-sm text-muted-foreground">
+                    <T k={`verdictDesc.${verdict}` as MessageKey} />
+                  </dd>
                 </div>
               </TiltCard>
             </Reveal>

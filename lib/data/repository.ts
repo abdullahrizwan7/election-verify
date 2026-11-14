@@ -1,3 +1,4 @@
+import type { Analytics } from "@/lib/analytics";
 import type {
   ActivityEntry,
   AppUser,
@@ -35,6 +36,8 @@ export interface Repository {
   listForReview(filter?: { status?: Status; sort?: ReviewSort }): Promise<SubmissionSummary[]>;
   listByUser(userId: string): Promise<SubmissionSummary[]>;
   getStats(): Promise<DashboardStats>;
+  /** Numbers and series for the analytics dashboard, for the last `rangeDays` days. */
+  getAnalytics(rangeDays: number): Promise<Analytics>;
   getSubmission(id: string): Promise<SubmissionDetail | null>;
   findPublishedByHash(contentHash: string): Promise<SubmissionSummary | null>;
   /** A submission with the same content that is still being checked. */

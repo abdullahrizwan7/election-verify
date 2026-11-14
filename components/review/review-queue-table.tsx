@@ -18,7 +18,7 @@ export function ReviewQueueTable({ items }: { items: SubmissionSummary[] }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border bg-card">
+    <div className="overflow-hidden rounded-xl border bg-card" data-tour="queue">
       <Table>
         <TableHeader>
           <TableRow>
@@ -66,7 +66,9 @@ export function ReviewQueueTable({ items }: { items: SubmissionSummary[] }) {
               </TableCell>
               <TableCell className="pr-4 text-right">
                 <Button size="sm" variant={item.status === "NEEDS_REVIEW" ? "default" : "outline"} asChild>
-                  <Link href={`/review/${item.id}`}>{item.status === "NEEDS_REVIEW" ? "Review" : "Open"}</Link>
+                  <Link href={`/review/${item.id}`} data-queue-link>
+                    {item.status === "NEEDS_REVIEW" ? "Review" : "Open"}
+                  </Link>
                 </Button>
               </TableCell>
             </TableRow>

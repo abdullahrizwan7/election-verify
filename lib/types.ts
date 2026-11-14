@@ -50,6 +50,26 @@ export interface Claim {
   text: string;
 }
 
+/** A word found in an image, with its box in image pixels. */
+export interface OcrWord {
+  text: string;
+  box: [x0: number, y0: number, x1: number, y1: number];
+}
+
+/** Extra details some evidence carries, used by the image forensics view. */
+export interface EvidenceData {
+  /** Text recognition: every word and the image size the boxes refer to. */
+  words?: OcrWord[];
+  imageWidth?: number;
+  imageHeight?: number;
+  /** Image metadata shown in the forensics panel (GPS is never included). */
+  fields?: Record<string, string>;
+  /** An earlier copy of the image, for the side-by-side comparison. */
+  compareSubmissionId?: string;
+  compareImageUrl?: string;
+  compareLabel?: string;
+}
+
 export interface Evidence {
   id: string;
   claimId: string | null;
@@ -61,6 +81,7 @@ export interface Evidence {
   stance: Stance | null;
   snippet: string | null;
   publishedAt: Date | null;
+  data?: EvidenceData | null;
 }
 
 export interface Review {

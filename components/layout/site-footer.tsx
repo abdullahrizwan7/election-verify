@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { T } from "@/components/i18n";
 
 export function SiteFooter() {
   return (
@@ -7,8 +8,7 @@ export function SiteFooter() {
         <div className="space-y-2">
           <p className="font-medium text-foreground">ElectionVerify</p>
           <p className="max-w-md">
-            AI helps us collect evidence quickly. A human reviewer checks every result before it is published.
-            Always confirm voting information with your official election authority.
+            <T k="footer.about" />
           </p>
         </div>
         <div className="space-y-2">

@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { AlertTriangle, CheckCircle2, ClipboardCheck, Loader2 } from "lucide-react";
+import { AlertTriangle, BarChart3, CheckCircle2, ClipboardCheck, Loader2 } from "lucide-react";
 import { CountUp } from "@/components/fx/count-up";
 import { TiltCard } from "@/components/fx/tilt-card";
+import { QueueKeys } from "@/components/review/queue-keys";
 import { ReviewQueueTable } from "@/components/review/review-queue-table";
 import { TableSkeleton } from "@/components/skeletons";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -52,6 +53,9 @@ export default function ReviewPage({ searchParams }: { searchParams: SearchParam
         <p className="mt-1 text-muted-foreground">
           Check the evidence the system collected, then publish a verdict. Nothing is public until you do.
         </p>
+        <Link href="/review/analytics" className="mt-2 inline-flex items-center gap-1 text-sm text-primary hover:underline">
+          <BarChart3 className="size-4" aria-hidden /> Open analytics
+        </Link>
       </div>
       <Suspense
         fallback={
@@ -151,6 +155,13 @@ async function ReviewDashboard({ searchParams }: { searchParams: SearchParams })
       </div>
 
       <ReviewQueueTable items={items} />
+      <QueueKeys />
+      <p className="text-xs text-muted-foreground">
+        Tip: press <kbd className="rounded border bg-muted px-1 font-mono">J</kbd> /{" "}
+        <kbd className="rounded border bg-muted px-1 font-mono">K</kbd> to move through the queue and{" "}
+        <kbd className="rounded border bg-muted px-1 font-mono">Enter</kbd> to open. Press{" "}
+        <kbd className="rounded border bg-muted px-1 font-mono">?</kbd> for all shortcuts.
+      </p>
     </div>
   );
 }
