@@ -17,6 +17,7 @@ const ERRORS: Record<string, { title: string; text: string }> = {
   forbidden: { title: "You don't have access to that page", text: "Sign in with a reviewer or admin account to continue." },
   link: { title: "That sign-in link didn't work", text: "It may have expired. Ask for a new link below." },
   oauth: { title: "Google sign-in failed", text: "Try again, or use an email link instead." },
+  "google-off": { title: "Google sign-in isn’t set up yet", text: "Use the email link above for now. An admin can switch Google on in Supabase." },
 };
 
 type SearchParams = Promise<{ next?: string; error?: string }>;

@@ -37,8 +37,24 @@ export async function sendMagicLink(_prev: MagicLinkState, formData: FormData): 
   return { status: "sent", message: `We sent a sign-in link to ${email.data}. Open it on this device.` };
 }
 
+/** Asks Supabase whether the Google provider is switched on (Authentication → Sign In / Providers). */
+async function isGoogleEnabled(): Promise<boolean> {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/settings`, {
+      headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "" },
+      signal: AbortSignal.timeout(8_000),
+    });
+    const settings = (await response.json()) as { external?: { google?: boolean } };
+    return Boolean(settings.external?.google);
+  } catch {
+    return true; // couldn't check: let Supabase decide
+  }
+}
+
 export async function signInWithGoogle(formData: FormData) {
   const next = safeNext(formData.get("next"));
+  // Without this check, people would land on Supabase's raw "provider is not enabled" error.
+  if (!(await isGoogleEnabled())) redirect(`/login?error=google-off&next=${encodeURIComponent(next)}`);
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
