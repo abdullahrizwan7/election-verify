@@ -7,6 +7,9 @@ the verdict.
 
 > The AI only suggests. Nothing is published without a person checking it.
 
+**Code:** [github.com/abdullahrizwan7/election-verify](https://github.com/abdullahrizwan7/election-verify) ·
+**Set up for:** elections in India (Election Commission of India, PIB, IFCN fact-checkers, English and Hindi news)
+
 ---
 
 ## Run it (no accounts needed)
@@ -190,13 +193,32 @@ every key with one tiny real request and says exactly what is wrong if one fails
    - Run `npm run setup:supabase` to create the private `submissions` bucket for images.
    - Authentication → URL Configuration → add `http://localhost:3000/auth/callback`.
    - Then run `npm run db:migrate` and `npm run db:seed`.
-2. **Gemini**: `GEMINI_API_KEY` from [Google AI Studio](https://aistudio.google.com/apikey).
+2. **Gemini**: `GEMINI_API_KEY` from [Google AI Studio](https://aistudio.google.com/apikey). When Google's
+   main model is busy, the app automatically uses `gemini-flash-lite-latest` instead.
 3. **Fact checks**: `GOOGLE_FACT_CHECK_API_KEY`. In Google Cloud, enable *Fact Check Tools API*, then create an API key.
-4. **Web search**: `TAVILY_API_KEY` from [tavily.com](https://app.tavily.com).
+4. **Web search**: `TAVILY_API_KEY` from [tavily.com](https://app.tavily.com). Trusted sites are searched
+   first; the open web only when they have fewer than 2 results. `SEARCH_COUNTRY` (default `india`) ranks
+   local results higher.
 5. **Admins**: `ADMIN_EMAILS` with your email.
 6. **Inngest** (optional locally): run `npx inngest-cli@latest dev` in a second terminal and set `INNGEST_DEV=1`.
 
 Free Supabase projects pause after a week without use. Open the dashboard before your presentation.
+
+### Trusted sources (India)
+
+[`lib/data/sources-india.ts`](lib/data/sources-india.ts) lists 33 real sources with a starting trust score:
+
+| Type | Sources |
+|---|---|
+| Official | Election Commission of India (eci.gov.in, incl. results and voter portals), PIB, india.gov.in, MyGov |
+| Fact-checkers (IFCN) | Alt News, BOOM, FACTLY, Newschecker, Vishvas News, Fact Crescendo, AFP Fact Check |
+| News | PTI, The Hindu, Indian Express, Hindustan Times, Mint, NDTV, Times of India, India Today, The Quint, Deccan Herald, The Wire, Scroll, Reuters, BBC, DD News, All India Radio |
+| Hindi news | Dainik Bhaskar, Amar Ujala, Dainik Jagran, Aaj Tak |
+| Satire | The Fauxy, Faking News (both say so on their own sites) |
+
+`npm run db:sources` puts the list in the database without touching submissions. Admins can change trust
+scores and add sites (for example state election offices, or sites with a record of false stories) at
+**Admin → Sources**. The made-up `.example` sources are only used by the sample stories in demo mode.
 
 ---
 
@@ -205,7 +227,8 @@ Free Supabase projects pause after a week without use. Open the dashboard before
 1. Push the code to GitHub.
 2. In Vercel, import the repository. The default settings work.
 3. Add the same environment variables in Project Settings → Environment Variables, plus
-   `NEXT_PUBLIC_SITE_URL` with your Vercel address and the two Inngest production keys.
+   `NEXT_PUBLIC_SITE_URL` with your Vercel address. For `DATABASE_URL` use Supabase's **Transaction pooler**
+   (same address, port `6543`), which suits serverless hosting. Inngest keys are optional.
 4. In Supabase, add `https://<your-app>.vercel.app/auth/callback` as a redirect URL.
 5. In Inngest, sync the app at `https://<your-app>.vercel.app/api/inngest`.
 
@@ -221,6 +244,7 @@ Free Supabase projects pause after a week without use. Open the dashboard before
 | `npm run test:e2e` | Browser tests (Playwright). First run `npx playwright install chromium` |
 | `npm run lint` / `npm run typecheck` | ESLint / TypeScript |
 | `npm run db:migrate` / `db:seed` / `db:studio` | Database schema, sample data, database browser |
+| `npm run db:sources` | Put the Indian trusted-sources list in the database |
 | `npm run check:services` | Test every API key in `.env` |
 | `npm run setup:supabase` | Create the private image bucket in Supabase |
 
@@ -239,4 +263,5 @@ GitHub runs lint, types, unit tests, the build and the browser tests on every pu
 | 4 | Fact-check search, web evidence, AI suggestion with citations | ✅ Done (needs free keys) |
 | 5 | Image metadata, OCR, AI image notes, reverse image search links | ✅ Done |
 | 6 | Re-run, reviewer evidence, duplicate reports, queue sorting, activity log, setup page | ✅ Done |
-| 7 | Tests (68 unit, 8 browser), CI, sitemap, security headers, method page, key checker | ✅ Done. Deploying needs your accounts. |
+| 7 | Tests (72 unit, 8 browser), CI, sitemap, security headers, method page, key checker | ✅ Done |
+| + | Real services connected: Supabase, Gemini, Google Fact Check, Tavily; Indian trusted sources; code on GitHub | ✅ Done |
