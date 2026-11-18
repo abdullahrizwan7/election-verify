@@ -11,6 +11,7 @@
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
+    "db:sources": "tsx scripts/sync-sources.ts",
     "db:studio": "prisma studio",
     "test": "vitest run",
     "test:watch": "vitest",

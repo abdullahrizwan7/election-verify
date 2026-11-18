@@ -1,9 +1,11 @@
 /**
  * Sample data for demo mode and for `npm run db:seed`.
  *
- * Every organization, website and person here is made up. All domains end in
- * `.example`, a name reserved for documentation, so no link points at a real site.
+ * Every organization, website and person in the sample stories is made up. Their
+ * domains end in `.example`, a name reserved for documentation, so no link points
+ * at a real site. The real trusted sources live in lib/data/sources-india.ts.
  */
+import { INDIA_SOURCES } from "@/lib/data/sources-india";
 import type { AppUser, Evidence, PipelineSteps, Source, SubmissionDetail } from "@/lib/types";
 
 export const DEMO_USERS: Record<"citizen" | "reviewer" | "admin", AppUser> = {
@@ -27,7 +29,8 @@ export const DEMO_USERS: Record<"citizen" | "reviewer" | "admin", AppUser> = {
   },
 };
 
-export const DEMO_SOURCES: Source[] = [
+/** Made-up sources that the sample stories below refer to. */
+export const EXAMPLE_SOURCES: Source[] = [
   { domain: "elections.gov.example", name: "National Election Commission", type: "OFFICIAL", trust: 95, notes: "Official results, schedules and notices." },
   { domain: "voters.gov.example", name: "Voter Registration Office", type: "OFFICIAL", trust: 95, notes: "Registration rules and ID requirements." },
   { domain: "factwatch.example", name: "FactWatch Desk", type: "FACT_CHECKER", trust: 90, notes: "Independent fact-checker." },
@@ -38,6 +41,9 @@ export const DEMO_SOURCES: Source[] = [
   { domain: "ballotboxgazette.example", name: "The Ballot Box Gazette", type: "SATIRE", trust: 20, notes: "Says on its About page that every story is satire." },
   { domain: "breaking-vote-news.example", name: "Breaking Vote News", type: "KNOWN_MISINFO", trust: 5, notes: "Has published made-up election stories several times." },
 ];
+
+/** Demo mode (no database) shows the sample stories' sources plus the real Indian list. */
+export const DEMO_SOURCES: Source[] = [...INDIA_SOURCES, ...EXAMPLE_SOURCES];
 
 const ALL_DONE: PipelineSteps = {
   extract: "done",

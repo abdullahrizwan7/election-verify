@@ -5,7 +5,8 @@
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../lib/generated/prisma/client";
-import { DEMO_SOURCES, DEMO_SUBMISSIONS, DEMO_USERS } from "../lib/data/demo-data";
+import { DEMO_SUBMISSIONS, DEMO_USERS } from "../lib/data/demo-data";
+import { INDIA_SOURCES } from "../lib/data/sources-india";
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
@@ -17,9 +18,12 @@ async function main() {
     await prisma.profile.upsert({ where: { id: user.id }, create: user, update: {} });
   }
 
-  console.log("Seeding trusted sources…");
-  for (const source of DEMO_SOURCES) {
-    await prisma.source.upsert({ where: { domain: source.domain }, create: source, update: source });
+  console.log("Seeding trusted sources (India)…");
+  // The made-up ".example" sources are only for offline demo mode, not the real database.
+  await prisma.source.deleteMany({ where: { domain: { endsWith: ".example" } } });
+  for (const source of INDIA_SOURCES) {
+    // Keep any trust score or note an admin has already changed.
+    await prisma.source.upsert({ where: { domain: source.domain }, create: source, update: {} });
   }
 
   console.log("Seeding sample submissions…");
@@ -72,7 +76,7 @@ async function main() {
     }
   }
 
-  console.log(`Done: ${DEMO_SUBMISSIONS.length} submissions, ${DEMO_SOURCES.length} sources.`);
+  console.log(`Done: ${DEMO_SUBMISSIONS.length} submissions, ${INDIA_SOURCES.length} sources.`);
 }
 
 main()

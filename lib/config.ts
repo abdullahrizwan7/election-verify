@@ -31,7 +31,11 @@ export const services = {
     fallbackModel: process.env.GEMINI_FALLBACK_MODEL || "gemini-flash-lite-latest",
   },
   factCheck: { apiKey: process.env.GOOGLE_FACT_CHECK_API_KEY ?? "" },
-  tavily: { apiKey: process.env.TAVILY_API_KEY ?? "" },
+  tavily: {
+    apiKey: process.env.TAVILY_API_KEY ?? "",
+    /** Ranks results from this country higher (Tavily country name, e.g. "india"). Empty = worldwide. */
+    country: process.env.SEARCH_COUNTRY ?? "india",
+  },
   /** Inngest runs the pipeline as a background job. Without it, the pipeline runs inside the web server. */
   inngest: { enabled: Boolean(process.env.INNGEST_EVENT_KEY || process.env.INNGEST_DEV) },
 };
