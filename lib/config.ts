@@ -24,7 +24,12 @@ export const adminEmails = (process.env.ADMIN_EMAILS ?? "")
 
 /** Optional free services used by the verification pipeline. Each one is skipped when its key is missing. */
 export const services = {
-  gemini: { apiKey: process.env.GEMINI_API_KEY ?? "", model: process.env.GEMINI_MODEL || "gemini-flash-latest" },
+  gemini: {
+    apiKey: process.env.GEMINI_API_KEY ?? "",
+    model: process.env.GEMINI_MODEL || "gemini-flash-latest",
+    /** Used when the main model is busy (Google's free tier is sometimes overloaded). */
+    fallbackModel: process.env.GEMINI_FALLBACK_MODEL || "gemini-flash-lite-latest",
+  },
   factCheck: { apiKey: process.env.GOOGLE_FACT_CHECK_API_KEY ?? "" },
   tavily: { apiKey: process.env.TAVILY_API_KEY ?? "" },
   /** Inngest runs the pipeline as a background job. Without it, the pipeline runs inside the web server. */

@@ -16,6 +16,9 @@ export type GeminiSchema =
   | { type: "ARRAY"; items: GeminiSchema; description?: string }
   | { type: "OBJECT"; properties: Record<string, GeminiSchema>; required?: string[]; description?: string };
 
+/** Responses that mean "try again later", not "your request is wrong". */
+const BUSY_STATUSES = new Set([429, 500, 503]);
+
 export function isAiConfigured(): boolean {
   return Boolean(services.gemini.apiKey);
 }
@@ -26,7 +29,7 @@ export async function generateJson<T>(options: {
   schema: GeminiSchema;
   image?: { bytes: Buffer; mimeType: string };
 }): Promise<T> {
-  const { apiKey, model } = services.gemini;
+  const { apiKey, model, fallbackModel } = services.gemini;
   if (!apiKey) throw new Error("GEMINI_API_KEY is not set");
 
   const parts: object[] = [];
@@ -35,19 +38,35 @@ export async function generateJson<T>(options: {
   }
   parts.push({ text: options.prompt });
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
-    {
+  const body = JSON.stringify({
+    systemInstruction: { parts: [{ text: options.system }] },
+    contents: [{ role: "user", parts }],
+    generationConfig: { responseMimeType: "application/json", responseSchema: options.schema, temperature: 0.2 },
+  });
+  const send = (name: string) =>
+    fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(name)}:generateContent`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
       signal: AbortSignal.timeout(60_000),
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: options.system }] },
-        contents: [{ role: "user", parts }],
-        generationConfig: { responseMimeType: "application/json", responseSchema: options.schema, temperature: 0.2 },
-      }),
-    },
-  );
+      body,
+    });
+  // A dropped connection (flaky Wi-Fi, a network firewall) gets two more tries.
+  const call = async (name: string): Promise<Response> => {
+    for (let attempt = 1; ; attempt++) {
+      try {
+        return await send(name);
+      } catch (error) {
+        if (attempt >= 3) throw error;
+        await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
+      }
+    }
+  };
+
+  let response = await call(model);
+  // Busy or rate-limited? Try the lighter model once before giving up.
+  if (BUSY_STATUSES.has(response.status) && fallbackModel && fallbackModel !== model) {
+    response = await call(fallbackModel);
+  }
 
   if (!response.ok) {
     const detail = await response.text().catch(() => "");

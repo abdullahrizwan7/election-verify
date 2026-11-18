@@ -65,17 +65,27 @@ async function main() {
   });
 
   await check("Gemini AI", Boolean(env.GEMINI_API_KEY), "GEMINI_API_KEY not set (built-in rules are used)", async () => {
-    const model = env.GEMINI_MODEL || "gemini-flash-latest";
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY! },
-      body: JSON.stringify({
-        contents: [{ role: "user", parts: [{ text: 'Reply with the JSON {"ok": true}' }] }],
-        generationConfig: { responseMimeType: "application/json" },
-      }),
-    });
+    const send = (model: string) =>
+      fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY! },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: 'Reply with the JSON {"ok": true}' }] }],
+          generationConfig: { responseMimeType: "application/json" },
+        }),
+      });
+    const call = (model: string) => send(model).catch(() => send(model)); // one retry if the connection drops
+    let model = env.GEMINI_MODEL || "gemini-flash-latest";
+    let response = await call(model);
+    let note = "";
+    if ([429, 500, 503].includes(response.status)) {
+      // The main model is busy; the app falls back to the lighter one, so check that too.
+      note = ` (${model} is busy right now, so the app will use this one)`;
+      model = env.GEMINI_FALLBACK_MODEL || "gemini-flash-lite-latest";
+      response = await call(model);
+    }
     await expectOk(response, response.status === 404 ? `Model "${model}" not found. Set GEMINI_MODEL to a current model.` : "Check GEMINI_API_KEY.");
-    return `Working with model ${model}.`;
+    return `Working with model ${model}${note}.`;
   });
 
   await check("Fact-check search", Boolean(env.GOOGLE_FACT_CHECK_API_KEY), "GOOGLE_FACT_CHECK_API_KEY not set (step skipped)", async () => {
