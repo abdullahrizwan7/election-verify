@@ -12,6 +12,11 @@ type Result = { name: string; status: "ok" | "fail" | "off"; detail: string };
 const results: Result[] = [];
 const env = process.env;
 
+// No single check may hang the script: every request gives up after 45 seconds
+// (the AI can take a while when Google is busy).
+const realFetch = globalThis.fetch;
+globalThis.fetch = (input, init) => realFetch(input, { signal: AbortSignal.timeout(45_000), ...init });
+
 async function check(name: string, configured: boolean, offHint: string, run: () => Promise<string>) {
   if (!configured) {
     results.push({ name, status: "off", detail: offHint });
