@@ -41,6 +41,10 @@
   .tile b { font-size: 30px; } .tile span { font-size: 21px; color: var(--muted); margin-top: 4px; }
   .msg { max-width: 470px; padding: 18px 22px; border-radius: 20px; border-top-left-radius: 6px; background: #1d2a44; font-size: 25px; line-height: 1.35; box-shadow: 0 14px 40px -12px rgba(0,0,0,.6); }
   .msg small { display: block; font-size: 17px; color: #8fa0c4; font-style: italic; margin-bottom: 6px; }
+  .person .bubble { bottom: 46%; }
+  .fig { position: absolute; left: 0; top: 0; width: 267px; height: 400px; transform-origin: 50% 98%; }
+  .fig img { position: absolute; left: 0; top: 0; width: 267px; height: 400px; opacity: 0; }
+  .shadow { position: absolute; left: 50%; top: 382px; width: 170px; height: 22px; margin-left: -85px; border-radius: 50%; background: radial-gradient(closest-side, rgba(0,0,0,.6), transparent); }
   .tag { position: absolute; left: 50%; top: 404px; transform: translateX(-50%); white-space: nowrap; font-size: 26px; font-weight: 700; padding: 8px 20px; border-radius: 999px; background: #0f172b; border: 1px solid rgba(148,163,209,.3); }
   .tag span { font-weight: 500; color: var(--muted); margin-left: 8px; }
   .phone { width: 560px; height: 860px; border-radius: 70px; background: #0b1120; border: 12px solid #1c2640; box-shadow: 0 50px 140px -40px rgba(139,92,246,.6); overflow: hidden; }
@@ -338,90 +342,36 @@ A("s9-url", { o: [[61.3, 0], [61.8, 1]], y: [[61.3, 40], [62, 0]], s: [[61.3, 0.
 A("fade", { o: [[0, 1], [0.6, 0], [65.2, 0], [66, 1, "inOut"]] });
 
 // ── Characters: Veri (the app's guide) and the team ──
-/** Lighten (f > 0) or darken (f < 0) a hex colour, for shading. */
-function shade(hex, f) {
-  const n = parseInt(hex.slice(1), 16);
-  const m = (c) => Math.round(f >= 0 ? c + (255 - c) * f : c * (1 + f));
-  return `rgb(${m(n >> 16)},${m((n >> 8) & 255)},${m(n & 255)})`;
-}
-
 /**
- * A semi-3D animated person drawn in SVG: shaded skin, layered hair, eyes with
- * irises and highlights, glasses with reflections, a shirt with folds.
- * Illustrated from the team's descriptions, not a real likeness.
+ * The team, as 3D-style character images (video/characters/*.png, made with an
+ * image generator from the team's descriptions). Each person has three poses on
+ * the same canvas: standing (mouth closed), waving and talking (open hand).
+ * Lip-sync: while someone speaks we show the talking pose and lay the closed
+ * mouth from the standing pose on top through a soft mask; the mask fades with
+ * the loudness of the voice, so the mouth opens and closes with the words.
  */
-function personSVG(id, { skin, hair, shirt, glasses, wavy, broad }) {
-  const sh = broad ? 1.18 : 1;
-  const L = 120 - 70 * sh, R = 120 + 70 * sh, armW = broad ? 42 : 32;
-  const dark = shade(skin, -0.45);
-  const front = wavy
-    ? "M58 124 C46 70 84 38 122 40 C166 40 194 72 182 124 C178 104 170 94 160 96 C154 82 138 80 128 90 C118 78 100 80 92 92 C80 86 68 96 64 110 C61 114 59 119 58 124Z"
-    : "M60 120 C54 72 86 44 122 46 C160 46 186 70 180 120 C174 100 164 88 150 84 C136 92 104 94 86 86 C74 94 64 104 60 120Z";
-  const eye = (cx) => `
-      <ellipse cx="${cx}" cy="115" rx="11" ry="8" fill="#fbfbff"/>
-      <g class="iris"><circle cx="${cx}" cy="115.5" r="6.4" fill="url(#${id}-iris)"/><circle cx="${cx}" cy="115.5" r="3" fill="#0b0705"/><circle cx="${cx + 2}" cy="112.6" r="1.9" fill="#fff"/></g>
-      <path d="M${cx - 12} 113 Q${cx} 103 ${cx + 12} 113" fill="none" stroke="${dark}" stroke-width="2.6" stroke-linecap="round"/>`;
-  const arm = (x, cls) => `
-    <g class="${cls}" style="transform-origin:${x + armW / 2}px 234px">
-      <rect x="${x}" y="222" width="${armW}" height="84" rx="${armW / 2}" fill="url(#${id}-shirt)"/>
-      <rect x="${x + 3}" y="282" width="${armW - 6}" height="50" rx="${(armW - 6) / 2}" fill="url(#${id}-skin)"/>
-      <circle cx="${x + armW / 2}" cy="334" r="${armW / 2 + 1}" fill="url(#${id}-skin)"/>
-    </g>`;
-  return `<svg width="240" height="400" viewBox="0 0 240 400" overflow="visible">
-    <defs>
-      <radialGradient id="${id}-skin" cx="42%" cy="36%" r="72%"><stop offset="0" stop-color="${shade(skin, 0.22)}"/><stop offset=".55" stop-color="${skin}"/><stop offset="1" stop-color="${shade(skin, -0.3)}"/></radialGradient>
-      <linearGradient id="${id}-neck" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${shade(skin, -0.38)}"/><stop offset="1" stop-color="${shade(skin, -0.08)}"/></linearGradient>
-      <linearGradient id="${id}-shirt" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${shade(shirt, 0.2)}"/><stop offset=".6" stop-color="${shirt}"/><stop offset="1" stop-color="${shade(shirt, -0.38)}"/></linearGradient>
-      <linearGradient id="${id}-hair" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${shade(hair, 0.28)}"/><stop offset="1" stop-color="${hair}"/></linearGradient>
-      <radialGradient id="${id}-iris" cx="50%" cy="38%" r="62%"><stop offset="0" stop-color="#8a5530"/><stop offset="1" stop-color="#2a170c"/></radialGradient>
-    </defs>
-    <ellipse cx="120" cy="394" rx="${92 * sh}" ry="8" fill="#000" opacity=".35"/>
-    ${arm(L - armW + 10, "arm-l")}
-    ${arm(R - 10, "arm-r")}
-    <path d="M${L + 8} 394 L${L + 3} 266 C${L + 3} 230 84 214 120 214 C156 214 ${R - 3} 230 ${R - 3} 266 L${R - 8} 394 Z" fill="url(#${id}-shirt)"/>
-    ${broad ? `<path d="M86 270 Q103 282 117 270 M123 270 Q137 282 154 270" fill="none" stroke="${shade(shirt, -0.32)}" stroke-width="3" stroke-linecap="round" opacity=".7"/>` : ""}
-    <path d="M${L + 22} 330 Q${L + 30} 360 ${L + 26} 392 M${R - 22} 330 Q${R - 30} 360 ${R - 26} 392" fill="none" stroke="${shade(shirt, -0.25)}" stroke-width="2.5" opacity=".6"/>
-    <rect x="${broad ? 98 : 102}" y="156" width="${broad ? 44 : 36}" height="66" rx="15" fill="url(#${id}-neck)"/>
-    <path d="M100 215 L120 248 L140 215 Z" fill="url(#${id}-neck)"/>
-    <path d="M96 214 L120 250 L144 214" fill="none" stroke="${shade(shirt, -0.3)}" stroke-width="4" stroke-linejoin="round"/>
-    <g class="head" style="transform-origin:120px 178px">
-      <ellipse cx="63" cy="124" rx="10" ry="14" fill="url(#${id}-skin)"/><ellipse cx="177" cy="124" rx="10" ry="14" fill="url(#${id}-skin)"/>
-      <path d="M62 120 q4 -6 3 6 M178 120 q-4 -6 -3 6" fill="none" stroke="${dark}" stroke-width="2" opacity=".6"/>
-      <path d="M120 52 C157 52 179 80 179 118 C179 157 155 186 120 186 C85 186 61 157 61 118 C61 80 83 52 120 52 Z" fill="url(#${id}-skin)"/>
-      <ellipse cx="90" cy="148" rx="11" ry="6" fill="#e0705f" opacity=".16"/><ellipse cx="150" cy="148" rx="11" ry="6" fill="#e0705f" opacity=".16"/>
-      <path d="${front}" fill="url(#${id}-hair)"/>
-      <path d="M94 62 Q120 50 150 62" fill="none" stroke="${shade(hair, 0.45)}" stroke-width="4" stroke-linecap="round" opacity=".45"/>
-      <rect x="60" y="104" width="8" height="22" rx="4" fill="${hair}"/><rect x="172" y="104" width="8" height="22" rx="4" fill="${hair}"/>
-      <path d="M84 99 Q98 90 111 98 M129 98 Q142 90 156 99" fill="none" stroke="${hair}" stroke-width="5.5" stroke-linecap="round"/>
-      <g class="eyes" style="transform-origin:120px 115px">${eye(98)}${eye(142)}</g>
-      <path d="M120 120 C117 132 113 139 116 143 C119 146 124 146 127 143" fill="none" stroke="${dark}" stroke-width="2.8" stroke-linecap="round" opacity=".75"/>
-      <g class="mouth-g">
-        <ellipse class="mouth-in" cx="120" cy="161" rx="10" ry="0.5" fill="#4a1414"/>
-        <path class="mouth-line" d="M106 158 Q120 166 134 158" fill="none" stroke="${shade(skin, -0.55)}" stroke-width="3" stroke-linecap="round"/>
-      </g>
-      ${glasses ? `<g>
-        <rect x="80" y="102" width="37" height="27" rx="11" fill="rgba(210,235,255,.10)" stroke="#1d212b" stroke-width="3.5"/>
-        <rect x="123" y="102" width="37" height="27" rx="11" fill="rgba(210,235,255,.10)" stroke="#1d212b" stroke-width="3.5"/>
-        <path d="M117 113 Q120 110 123 113 M80 112 L66 117 M160 112 L174 117" fill="none" stroke="#1d212b" stroke-width="3"/>
-        <path d="M87 108 L96 105 M130 108 L139 105" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity=".55"/>
-      </g>` : ""}
-    </g>
-  </svg>`;
-}
-
 const PEOPLE = {
-  // Looks as described by the team: Abdullah fair, no glasses; Sandeep (South
-  // Indian) brown with glasses; Uday light brown, muscular, with glasses.
-  sandeep: { name: "Sandeep", role: "Citizen", look: { skin: "#9c6238", hair: "#120c08", shirt: "#f08a3c", wavy: true, glasses: true } },
-  uday: { name: "Uday", role: "Reviewer", look: { skin: "#c08456", hair: "#16100c", shirt: "#7c5cf6", broad: true, glasses: true } },
-  abdullah: { name: "Abdullah Rizwan", role: "Admin", look: { skin: "#f2cfa9", hair: "#1c140e", shirt: "#14a38b" } },
+  // mouth = centre of the mouth in the 400px-tall figure; dx/dy = measured offset between poses
+  sandeep: { name: "Sandeep", role: "Citizen", mouth: [130, 74], dx: 0, dy: 0 },
+  uday: { name: "Uday", role: "Reviewer", mouth: [130, 72.5], dx: 0, dy: 0 },
+  abdullah: { name: "Abdullah Rizwan", role: "Admin", mouth: [133, 74], dx: -0.5, dy: 0 },
 };
 for (const [key, p] of Object.entries(PEOPLE)) {
   const el = document.createElement("div");
-  el.className = "abs";
+  el.className = "abs person";
   el.id = key;
-  el.style.cssText = "left:0;top:0;width:240px;height:440px;transform-origin:50% 100%;";
-  el.innerHTML = `<div class="bubble"></div>${personSVG(key, p.look)}<div class="tag">${p.name}<span>${p.role}</span></div>`;
+  el.style.cssText = "left:0;top:0;width:267px;height:440px;transform-origin:50% 100%;";
+  const [mx, my] = p.mouth;
+  el.innerHTML = `<div class="bubble"></div>
+    <div class="shadow"></div>
+    <div class="fig">
+      <img class="pose stand" src="characters/${key}-1.png" />
+      <img class="pose wave" src="characters/${key}-wave.png" />
+      <img class="pose talk" src="characters/${key}-talk.png" />
+      <img class="pose closed" src="characters/${key}-1.png"
+        style="transform:translate(${p.dx}px,${p.dy}px);-webkit-mask-image:radial-gradient(ellipse 24px 15px at ${mx}px ${my}px,#000 50%,transparent 100%);mask-image:radial-gradient(ellipse 24px 15px at ${mx}px ${my}px,#000 50%,transparent 100%)" />
+    </div>
+    <div class="tag">${p.name}<span>${p.role}</span></div>`;
   document.getElementById("people").appendChild(el);
 }
 
@@ -444,21 +394,21 @@ const ACTORS = [
   },
   {
     who: "Sandeep", el: document.getElementById("sandeep"), waveRest: 6, waveUp: -160,
-    pos: [[6.6, 1560, HIDE, 0.82], [7.4, 1560, 590, 0.82], [13.5, 1560, 590, 0.82], [14.3, 1640, 600, 0.7], [21.9, 1640, 600, 0.7], [22.5, 1640, HIDE, 0.7],
-          [47.4, 700, HIDE, 0.76], [48.2, 700, 590, 0.76], [53.4, 700, 590, 0.76], [54.1, 700, HIDE, 0.76],
-          [60.4, 1180, HIDE, 0.72], [61.2, 1180, 590, 0.72]],
+    pos: [[6.6, 1660, HIDE, 1.2], [7.4, 1660, 590, 1.2], [13.5, 1660, 590, 1.2], [14.3, 1630, 600, 1.05], [21.9, 1630, 600, 1.05], [22.5, 1630, HIDE, 1.05],
+          [47.4, 690, HIDE, 1.12], [48.2, 690, 590, 1.12], [53.4, 690, 590, 1.12], [54.1, 690, HIDE, 1.12],
+          [60.4, 1120, HIDE, 0.95], [61.2, 1120, 590, 0.95]],
     wave: [[61.4, 64.2]],
   },
   {
     who: "Uday", el: document.getElementById("uday"), waveRest: 6, waveUp: -160,
-    pos: [[40.2, 1600, HIDE, 0.82], [41, 1600, 590, 0.82], [46.4, 1600, 590, 0.82], [47.1, 1600, HIDE, 0.82],
-          [60.6, 1420, HIDE, 0.72], [61.4, 1420, 590, 0.72]],
+    pos: [[40.2, 1600, HIDE, 1.2], [41, 1600, 590, 1.2], [46.4, 1600, 590, 1.2], [47.1, 1600, HIDE, 1.2],
+          [60.6, 1360, HIDE, 0.95], [61.4, 1360, 590, 0.95]],
     wave: [[61.6, 64.2]],
   },
   {
     who: "Abdullah Rizwan", el: document.getElementById("abdullah"), waveRest: 6, waveUp: -160,
-    pos: [[54.2, 1620, HIDE, 0.82], [55, 1620, 590, 0.82], [60, 1620, 590, 0.82], [60.5, 1620, HIDE, 0.82],
-          [60.9, 1660, HIDE, 0.72], [61.7, 1660, 590, 0.72]],
+    pos: [[54.2, 1560, HIDE, 1.2], [55, 1560, 590, 1.2], [60, 1560, 590, 1.2], [60.5, 1560, HIDE, 1.2],
+          [60.9, 1600, HIDE, 0.95], [61.7, 1600, 590, 0.95]],
     wave: [[55.0, 56.2], [61.8, 64.2]],
   },
 ];
@@ -469,14 +419,15 @@ for (const a of ACTORS) {
   a.lines = linesFor(a.who);
   a.bubble = a.el.querySelector(".bubble");
   a.eyes = a.el.querySelector(".eyes");
-  a.irises = [...a.el.querySelectorAll(".iris")];
-  a.head = a.el.querySelector(".head");
   a.mouth = a.el.querySelector(".mouth");
-  a.mouthIn = a.el.querySelector(".mouth-in");
-  a.mouthLine = a.el.querySelector(".mouth-line");
   a.armR = a.el.querySelector(".arm-r");
   a.armL = a.el.querySelector(".arm-l");
   a.glow = a.el.querySelector(".glow");
+  a.fig = a.el.querySelector(".fig");
+  if (a.fig) {
+    a.poses = { stand: a.el.querySelector(".stand"), wave: a.el.querySelector(".wave"), talk: a.el.querySelector(".talk") };
+    a.closed = a.el.querySelector(".closed");
+  }
   a.last = "";
 }
 rise("s9-credit", 62.2, 99, 30);
@@ -489,38 +440,42 @@ function mouthOpen(line, t) {
   return a + (b - a) * (f - i);
 }
 
+/** 0→1 ramp between a and b (for smooth pose changes). */
+function ramp(t, a, b) { return Math.min(1, Math.max(0, (t - a) / (b - a))); }
+
 function renderActor(a, t, i) {
   const x = kf(a.kx, t), y = kf(a.ky, t), s = kf(a.ks, t);
-  const breathe = Math.sin(t * 2.1 + i) * 5;
-  a.el.style.visibility = y > 1200 ? "hidden" : "visible";
-  a.el.style.transform = `translate(${x}px, ${y + breathe}px) scale(${s})`;
-
-  // Blink every few seconds, glance around, and look at the viewer while talking.
-  a.eyes.style.transform = `scaleY(${(t + i * 0.9) % 3.6 < 0.13 ? 0.1 : 1})`;
   const speaking = a.lines.find((l) => t >= l.start && t < l.end);
   const v = speaking ? mouthOpen(speaking, t) : 0;
-  const look = speaking ? 0 : Math.round(Math.sin(t * 0.55 + i * 2.1) * 1.6) * 2;
-  for (const iris of a.irises) iris.style.transform = `translate(${look}px, 0)`;
+  a.el.style.visibility = y > 1200 ? "hidden" : "visible";
 
-  if (a.head) {
-    const tilt = Math.sin(t * 1.1 + i) * 2.2 + (speaking ? Math.sin(t * 6.5) * 2.4 * v : 0);
-    const nod = speaking ? v * 2.5 : 0;
-    a.head.style.transform = `translateY(${nod}px) rotate(${tilt}deg)`;
-  }
+  if (a.fig) {
+    // Image characters: gentle breathing and sway, a small nod with the voice.
+    a.el.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+    const sway = Math.sin(t * 0.9 + i) * 0.8;
+    const breathe = 1 + Math.sin(t * 2.1 + i) * 0.006;
+    a.fig.style.transform = `translateY(${v * 2}px) rotate(${sway}deg) scale(1, ${breathe})`;
 
-  // Lip-sync
-  if (a.robot) {
-    a.mouth.setAttribute("d", `M114 166 Q130 ${178 + v * 16} 146 166`);
+    // Which pose: waving, talking (while speaking) or standing, with soft crossfades.
+    const talkW = Math.max(0, ...a.lines.map((l) => ramp(t, l.start - 0.3, l.start - 0.05) * (1 - ramp(t, l.end + 0.15, l.end + 0.45))));
+    const waveW = Math.max(0, ...a.wave.map(([w0, w1]) => ramp(t, w0 - 0.2, w0 + 0.1) * (1 - ramp(t, w1 - 0.1, w1 + 0.2))));
+    const wave = waveW * (1 - talkW), talk = talkW;
+    a.poses.wave.style.opacity = wave;
+    a.poses.talk.style.opacity = talk;
+    a.poses.stand.style.opacity = 1;
+    // Closed mouth over the talking face; it fades away as the voice gets louder.
+    a.closed.style.opacity = talk * (1 - Math.min(1, v * 1.25));
   } else {
-    a.mouthIn.setAttribute("ry", (0.5 + v * 9).toFixed(2));
-    a.mouthIn.setAttribute("rx", (9 + v * 3).toFixed(2));
-    a.mouthLine.style.opacity = v > 0.2 ? 0.25 : 1;
+    // Veri, the drawn robot
+    const breathe = Math.sin(t * 2.1 + i) * 5;
+    a.el.style.transform = `translate(${x}px, ${y + breathe}px) scale(${s})`;
+    a.eyes.style.transform = `scaleY(${(t + i * 0.9) % 3.6 < 0.13 ? 0.1 : 1})`;
+    a.mouth.setAttribute("d", `M114 166 Q130 ${178 + v * 16} 146 166`);
+    const waving = a.wave.some(([w0, w1]) => t >= w0 && t <= w1);
+    a.armR.style.transform = `rotate(${waving ? a.waveUp + Math.sin(t * 14) * 24 : a.waveRest + Math.sin(t * 2.1 + i) * 4}deg)`;
+    a.armL.style.transform = `rotate(${12 + Math.sin(t * 2.1 + i + 1) * 4}deg)`;
+    if (a.glow) a.glow.style.opacity = 0.5 + 0.5 * Math.sin(t * 4) + v * 0.5;
   }
-
-  const waving = a.wave.some(([w0, w1]) => t >= w0 && t <= w1);
-  a.armR.style.transform = `rotate(${waving ? a.waveUp + Math.sin(t * 14) * 24 : a.waveRest + Math.sin(t * 2.1 + i) * 4 + (speaking ? -v * 10 : 0)}deg)`;
-  a.armL.style.transform = `rotate(${(a.robot ? 12 : -6) + Math.sin(t * 2.1 + i + 1) * 4}deg)`;
-  if (a.glow) a.glow.style.opacity = 0.5 + 0.5 * Math.sin(t * 4) + v * 0.5;
 
   // Speech bubble: shows exactly what is being said, while it is said.
   const line = a.lines.find((l) => t >= l.start - 0.15 && t <= l.end + 0.45);
@@ -529,7 +484,8 @@ function renderActor(a, t, i) {
     a.bubble.classList.toggle("up", (a.up || []).includes(line.start));
     const s0 = line.start - 0.15, s1 = line.end + 0.1;
     a.bubble.style.opacity = kf([[s0, 0], [s0 + 0.25, 1], [s1, 1], [s1 + 0.35, 0]], t);
-    a.bubble.style.transform = `scale(${kf([[s0, 0.5], [s0 + 0.45, 1, "back"], [s1, 1], [s1 + 0.35, 0.85]], t)})`;
+    // Same on-screen size for every character, however big they are drawn.
+    a.bubble.style.transform = `scale(${kf([[s0, 0.5], [s0 + 0.45, 1, "back"], [s1, 1], [s1 + 0.35, 0.85]], t) * (0.82 / s)})`;
   } else {
     a.bubble.style.opacity = 0;
   }
