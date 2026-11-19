@@ -10,8 +10,16 @@ import { refreshSession } from "@/lib/supabase/session";
  * with requireRole(), because a proxy check alone is not enough.
  */
 export async function proxy(request: NextRequest) {
+  const { pathname, search, searchParams } = request.nextUrl;
+
+  // When Google or email sign-in fails, Supabase sends people to the site with
+  // ?error_description=... Show the friendly message on the login page instead.
+  if (searchParams.has("error_description") && pathname !== "/login") {
+    console.warn("[auth] sign-in failed:", searchParams.get("error_description"));
+    return NextResponse.redirect(new URL("/login?error=oauth", request.url));
+  }
+
   const { response, isSignedIn } = await refreshSession(request);
-  const { pathname, search } = request.nextUrl;
 
   const isProtected = PROTECTED_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
   if (isProtected && !isSignedIn) {
