@@ -1,0 +1,505 @@
+<!doctype html>
+<!--
+  ElectionVerify motion-graphics intro (1920x1080).
+  Every frame is drawn by render(t) from a timeline, so the recording script
+  (scripts/render-video.mjs) can step through time exactly and export an MP4.
+  Open this file in a browser to preview it live.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>ElectionVerify intro</title>
+<style>
+  :root { --bg: #060a14; --glow: #2f7cf6; --glow2: #8b5cf6; --text: #eef2ff; --muted: #9aa6c4; --card: #0d1426; --line: rgba(148,163,209,.18); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+  body { font-family: -apple-system, "SF Pro Display", "Inter", system-ui, sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; }
+  #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+  .abs { position: absolute; will-change: transform, opacity; }
+  .bg-glow { border-radius: 50%; filter: blur(120px); }
+  .grid { inset: 0; background-image: linear-gradient(to right, rgba(148,163,209,.07) 1px, transparent 1px), linear-gradient(to bottom, rgba(148,163,209,.07) 1px, transparent 1px); background-size: 64px 64px; mask-image: radial-gradient(ellipse at center, #000 25%, transparent 75%); }
+  .dot { width: 4px; height: 4px; border-radius: 50%; background: #9cc2ff; }
+  h1 { font-size: 84px; font-weight: 700; letter-spacing: -2px; line-height: 1.05; }
+  h2 { font-size: 64px; font-weight: 700; letter-spacing: -1.5px; line-height: 1.08; }
+  .grad { background: linear-gradient(100deg, #fff 5%, #7fb0ff 50%, #b79cff 95%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lead { font-size: 32px; color: var(--muted); line-height: 1.45; }
+  .chip { display: inline-flex; align-items: center; gap: 12px; padding: 10px 22px; border-radius: 999px; font-size: 24px; font-weight: 600; background: rgba(47,124,246,.14); color: #a9c8ff; border: 1px solid rgba(47,124,246,.4); }
+  .frame { border-radius: 20px; overflow: hidden; background: var(--card); border: 1px solid var(--line); box-shadow: 0 40px 120px -30px rgba(47,124,246,.55), 0 0 0 1px rgba(255,255,255,.03); }
+  .frame .bar { height: 44px; display: flex; align-items: center; gap: 9px; padding: 0 18px; background: #0a1020; border-bottom: 1px solid var(--line); }
+  .frame .bar i { width: 13px; height: 13px; border-radius: 50%; display: block; }
+  .frame .bar .url { margin-left: 18px; flex: 1; height: 26px; border-radius: 8px; background: #121a2e; font-size: 15px; color: #7d89a8; display: flex; align-items: center; padding: 0 14px; }
+  .frame .shot { overflow: hidden; }
+  .frame img { display: block; width: 100%; transform-origin: 50% 0; }
+  .pill { padding: 14px 26px; border-radius: 16px; font-size: 26px; font-weight: 600; background: #111a30; border: 1px solid var(--line); display: flex; align-items: center; gap: 12px; }
+  .step { display: flex; align-items: center; gap: 22px; font-size: 30px; font-weight: 500; }
+  .tick { width: 46px; height: 46px; border-radius: 50%; border: 2px solid #33405f; display: grid; place-items: center; flex: none; }
+  .tick svg { width: 26px; height: 26px; }
+  .bubble { position: absolute; right: 88%; bottom: 82%; white-space: nowrap; background: #fff; color: #0b1324; font-size: 34px; font-weight: 600; padding: 20px 30px; border-radius: 28px; border-bottom-right-radius: 8px; box-shadow: 0 20px 60px -15px rgba(0,0,0,.6); transform-origin: 100% 100%; }
+  .bubble.up { right: 4%; bottom: 102%; transform-origin: 90% 100%; }
+  .stamp { font-size: 120px; font-weight: 900; letter-spacing: 8px; color: #ff4d5e; border: 10px solid #ff4d5e; border-radius: 24px; padding: 6px 40px; background: rgba(255,77,94,.08); }
+  .tile { width: 400px; height: 120px; border-radius: 22px; background: #0f172b; border: 1px solid var(--line); display: flex; flex-direction: column; justify-content: center; padding: 0 30px; }
+  .tile b { font-size: 30px; } .tile span { font-size: 21px; color: var(--muted); margin-top: 4px; }
+  .msg { max-width: 470px; padding: 18px 22px; border-radius: 20px; border-top-left-radius: 6px; background: #1d2a44; font-size: 25px; line-height: 1.35; box-shadow: 0 14px 40px -12px rgba(0,0,0,.6); }
+  .msg small { display: block; font-size: 17px; color: #8fa0c4; font-style: italic; margin-bottom: 6px; }
+  .tag { position: absolute; left: 50%; top: 404px; transform: translateX(-50%); white-space: nowrap; font-size: 26px; font-weight: 700; padding: 8px 20px; border-radius: 999px; background: #0f172b; border: 1px solid rgba(148,163,209,.3); }
+  .tag span { font-weight: 500; color: var(--muted); margin-left: 8px; }
+  .phone { width: 560px; height: 860px; border-radius: 70px; background: #0b1120; border: 12px solid #1c2640; box-shadow: 0 50px 140px -40px rgba(139,92,246,.6); overflow: hidden; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <!-- Background -->
+  <div class="abs bg-glow" id="g1" style="width:900px;height:900px;left:-200px;top:-300px;background:rgba(47,124,246,.35)"></div>
+  <div class="abs bg-glow" id="g2" style="width:900px;height:900px;right:-250px;bottom:-350px;background:rgba(139,92,246,.30)"></div>
+  <div class="abs grid"></div>
+  <div id="dots"></div>
+
+  <!-- 1. Title -->
+  <div class="abs" id="s1-logo" style="left:200px;top:300px;width:120px;height:120px;border-radius:32px;background:linear-gradient(135deg,#2f7cf6,#8b5cf6);display:grid;place-items:center;box-shadow:0 30px 80px -20px rgba(47,124,246,.8)">
+    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+  </div>
+  <h1 class="abs" id="s1-name" style="left:200px;top:460px;font-size:120px">ElectionVerify</h1>
+  <div class="abs lead" id="s1-tag" style="left:204px;top:610px;font-size:44px"><span class="grad" style="font-weight:700">Check before you forward.</span></div>
+  <div class="abs lead" id="s1-sub" style="left:204px;top:690px">AI-assisted fact-checking for election news in India.</div>
+
+  <!-- 2. Problem -->
+  <div class="abs phone" id="s2-phone" style="left:200px;top:110px">
+    <div style="height:90px;background:#121b31;display:flex;align-items:center;gap:16px;padding:0 30px;font-size:24px;font-weight:600">
+      <div style="width:46px;height:46px;border-radius:50%;background:#2a3a5f"></div>Family group
+    </div>
+    <div style="padding:30px 26px;display:flex;flex-direction:column;gap:22px">
+      <div class="msg abs" id="s2-m1" style="position:relative"><small>Forwarded many times</small>Polling stations will close at 2 PM this year. Go early!</div>
+      <div class="msg abs" id="s2-m2" style="position:relative"><small>Forwarded many times</small>EVMs can be hacked with Bluetooth from a phone!</div>
+      <div class="msg abs" id="s2-m3" style="position:relative"><small>Forwarded</small>You can vote by SMS this time. Just reply YES.</div>
+    </div>
+  </div>
+  <div class="abs" id="s2-warn" style="left:640px;top:150px;width:96px;height:96px;border-radius:50%;background:#ff4d5e;display:grid;place-items:center;font-size:58px;font-weight:900;box-shadow:0 0 60px rgba(255,77,94,.7)">!</div>
+  <h2 class="abs" id="s2-title" style="left:900px;top:330px;width:900px">Fake election news<br/><span class="grad">spreads in seconds.</span></h2>
+  <div class="abs lead" id="s2-sub" style="left:904px;top:520px;width:820px">One forwarded message can mislead thousands of voters before anyone checks it.</div>
+
+  <!-- 3. Submit -->
+  <div class="abs chip" id="s3-chip" style="left:140px;top:250px">Step 1</div>
+  <h2 class="abs" id="s3-title" style="left:140px;top:330px;width:640px">Send it to<br/><span class="grad">ElectionVerify</span></h2>
+  <div class="abs lead" id="s3-sub" style="left:142px;top:520px;width:600px">Paste a news link, a forwarded message or a screenshot.</div>
+  <div class="abs pill" id="s3-p1" style="left:140px;top:690px">🔗 Link</div>
+  <div class="abs pill" id="s3-p2" style="left:320px;top:690px">💬 Message</div>
+  <div class="abs pill" id="s3-p3" style="left:560px;top:690px">🖼️ Image</div>
+  <div class="abs frame" id="s3-frame" style="left:820px;top:170px;width:980px">
+    <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><div class="url">election-verify.vercel.app/submit</div></div>
+    <div class="shot" style="height:560px"><img id="s3-img" src="../docs/screenshots/submit.png" /></div>
+  </div>
+
+  <!-- 4. Pipeline -->
+  <h2 class="abs" id="s4-title" style="left:140px;top:130px">Evidence in <span class="grad">about a minute</span></h2>
+  <div class="abs" id="s4-list" style="left:140px;top:300px;display:flex;flex-direction:column;gap:30px"></div>
+  <div class="abs frame" id="s4-frame" style="left:900px;top:300px;width:900px">
+    <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><div class="url">Checking your claim…</div></div>
+    <div class="shot" style="height:470px"><img id="s4-img" src="../docs/screenshots/progress.png" /></div>
+  </div>
+  <div class="abs" id="s4-bar" style="left:900px;top:810px;width:900px;height:10px;border-radius:5px;background:#18223a;overflow:hidden">
+    <div id="s4-fill" style="height:100%;width:0;background:linear-gradient(90deg,#2f7cf6,#8b5cf6)"></div>
+  </div>
+
+  <!-- 5. AI suggests -->
+  <h2 class="abs" id="s5-title" style="left:140px;top:110px">AI suggests. <span class="grad">It never decides.</span></h2>
+  <div class="abs frame" id="s5-frame" style="left:140px;top:270px;width:1180px">
+    <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><div class="url">Evidence board</div></div>
+    <div class="shot" style="height:600px"><img id="s5-img" src="../docs/screenshots/board.png" /></div>
+  </div>
+  <div class="abs frame" id="s5-ai" style="left:1240px;top:330px;width:520px"><img src="../docs/screenshots/ai.png" style="display:block;width:100%" /></div>
+  <div class="abs chip" id="s5-cite" style="left:160px;top:936px">Every claim cites its source</div>
+
+  <!-- 6. Human decides -->
+  <div class="abs chip" id="s6-chip" style="left:140px;top:250px">Step 2</div>
+  <h2 class="abs" id="s6-title" style="left:140px;top:330px;width:700px">A human reviewer<br/><span class="grad">makes the call.</span></h2>
+  <div class="abs lead" id="s6-sub" style="left:142px;top:520px;width:620px">Reviewers read the evidence, choose the verdict and explain it in plain words.</div>
+  <div class="abs frame" id="s6-queue" style="left:880px;top:150px;width:900px">
+    <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><div class="url">Review queue</div></div>
+    <div class="shot" style="height:520px"><img src="../docs/screenshots/queue.png" /></div>
+  </div>
+  <div class="abs frame" id="s6-form" style="left:1080px;top:330px;width:460px"><img src="../docs/screenshots/verdict-form.png" style="display:block;width:100%" /></div>
+  <div class="abs stamp" id="s6-stamp" style="left:1130px;top:430px">FALSE</div>
+
+  <!-- 7. Result -->
+  <div class="abs chip" id="s7-chip" style="left:140px;top:250px">Step 3</div>
+  <h2 class="abs" id="s7-title" style="left:140px;top:330px;width:700px">A verified answer<br/><span class="grad">for everyone.</span></h2>
+  <div class="abs lead" id="s7-sub" style="left:142px;top:520px;width:620px">Free to read, search and share. In English, Hindi and Urdu.</div>
+  <div class="abs pill" id="s7-p1" style="left:140px;top:690px">↗ Share</div>
+  <div class="abs pill" id="s7-p2" style="left:320px;top:690px">🔎 Search</div>
+  <div class="abs pill" id="s7-p3" style="left:520px;top:690px">अ · ع · A</div>
+  <div class="abs frame" id="s7-frame" style="left:820px;top:180px;width:900px">
+    <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><div class="url">election-verify.vercel.app/s/…</div></div>
+    <div class="shot" style="height:520px"><img id="s7-img" src="../docs/screenshots/result.png" /></div>
+  </div>
+  <div class="abs" id="s7-phone" style="left:1520px;top:360px;width:300px;border-radius:40px;overflow:hidden;border:8px solid #1c2640;box-shadow:0 40px 100px -30px rgba(139,92,246,.7)"><img src="../docs/screenshots/mobile.png" style="display:block;width:100%" /></div>
+
+  <!-- 8. Trusted sources -->
+  <h2 class="abs" id="s8-title" style="left:0;width:1920px;top:150px;text-align:center">Built on <span class="grad">trusted sources</span></h2>
+  <div class="abs lead" id="s8-sub" style="left:0;width:1920px;top:250px;text-align:center">Admins choose the reviewers and the sources. Every action is logged.</div>
+  <div class="abs" id="s8-grid" style="left:110px;top:380px;width:1700px;display:flex;flex-wrap:wrap;gap:30px;justify-content:center"></div>
+
+  <!-- 9. Outro -->
+  <div class="abs" id="s9-logo" style="left:200px;top:300px;width:120px;height:120px;border-radius:32px;background:linear-gradient(135deg,#2f7cf6,#8b5cf6);display:grid;place-items:center;box-shadow:0 30px 80px -20px rgba(47,124,246,.8)">
+    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+  </div>
+  <h1 class="abs" id="s9-title" style="left:200px;top:460px;width:1100px">Check before<br/><span class="grad">you forward.</span></h1>
+  <div class="abs" id="s9-url" style="left:204px;top:700px;font-size:40px;font-weight:600;padding:18px 34px;border-radius:20px;background:#0f172b;border:1px solid rgba(47,124,246,.5);box-shadow:0 0 60px -10px rgba(47,124,246,.6)">election-verify.vercel.app</div>
+
+  <!-- Veri, the guide character -->
+  <div class="abs" id="veri" style="left:0;top:0;width:260px;height:320px;transform-origin:50% 100%">
+    <div class="bubble"></div>
+    <svg width="260" height="320" viewBox="0 0 260 320" id="veri-svg">
+      <defs>
+        <linearGradient id="vb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4f95ff"/><stop offset="1" stop-color="#7c5cf6"/></linearGradient>
+        <radialGradient id="vg" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#bfe0ff"/><stop offset="1" stop-color="#bfe0ff" stop-opacity="0"/></radialGradient>
+      </defs>
+      <ellipse cx="130" cy="308" rx="80" ry="10" fill="#000" opacity=".35"/>
+      <g id="veri-body">
+        <line x1="130" y1="44" x2="130" y2="18" stroke="#9ab8ff" stroke-width="5" stroke-linecap="round"/>
+        <circle class="glow" cx="130" cy="14" r="22" fill="url(#vg)"/>
+        <circle cx="130" cy="14" r="9" fill="#e6f1ff"/>
+        <g class="arm-l" style="transform-origin:46px 170px"><rect x="18" y="160" width="40" height="22" rx="11" fill="#5b8cff"/></g>
+        <g class="arm-r" style="transform-origin:214px 170px"><rect x="202" y="160" width="40" height="22" rx="11" fill="#6f6cff"/><circle cx="244" cy="171" r="13" fill="#7f7aff"/></g>
+        <path d="M130 44 L218 76 L218 160 C218 228 172 272 130 292 C88 272 42 228 42 160 L42 76 Z" fill="url(#vb)" stroke="#a9c6ff" stroke-width="3"/>
+        <path d="M130 58 L204 86 L204 158 C204 214 166 252 130 270 C94 252 56 214 56 158 L56 86 Z" fill="#fff" opacity=".1"/>
+        <rect x="70" y="100" width="120" height="84" rx="38" fill="#0b1430"/>
+        <g class="eyes" style="transform-origin:130px 140px">
+          <ellipse cx="106" cy="140" rx="12" ry="16" fill="#8fe3ff"/>
+          <ellipse cx="154" cy="140" rx="12" ry="16" fill="#8fe3ff"/>
+          <circle cx="110" cy="134" r="4" fill="#fff"/><circle cx="158" cy="134" r="4" fill="#fff"/>
+        </g>
+        <path class="mouth" d="M114 166 Q130 178 146 166" fill="none" stroke="#8fe3ff" stroke-width="5" stroke-linecap="round"/>
+        <circle cx="130" cy="226" r="24" fill="#fff" opacity=".95"/>
+        <path d="M118 226 l8 8 l15 -16" fill="none" stroke="#4f7cff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="abs lead" id="s9-credit" style="left:204px;top:820px;font-size:28px">Made by <b style="color:#fff">Abdullah Rizwan</b>, <b style="color:#fff">Uday</b> and <b style="color:#fff">Sandeep</b></div>
+  <div id="people"></div>
+
+  <div class="abs" id="fade" style="inset:0;background:#000;pointer-events:none"></div>
+</div>
+
+<script>
+const DURATION = 66;
+const ease = {
+  out: (x) => 1 - Math.pow(1 - x, 3),
+  inOut: (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2),
+  back: (x) => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); },
+  lin: (x) => x,
+};
+
+/** Interpolate keyframes [[time, value, easeName?], ...] at time t. */
+function kf(keys, t) {
+  if (t <= keys[0][0]) return keys[0][1];
+  for (let i = 1; i < keys.length; i++) {
+    const [t1, v1, e = "out"] = keys[i];
+    const [t0, v0] = keys[i - 1];
+    if (t <= t1) {
+      const p = t1 === t0 ? 1 : (t - t0) / (t1 - t0);
+      return v0 + (v1 - v0) * ease[e](p);
+    }
+  }
+  return keys[keys.length - 1][1];
+}
+
+const tracks = [];
+/** Register an animated element. props: o (opacity), x, y, s (scale), r (rotate deg), ry (rotateY deg). */
+function A(id, props) { tracks.push({ el: typeof id === "string" ? document.getElementById(id) : id, props }); }
+
+/** Fade + rise in at `start`, fade out at `end`. */
+function rise(id, start, end, dist = 50, extra = {}) {
+  A(id, {
+    o: [[start, 0], [start + 0.6, 1], [end, 1], [end + 0.45, 0, "inOut"]],
+    y: [[start, dist], [start + 0.8, 0], [end, 0], [end + 0.45, -20, "inOut"]],
+    ...extra,
+  });
+}
+/** Pop in with a little overshoot. */
+function pop(id, start, end) {
+  A(id, {
+    o: [[start, 0], [start + 0.25, 1], [end, 1], [end + 0.4, 0]],
+    s: [[start, 0.6], [start + 0.5, 1, "back"], [end, 1], [end + 0.4, 0.9]],
+  });
+}
+/** Slide a screenshot frame in from the right with a 3D turn, drift while on screen. */
+function frameIn(id, start, end, from = 140) {
+  A(id, {
+    o: [[start, 0], [start + 0.6, 1], [end, 1], [end + 0.5, 0, "inOut"]],
+    x: [[start, from], [start + 1.1, 0], [end, -10, "lin"], [end + 0.5, -60, "inOut"]],
+    ry: [[start, -22], [start + 1.2, -4], [end, 0, "lin"]],
+    s: [[start, 0.94], [start + 1.1, 1], [end + 0.5, 0.97]],
+  });
+}
+/** Slow "Ken Burns" zoom on a screenshot inside its frame. */
+function zoom(id, start, end, s1 = 1.12, y1 = -40) {
+  A(id, { s: [[start, 1], [end, s1, "inOut"]], y: [[start, 0], [end, y1, "inOut"]] });
+}
+
+// ── Background motion ──
+A("g1", { x: [[0, 0], [DURATION, 260, "inOut"]], y: [[0, 0], [DURATION, 180, "inOut"]] });
+A("g2", { x: [[0, 0], [DURATION, -240, "inOut"]], y: [[0, 0], [DURATION, -120, "inOut"]] });
+const dots = [];
+for (let i = 0; i < 46; i++) {
+  const d = document.createElement("div");
+  d.className = "abs dot";
+  document.getElementById("dots").appendChild(d);
+  const seed = (i * 9301 + 49297) % 233280 / 233280;
+  dots.push({ el: d, x: (i * 173) % 1920, y: (i * 389) % 1080, sp: 8 + seed * 22, ph: seed * 6.28, sz: 0.6 + seed * 1.6 });
+}
+
+// ── 1. Title (0 – 6.4) ──
+pop("s1-logo", 0.3, 5.9);
+rise("s1-name", 0.7, 5.9, 60);
+rise("s1-tag", 1.3, 5.9);
+rise("s1-sub", 1.8, 5.9);
+
+// ── 2. Problem (6.4 – 14) ──
+A("s2-phone", { o: [[6.4, 0], [7, 1], [13.4, 1], [13.9, 0]], y: [[6.4, 120], [7.3, 0], [13.4, 0], [13.9, -40]], r: [[6.4, -6], [7.3, -2], [13.4, -1, "lin"]] });
+pop("s2-m1", 7.3, 13.4);
+pop("s2-m2", 8.2, 13.4);
+pop("s2-m3", 9.1, 13.4);
+A("s2-warn", { o: [[9.6, 0], [9.8, 1], [13.4, 1], [13.8, 0]], s: [[9.6, 0.2], [10.1, 1, "back"], [13.4, 1]] });
+rise("s2-title", 7.6, 13.4);
+rise("s2-sub", 8.4, 13.4);
+
+// ── 3. Submit (14 – 22) ──
+rise("s3-chip", 14.2, 21.5, 30);
+rise("s3-title", 14.4, 21.5);
+rise("s3-sub", 15, 21.5);
+pop("s3-p1", 16, 21.5); pop("s3-p2", 16.3, 21.5); pop("s3-p3", 16.6, 21.5);
+frameIn("s3-frame", 14.6, 21.5);
+zoom("s3-img", 15, 21.5, 1.18, -60);
+
+// ── 4. Pipeline (22 – 32) ──
+const STEPS = ["Source reputation", "Claims pulled out", "Fact-check search", "Trusted news and ECI", "Image forensics (OCR)", "AI summary with citations"];
+const list = document.getElementById("s4-list");
+STEPS.forEach((label, i) => {
+  const row = document.createElement("div");
+  row.className = "step";
+  row.innerHTML = `<div class="tick" id="tk${i}"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path id="tkp${i}" d="m5 12 5 5 9-10" stroke-dasharray="24" stroke-dashoffset="24"/></svg></div><span>${label}</span>`;
+  list.appendChild(row);
+  const s = 23.2 + i * 1.15;
+  A(row, { o: [[22.3 + i * 0.12, 0], [22.8 + i * 0.12, 0.45], [s, 0.45], [s + 0.2, 1], [31.4, 1], [31.9, 0]], x: [[22.3 + i * 0.12, -40], [23 + i * 0.12, 0]] });
+});
+rise("s4-title", 22.2, 31.4);
+frameIn("s4-frame", 22.6, 31.4);
+zoom("s4-img", 23, 31.4, 1.1, -30);
+A("s4-bar", { o: [[22.8, 0], [23.3, 1], [31.4, 1], [31.9, 0]] });
+
+// ── 5. AI suggests (32 – 40) ──
+rise("s5-title", 32.2, 39.4);
+frameIn("s5-frame", 32.4, 39.4, 0);
+zoom("s5-img", 32.6, 39.4, 1.08, -20);
+A("s5-ai", { o: [[33.8, 0], [34.3, 1], [39.4, 1], [39.8, 0]], x: [[33.8, 200], [34.8, 0], [39.4, -10, "lin"]], r: [[33.8, 6], [34.8, 2]] });
+pop("s5-cite", 35.4, 39.4);
+
+// ── 6. Human decides (40 – 47) ──
+rise("s6-chip", 40.2, 46.5, 30);
+rise("s6-title", 40.4, 46.5);
+rise("s6-sub", 41, 46.5);
+frameIn("s6-queue", 40.4, 46.5);
+A("s6-form", { o: [[41.6, 0], [42.1, 1], [46.5, 1], [46.9, 0]], y: [[41.6, 140], [42.5, 0]], r: [[41.6, -4], [42.5, -1.5]] });
+A("s6-stamp", { o: [[43.6, 0], [43.7, 1], [46.5, 1], [46.9, 0]], s: [[43.6, 2.6], [44.0, 1, "out"], [46.5, 1]], r: [[43.6, -30], [44.0, -12]] });
+
+// ── 7. Result (47 – 54) ──
+rise("s7-chip", 47.2, 53.5, 30);
+rise("s7-title", 47.4, 53.5);
+rise("s7-sub", 48, 53.5);
+pop("s7-p1", 48.8, 53.5); pop("s7-p2", 49.1, 53.5); pop("s7-p3", 49.4, 53.5);
+frameIn("s7-frame", 47.6, 53.5);
+zoom("s7-img", 48, 53.5, 1.12, -40);
+A("s7-phone", { o: [[49, 0], [49.5, 1], [53.5, 1], [53.9, 0]], y: [[49, 260], [50, 0], [53.5, -14, "lin"]], r: [[49, 8], [50, 4]] });
+
+// ── 8. Trusted sources (54 – 60) ──
+const SOURCES = [
+  ["Election Commission of India", "Official"], ["Press Information Bureau", "Official"], ["Alt News", "Fact-checker"],
+  ["BOOM", "Fact-checker"], ["FACTLY", "Fact-checker"], ["Newschecker", "Fact-checker"],
+  ["Vishvas News", "Fact-checker"], ["AFP Fact Check", "Fact-checker"],
+];
+const grid = document.getElementById("s8-grid");
+SOURCES.forEach(([name, kind], i) => {
+  const t = document.createElement("div");
+  t.className = "tile";
+  t.innerHTML = `<b>${name}</b><span>${kind}</span>`;
+  grid.appendChild(t);
+  const s = 54.9 + i * 0.18;
+  A(t, { o: [[s, 0], [s + 0.35, 1], [59.4, 1], [59.8, 0]], y: [[s, 50], [s + 0.6, 0]], s: [[s, 0.9], [s + 0.6, 1, "back"]] });
+});
+rise("s8-title", 54.2, 59.4);
+rise("s8-sub", 54.6, 59.4);
+
+// ── 9. Outro (60 – 66) ──
+pop("s9-logo", 60.2, 99);
+rise("s9-title", 60.5, 99, 60);
+A("s9-url", { o: [[61.3, 0], [61.8, 1]], y: [[61.3, 40], [62, 0]], s: [[61.3, 0.9], [62, 1, "back"]] });
+A("fade", { o: [[0, 1], [0.6, 0], [65.2, 0], [66, 1, "inOut"]] });
+
+// ── Characters: Veri (the app's guide) and the team ──
+/** A simple cartoon person drawn in SVG. Illustrated, not a real likeness. */
+function personSVG({ skin, hair, shirt, beard, glasses, wavy, broad }) {
+  // Broad = wider shoulders and thicker arms (a more muscular build).
+  const torsoX = broad ? 42 : 56, torsoW = broad ? 156 : 128, armW = broad ? 42 : 34;
+  const armLX = broad ? 16 : 30, armRX = broad ? 182 : 176;
+  const top = wavy
+    ? `M56 116 C50 64 86 44 120 46 C158 44 192 66 184 116 C176 98 168 92 160 96 C150 84 134 86 124 92 C112 82 96 84 88 94 C78 88 64 96 56 116Z`
+    : `M58 112 C58 60 92 46 120 46 C152 46 184 60 182 112 C170 90 150 82 120 82 C92 82 70 92 58 112Z`;
+  return `<svg width="240" height="400" viewBox="0 0 240 400">
+    <ellipse cx="120" cy="392" rx="84" ry="9" fill="#000" opacity=".35"/>
+    <g class="arm-l" style="transform-origin:${armLX + armW / 2}px 222px"><rect x="${armLX}" y="206" width="${armW}" height="124" rx="${armW / 2}" fill="${shirt}"/><circle cx="${armLX + armW / 2}" cy="330" r="${broad ? 19 : 16}" fill="${skin}"/></g>
+    <g class="arm-r" style="transform-origin:${armRX + armW / 2}px 222px"><rect x="${armRX}" y="206" width="${armW}" height="124" rx="${armW / 2}" fill="${shirt}"/><circle cx="${armRX + armW / 2}" cy="330" r="${broad ? 19 : 16}" fill="${skin}"/></g>
+    <rect x="${torsoX}" y="192" width="${torsoW}" height="200" rx="${broad ? 52 : 44}" fill="${shirt}"/>
+    <path d="M100 196 L120 226 L140 196" fill="none" stroke="#ffffff" stroke-opacity=".5" stroke-width="5" stroke-linejoin="round"/>
+    <rect x="104" y="166" width="32" height="40" rx="12" fill="${skin}"/>
+    <circle cx="58" cy="124" r="12" fill="${skin}"/><circle cx="182" cy="124" r="12" fill="${skin}"/>
+    <circle cx="120" cy="120" r="62" fill="${skin}"/>
+    <path d="${top}" fill="${hair}"/>
+    ${beard ? `<path d="M64 128 C68 176 98 190 120 190 C142 190 172 176 176 128 C166 158 148 166 120 166 C92 166 74 158 64 128Z" fill="${hair}"/>` : ""}
+    <path d="M90 106 Q98 100 106 106 M134 106 Q142 100 150 106" fill="none" stroke="${hair}" stroke-width="5" stroke-linecap="round"/>
+    <g class="eyes" style="transform-origin:120px 122px"><ellipse cx="98" cy="122" rx="7" ry="9" fill="#1b1b24"/><ellipse cx="142" cy="122" rx="7" ry="9" fill="#1b1b24"/><circle cx="100" cy="119" r="2.4" fill="#fff"/><circle cx="144" cy="119" r="2.4" fill="#fff"/></g>
+    ${glasses ? `<g fill="none" stroke="#2b2f3a" stroke-width="4"><circle cx="98" cy="122" r="18"/><circle cx="142" cy="122" r="18"/><path d="M116 120 Q120 116 124 120"/></g>` : ""}
+    <path class="mouth" d="M104 150 Q120 162 136 150" fill="${beard ? "#7a3b3b" : "none"}" stroke="#7a3b3b" stroke-width="4" stroke-linecap="round"/>
+  </svg>`;
+}
+
+const PEOPLE = {
+  // Looks as described by the team: Abdullah fair, no glasses; Sandeep brown;
+  // Uday light brown and muscular; Uday and Sandeep wear glasses.
+  sandeep: { name: "Sandeep", role: "Citizen", look: { skin: "#9c6238", hair: "#120c08", shirt: "#f08a3c", wavy: true, glasses: true } },
+  uday: { name: "Uday", role: "Reviewer", look: { skin: "#c08456", hair: "#16100c", shirt: "#7c5cf6", broad: true, glasses: true } },
+  abdullah: { name: "Abdullah Rizwan", role: "Admin", look: { skin: "#f2cfa9", hair: "#1c140e", shirt: "#14a38b" } },
+};
+for (const [key, p] of Object.entries(PEOPLE)) {
+  const el = document.createElement("div");
+  el.className = "abs";
+  el.id = key;
+  el.style.cssText = "left:0;top:0;width:240px;height:440px;transform-origin:50% 100%;";
+  el.innerHTML = `<div class="bubble"></div>${personSVG(p.look)}<div class="tag">${p.name}<span>${p.role}</span></div>`;
+  document.getElementById("people").appendChild(el);
+}
+
+/**
+ * Each actor: where it stands over time [time, x, y, scale, opacity],
+ * what it says [from, to, text], and when it waves [from, to].
+ */
+const HIDE = 1300; // below the screen
+const ACTORS = [
+  {
+    el: document.getElementById("veri"), mouthOpen: "M114 164 Q130 186 146 164", mouthShut: "M114 166 Q130 178 146 166", waveRest: -10, waveUp: -60,
+    pos: [[0, 1560, HIDE, 1.1, 1], [1.6, 1560, 620, 1.1, 1], [5.8, 1560, 620, 1.1, 1], [6.5, 1560, HIDE, 1.1, 1],
+          [22.2, 1640, HIDE, 0.62, 1], [23, 1640, 730, 0.62, 1], [39.2, 1640, 730, 0.62, 1], [39.9, 1640, HIDE, 0.62, 1],
+          [60.2, 1500, HIDE, 0.75, 1], [61, 1500, 120, 0.75, 1]],
+    say: [[2.4, 5.6, "Hi! I'm Veri, your fact-check guide.", "up"], [27.4, 31.0, "I gather evidence from trusted sources."],
+          [35.6, 38.8, "The AI suggests. A human decides."], [61.6, 64.8, "Try it now!"]],
+    wave: [[1.8, 4.4], [61.2, 64.2]],
+  },
+  {
+    el: document.getElementById("sandeep"), mouthOpen: "M104 148 Q120 172 136 148", mouthShut: "M104 150 Q120 162 136 150", waveRest: 6, waveUp: -160,
+    pos: [[6.6, 1560, HIDE, 0.72, 1], [7.4, 1560, 590, 0.72, 1], [13.5, 1560, 590, 0.72, 1], [14.3, 1640, 600, 0.62, 1], [21.5, 1640, 600, 0.62, 1], [22.2, 1640, HIDE, 0.62, 1],
+          [47.4, 700, HIDE, 0.68, 1], [48.2, 700, 590, 0.68, 1], [53.4, 700, 590, 0.68, 1], [54.1, 700, HIDE, 0.68, 1],
+          [60.4, 1180, HIDE, 0.66, 1], [61.2, 1180, 590, 0.66, 1]],
+    say: [[7.8, 10.2, "Wait... is this even true?"], [10.7, 13.3, "Everyone is forwarding it!"], [16.8, 21.0, "I'll send it to ElectionVerify."],
+          [49.6, 53.0, "Now I know the truth. Sharing it!"]],
+    wave: [[61.4, 64.2]],
+  },
+  {
+    el: document.getElementById("uday"), mouthOpen: "M104 148 Q120 172 136 148", mouthShut: "M104 150 Q120 162 136 150", waveRest: 6, waveUp: -160,
+    pos: [[40.2, 1600, HIDE, 0.72, 1], [41, 1600, 590, 0.72, 1], [46.4, 1600, 590, 0.72, 1], [47.1, 1600, HIDE, 0.72, 1],
+          [60.6, 1420, HIDE, 0.66, 1], [61.4, 1420, 590, 0.66, 1]],
+    say: [[42.4, 46.2, "I check the evidence, then publish."]],
+    wave: [[61.6, 64.2]],
+  },
+  {
+    el: document.getElementById("abdullah"), mouthOpen: "M104 148 Q120 172 136 148", mouthShut: "M104 150 Q120 162 136 150", waveRest: 6, waveUp: -160,
+    pos: [[54.2, 1620, HIDE, 0.72, 1], [55, 1620, 590, 0.72, 1], [59.4, 1620, 590, 0.72, 1], [60, 1620, HIDE, 0.72, 1],
+          [60.8, 1660, HIDE, 0.66, 1], [61.6, 1660, 590, 0.66, 1]],
+    say: [[55.6, 59.2, "I manage reviewers and trusted sources."]],
+    wave: [[54.8, 55.8], [61.8, 64.2]],
+  },
+];
+for (const a of ACTORS) {
+  a.kx = a.pos.map(([t, x]) => [t, x, "inOut"]);
+  a.ky = a.pos.map(([t, , y]) => [t, y, "inOut"]);
+  a.ks = a.pos.map(([t, , , s]) => [t, s, "inOut"]);
+  a.bubble = a.el.querySelector(".bubble");
+  a.eyes = a.el.querySelector(".eyes");
+  a.mouth = a.el.querySelector(".mouth");
+  a.armR = a.el.querySelector(".arm-r");
+  a.armL = a.el.querySelector(".arm-l");
+  a.glow = a.el.querySelector(".glow");
+  a.last = "";
+}
+rise("s9-credit", 62.2, 99, 30);
+
+function renderActor(a, t, i) {
+  const x = kf(a.kx, t), y = kf(a.ky, t), s = kf(a.ks, t);
+  const bob = Math.sin(t * 2.4 + i) * 7;
+  a.el.style.visibility = y > 1200 ? "hidden" : "visible";
+  a.el.style.transform = `translate(${x}px, ${y + bob}px) scale(${s})`;
+  a.eyes.style.transform = `scaleY(${(t + i * 0.9) % 3.3 < 0.14 ? 0.12 : 1})`;
+  const waving = a.wave.some(([w0, w1]) => t >= w0 && t <= w1);
+  a.armR.style.transform = `rotate(${waving ? a.waveUp + Math.sin(t * 14) * 24 : a.waveRest + Math.sin(t * 2.4 + i) * 5}deg)`;
+  a.armL.style.transform = `rotate(${(a.waveRest > 0 ? -6 : 12) + Math.sin(t * 2.4 + i + 1) * 5}deg)`;
+  if (a.glow) a.glow.style.opacity = 0.5 + 0.5 * Math.sin(t * 4);
+  const line = a.say.find(([s0, s1]) => t >= s0 && t <= s1 + 0.35);
+  if (line) {
+    const [s0, s1, text, side] = line;
+    if (text !== a.last) { a.bubble.textContent = text; a.last = text; }
+    a.bubble.classList.toggle("up", side === "up");
+    a.bubble.style.opacity = kf([[s0, 0], [s0 + 0.25, 1], [s1, 1], [s1 + 0.35, 0]], t);
+    a.bubble.style.transform = `scale(${kf([[s0, 0.5], [s0 + 0.45, 1, "back"], [s1, 1], [s1 + 0.35, 0.85]], t)})`;
+    a.mouth.setAttribute("d", t < s1 && Math.floor(t * 9) % 2 === 0 ? a.mouthOpen : a.mouthShut);
+  } else {
+    a.bubble.style.opacity = 0;
+    a.mouth.setAttribute("d", a.mouthShut);
+  }
+}
+
+function render(t) {
+  for (const { el, props } of tracks) {
+    const o = props.o ? kf(props.o, t) : 1;
+    const x = props.x ? kf(props.x, t) : 0;
+    const y = props.y ? kf(props.y, t) : 0;
+    const s = props.s ? kf(props.s, t) : 1;
+    const r = props.r ? kf(props.r, t) : 0;
+    const ry = props.ry ? kf(props.ry, t) : 0;
+    el.style.opacity = o;
+    el.style.visibility = o < 0.002 ? "hidden" : "visible";
+    el.style.transform = `perspective(1600px) translate(${x}px, ${y}px) rotateY(${ry}deg) rotate(${r}deg) scale(${s})`;
+  }
+
+  for (const d of dots) {
+    const yy = (d.y - t * d.sp + 1080 * 4) % 1080;
+    d.el.style.transform = `translate(${d.x + Math.sin(t * 0.6 + d.ph) * 20}px, ${yy}px) scale(${d.sz})`;
+    d.el.style.opacity = 0.25 + 0.35 * (0.5 + 0.5 * Math.sin(t * 1.3 + d.ph));
+  }
+
+  // Pipeline ticks and progress bar
+  STEPS.forEach((_, i) => {
+    const s = 23.2 + i * 1.15;
+    const p = Math.min(1, Math.max(0, (t - s) / 0.35));
+    document.getElementById(`tkp${i}`).style.strokeDashoffset = 24 * (1 - p);
+    const tk = document.getElementById(`tk${i}`);
+    tk.style.background = p > 0 ? `rgba(34,197,94,${0.25 + 0.6 * p})` : "transparent";
+    tk.style.borderColor = p > 0 ? "#22c55e" : "#33405f";
+  });
+  document.getElementById("s4-fill").style.width = `${Math.min(100, Math.max(0, ((t - 23.2) / (6 * 1.15)) * 100))}%`;
+
+  ACTORS.forEach((a, i) => renderActor(a, t, i));
+}
+
+window.render = render;
+window.DURATION = DURATION;
+
+// Live preview when opened directly in a browser (the recorder sets ?record=1).
+if (!location.search.includes("record")) {
+  const start = performance.now();
+  const loop = () => { render(((performance.now() - start) / 1000) % DURATION); requestAnimationFrame(loop); };
+  requestAnimationFrame(loop);
+} else {
+  render(0);
+}
+</script>
+</body>
+</html>

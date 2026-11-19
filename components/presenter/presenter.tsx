@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, Presentation, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, PlayCircle, Presentation, X } from "lucide-react";
 import { isTyping } from "@/components/command-palette";
 import { TOUR } from "@/components/presenter/steps";
 import { T } from "@/components/i18n";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 /**
  * Presenter mode: a guided tour for showing the project to an audience.
@@ -183,11 +184,50 @@ export function Presenter() {
   );
 }
 
-/** "Watch the guided demo" button for the home page. */
+/**
+ * "Watch the guided demo" button for the home page. Opens the one-minute
+ * animated video (made from video/intro.html with `npm run video`), with a
+ * link to the live presenter tour underneath.
+ */
 export function StartTourButton({ className }: { className?: string }) {
+  const [open, setOpen] = useState(false);
   return (
-    <Button variant="ghost" size="sm" className={className} onClick={() => window.dispatchEvent(new Event("ev:start-tour"))}>
-      <Presentation aria-hidden /> <T k="hero.tour" />
-    </Button>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="sm" className={className}>
+          <PlayCircle aria-hidden /> <T k="hero.tour" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-4xl">
+        <DialogTitle className="sr-only">ElectionVerify in one minute</DialogTitle>
+        <DialogDescription className="sr-only">
+          An animated video showing how a claim is submitted, checked with evidence and reviewed by a person.
+        </DialogDescription>
+        {/* The video has no sound: everything it says is on screen as text. */}
+        <video
+          src="/videos/electionverify-intro.mp4"
+          poster="/videos/electionverify-intro-poster.jpg"
+          controls
+          autoPlay
+          muted
+          playsInline
+          preload="metadata"
+          className="aspect-video w-full bg-black"
+        />
+        <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+          <p className="text-sm text-muted-foreground">Meet Veri, Sandeep, Uday and Abdullah Rizwan.</p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setOpen(false);
+              window.dispatchEvent(new Event("ev:start-tour"));
+            }}
+          >
+            <Presentation aria-hidden /> Take the live tour instead
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

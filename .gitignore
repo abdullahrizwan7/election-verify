@@ -57,3 +57,6 @@ next-env.d.ts
 
 # private notes with passwords and keys (never upload)
 /private/
+
+# Still frames for checking the intro video
+/video/stills/

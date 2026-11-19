@@ -18,7 +18,8 @@
     "test:e2e": "playwright test",
     "check:services": "tsx scripts/check-services.ts",
     "setup:supabase": "tsx scripts/setup-supabase.ts",
-    "docs:pdf": "node scripts/workflow-pdf.mjs"
+    "docs:pdf": "node scripts/workflow-pdf.mjs",
+    "video": "node scripts/render-video.mjs"
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",
