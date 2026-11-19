@@ -1,0 +1,11 @@
+# Never upload secrets or local-only files to Vercel.
+.env
+.env.*
+!.env.example
+private/
+node_modules/
+.next/
+lib/generated/
+test-results/
+playwright-report/
+docs/workflow.html

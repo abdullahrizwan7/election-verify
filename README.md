@@ -7,6 +7,7 @@ the verdict.
 
 > The AI only suggests. Nothing is published without a person checking it.
 
+**Live:** [election-verify.vercel.app](https://election-verify.vercel.app) ·
 **Code:** [github.com/abdullahrizwan7/election-verify](https://github.com/abdullahrizwan7/election-verify) ·
 **Set up for:** elections in India (Election Commission of India, PIB, IFCN fact-checkers, English and Hindi news)
 
@@ -230,7 +231,9 @@ scores and add sites (for example state election offices, or sites with a record
    `NEXT_PUBLIC_SITE_URL` with your Vercel address. For `DATABASE_URL` use Supabase's **Transaction pooler**
    (same address, port `6543`), which suits serverless hosting. Inngest keys are optional.
 4. In Supabase, add `https://<your-app>.vercel.app/auth/callback` as a redirect URL.
-5. In Inngest, sync the app at `https://<your-app>.vercel.app/api/inngest`.
+5. In Inngest, sync the app at `https://<your-app>.vercel.app/api/inngest` (optional).
+6. Deploying from your own computer instead: `npx vercel@latest deploy --prod`. `.vercelignore` keeps
+   `.env` and `private/` from ever being uploaded.
 
 ---
 
@@ -265,3 +268,4 @@ GitHub runs lint, types, unit tests, the build and the browser tests on every pu
 | 6 | Re-run, reviewer evidence, duplicate reports, queue sorting, activity log, setup page | ✅ Done |
 | 7 | Tests (72 unit, 8 browser), CI, sitemap, security headers, method page, key checker | ✅ Done |
 | + | Real services connected: Supabase, Gemini, Google Fact Check, Tavily; Indian trusted sources; code on GitHub | ✅ Done |
+| + | Google sign-in; live on Vercel at election-verify.vercel.app | ✅ Done |
