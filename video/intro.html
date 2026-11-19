@@ -37,13 +37,18 @@
   .bubble { position: absolute; right: 88%; bottom: 82%; width: max-content; max-width: 920px; line-height: 1.3; background: #fff; color: #0b1324; font-size: 34px; font-weight: 600; padding: 20px 30px; border-radius: 28px; border-bottom-right-radius: 8px; box-shadow: 0 20px 60px -15px rgba(0,0,0,.6); transform-origin: 100% 100%; }
   .bubble.up { right: 4%; bottom: 102%; transform-origin: 90% 100%; }
   .stamp { font-size: 120px; font-weight: 900; letter-spacing: 8px; color: #ff4d5e; border: 10px solid #ff4d5e; border-radius: 24px; padding: 6px 40px; background: rgba(255,77,94,.08); }
-  .tile { width: 400px; height: 120px; border-radius: 22px; background: #0f172b; border: 1px solid var(--line); display: flex; flex-direction: column; justify-content: center; padding: 0 30px; }
-  .tile b { font-size: 30px; } .tile span { font-size: 21px; color: var(--muted); margin-top: 4px; }
+  .tile { width: 317px; height: 128px; border-radius: 22px; background: #0f172b; border: 1px solid var(--line); display: flex; flex-direction: column; justify-content: center; padding: 0 30px; }
+  .tile b { font-size: 26px; line-height: 1.2; } .tile span { font-size: 21px; color: var(--muted); margin-top: 4px; }
   .msg { max-width: 470px; padding: 18px 22px; border-radius: 20px; border-top-left-radius: 6px; background: #1d2a44; font-size: 25px; line-height: 1.35; box-shadow: 0 14px 40px -12px rgba(0,0,0,.6); }
   .msg small { display: block; font-size: 17px; color: #8fa0c4; font-style: italic; margin-bottom: 6px; }
   .person .bubble { bottom: 46%; }
   .fig { position: absolute; left: 0; top: 0; width: 267px; height: 400px; transform-origin: 50% 98%; }
-  .fig img { position: absolute; left: 0; top: 0; width: 267px; height: 400px; opacity: 0; }
+  .fig img { position: absolute; left: 0; top: 0; width: 267px; height: 400px; }
+  .pose { position: absolute; left: 0; top: 0; width: 267px; height: 400px; opacity: 0; }
+  /* Each pose is split at the neck: the body below, the head above, blended over a soft band. */
+  .pose .body { -webkit-mask-image: linear-gradient(to bottom, transparent 84px, #000 100px); mask-image: linear-gradient(to bottom, transparent 84px, #000 100px); }
+  .pose .head { position: absolute; left: 0; top: 0; width: 267px; height: 400px; transform-origin: 133px 96px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 84px, transparent 100px); mask-image: linear-gradient(to bottom, #000 84px, transparent 100px); }
   .shadow { position: absolute; left: 50%; top: 382px; width: 170px; height: 22px; margin-left: -85px; border-radius: 50%; background: radial-gradient(closest-side, rgba(0,0,0,.6), transparent); }
   .tag { position: absolute; left: 50%; top: 404px; transform: translateX(-50%); white-space: nowrap; font-size: 26px; font-weight: 700; padding: 8px 20px; border-radius: 999px; background: #0f172b; border: 1px solid rgba(148,163,209,.3); }
   .tag span { font-weight: 500; color: var(--muted); margin-left: 8px; }
@@ -88,9 +93,9 @@
   <div class="abs pill" id="s3-p1" style="left:140px;top:690px">🔗 Link</div>
   <div class="abs pill" id="s3-p2" style="left:320px;top:690px">💬 Message</div>
   <div class="abs pill" id="s3-p3" style="left:560px;top:690px">🖼️ Image</div>
-  <div class="abs frame" id="s3-frame" style="left:820px;top:170px;width:980px">
+  <div class="abs frame" id="s3-frame" style="left:760px;top:150px;width:800px">
     <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><div class="url">election-verify.vercel.app/submit</div></div>
-    <div class="shot" style="height:560px"><img id="s3-img" src="../docs/screenshots/submit.png" /></div>
+    <div class="shot" style="height:470px"><img id="s3-img" src="../docs/screenshots/submit.png" /></div>
   </div>
 
   <!-- 4. Pipeline -->
@@ -117,12 +122,12 @@
   <div class="abs chip" id="s6-chip" style="left:140px;top:250px">Step 2</div>
   <h2 class="abs" id="s6-title" style="left:140px;top:330px;width:700px">A human reviewer<br/><span class="grad">makes the call.</span></h2>
   <div class="abs lead" id="s6-sub" style="left:142px;top:520px;width:620px">Reviewers read the evidence, choose the verdict and explain it in plain words.</div>
-  <div class="abs frame" id="s6-queue" style="left:880px;top:150px;width:900px">
+  <div class="abs frame" id="s6-queue" style="left:760px;top:140px;width:780px">
     <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><div class="url">Review queue</div></div>
-    <div class="shot" style="height:520px"><img src="../docs/screenshots/queue.png" /></div>
+    <div class="shot" style="height:500px"><img src="../docs/screenshots/queue.png" /></div>
   </div>
-  <div class="abs frame" id="s6-form" style="left:1080px;top:330px;width:460px"><img src="../docs/screenshots/verdict-form.png" style="display:block;width:100%" /></div>
-  <div class="abs stamp" id="s6-stamp" style="left:1130px;top:430px">FALSE</div>
+  <div class="abs frame" id="s6-form" style="left:900px;top:220px;width:350px"><img src="../docs/screenshots/verdict-form.png" style="display:block;width:100%" /></div>
+  <div class="abs stamp" id="s6-stamp" style="left:880px;top:340px;font-size:96px">FALSE</div>
 
   <!-- 7. Result -->
   <div class="abs chip" id="s7-chip" style="left:140px;top:250px">Step 3</div>
@@ -131,16 +136,16 @@
   <div class="abs pill" id="s7-p1" style="left:140px;top:690px">↗ Share</div>
   <div class="abs pill" id="s7-p2" style="left:320px;top:690px">🔎 Search</div>
   <div class="abs pill" id="s7-p3" style="left:520px;top:690px">अ · ع · A</div>
-  <div class="abs frame" id="s7-frame" style="left:820px;top:180px;width:900px">
+  <div class="abs frame" id="s7-frame" style="left:900px;top:170px;width:820px">
     <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><div class="url">election-verify.vercel.app/s/…</div></div>
-    <div class="shot" style="height:520px"><img id="s7-img" src="../docs/screenshots/result.png" /></div>
+    <div class="shot" style="height:480px"><img id="s7-img" src="../docs/screenshots/result.png" /></div>
   </div>
-  <div class="abs" id="s7-phone" style="left:1520px;top:360px;width:300px;border-radius:40px;overflow:hidden;border:8px solid #1c2640;box-shadow:0 40px 100px -30px rgba(139,92,246,.7)"><img src="../docs/screenshots/mobile.png" style="display:block;width:100%" /></div>
+  <div class="abs" id="s7-phone" style="left:1590px;top:380px;width:270px;border-radius:40px;overflow:hidden;border:8px solid #1c2640;box-shadow:0 40px 100px -30px rgba(139,92,246,.7)"><img src="../docs/screenshots/mobile.png" style="display:block;width:100%" /></div>
 
   <!-- 8. Trusted sources -->
   <h2 class="abs" id="s8-title" style="left:0;width:1920px;top:150px;text-align:center">Built on <span class="grad">trusted sources</span></h2>
   <div class="abs lead" id="s8-sub" style="left:0;width:1920px;top:250px;text-align:center">Admins choose the reviewers and the sources. Every action is logged.</div>
-  <div class="abs" id="s8-grid" style="left:110px;top:380px;width:1700px;display:flex;flex-wrap:wrap;gap:30px;justify-content:center"></div>
+  <div class="abs" id="s8-grid" style="left:110px;top:380px;width:1340px;display:flex;flex-wrap:wrap;gap:24px;justify-content:flex-start"></div>
 
   <!-- 9. Outro -->
   <div class="abs" id="s9-logo" style="left:200px;top:300px;width:120px;height:120px;border-radius:32px;background:linear-gradient(135deg,#2f7cf6,#8b5cf6);display:grid;place-items:center;box-shadow:0 30px 80px -20px rgba(47,124,246,.8)">
@@ -182,6 +187,7 @@
   <div class="abs lead" id="s9-credit" style="left:204px;top:820px;font-size:28px">Made by <b style="color:#fff">Abdullah Rizwan</b>, <b style="color:#fff">Uday</b> and <b style="color:#fff">Sandeep</b></div>
   <div id="people"></div>
 
+  <div class="abs" id="sweep" style="left:0;top:-200px;width:520px;height:1480px;background:linear-gradient(90deg,transparent,rgba(160,200,255,.16),rgba(255,255,255,.28),rgba(190,160,255,.16),transparent);pointer-events:none"></div>
   <div class="abs" id="fade" style="inset:0;background:#000;pointer-events:none"></div>
 </div>
 
@@ -365,11 +371,13 @@ for (const [key, p] of Object.entries(PEOPLE)) {
   el.innerHTML = `<div class="bubble"></div>
     <div class="shadow"></div>
     <div class="fig">
-      <img class="pose stand" src="characters/${key}-1.png" />
-      <img class="pose wave" src="characters/${key}-wave.png" />
-      <img class="pose talk" src="characters/${key}-talk.png" />
-      <img class="pose closed" src="characters/${key}-1.png"
-        style="transform:translate(${p.dx}px,${p.dy}px);-webkit-mask-image:radial-gradient(ellipse 24px 15px at ${mx}px ${my}px,#000 50%,transparent 100%);mask-image:radial-gradient(ellipse 24px 15px at ${mx}px ${my}px,#000 50%,transparent 100%)" />
+      ${["stand", "wave", "talk"].map((pose) => {
+        const file = `characters/${key}-${pose === "stand" ? "1" : pose}.png`;
+        const closed = pose === "talk"
+          ? `<img class="closed" src="characters/${key}-1.png" style="transform:translate(${p.dx}px,${p.dy}px);-webkit-mask-image:radial-gradient(ellipse 24px 15px at ${mx}px ${my}px,#000 50%,transparent 100%);mask-image:radial-gradient(ellipse 24px 15px at ${mx}px ${my}px,#000 50%,transparent 100%)" />`
+          : "";
+        return `<div class="pose ${pose}"><img class="body" src="${file}" /><div class="head"><img src="${file}" />${closed}</div></div>`;
+      }).join("")}
     </div>
     <div class="tag">${p.name}<span>${p.role}</span></div>`;
   document.getElementById("people").appendChild(el);
@@ -384,6 +392,7 @@ function linesFor(who) { return LINES.filter((l) => l.who === who); }
  * narration, and when it waves [from, to]. Bubbles and mouths follow the voice.
  */
 const HIDE = 1300; // below the screen
+const OFF_R = 2150, OFF_L = -450; // just outside the right / left edge
 const ACTORS = [
   {
     who: "Veri", el: document.getElementById("veri"), robot: true, waveRest: -10, waveUp: -60, up: [1.8],
@@ -393,23 +402,22 @@ const ACTORS = [
     wave: [[1.4, 4.2], [61.2, 64.2]],
   },
   {
-    who: "Sandeep", el: document.getElementById("sandeep"), waveRest: 6, waveUp: -160,
-    pos: [[6.6, 1660, HIDE, 1.2], [7.4, 1660, 590, 1.2], [13.5, 1660, 590, 1.2], [14.3, 1630, 600, 1.05], [21.9, 1630, 600, 1.05], [22.5, 1630, HIDE, 1.05],
-          [47.4, 690, HIDE, 1.12], [48.2, 690, 590, 1.12], [53.4, 690, 590, 1.12], [54.1, 690, HIDE, 1.12],
-          [60.4, 1120, HIDE, 0.95], [61.2, 1120, 590, 0.95]],
-    wave: [[61.4, 64.2]],
+    who: "Sandeep", el: document.getElementById("sandeep"),
+    pos: [[6.4, OFF_R, 590, 1.2], [7.6, 1660, 590, 1.2], [13.4, 1660, 590, 1.2], [14.3, 1610, 600, 1.05], [21.6, 1610, 600, 1.05], [22.6, OFF_R, 600, 1.05],
+          [22.7, OFF_R, HIDE, 1.12], [47.1, OFF_L, HIDE, 1.12], [47.2, OFF_L, 590, 1.12], [48.4, 690, 590, 1.12], [53.3, 690, 590, 1.12], [54.3, OFF_L, 590, 1.12],
+          [54.4, OFF_L, HIDE, 0.95], [60.5, OFF_L, HIDE, 0.95], [60.6, OFF_L, 590, 0.95], [62.0, 1040, 590, 0.95]],
+    wave: [[62.2, 66.5]],
   },
   {
-    who: "Uday", el: document.getElementById("uday"), waveRest: 6, waveUp: -160,
-    pos: [[40.2, 1600, HIDE, 1.2], [41, 1600, 590, 1.2], [46.4, 1600, 590, 1.2], [47.1, 1600, HIDE, 1.2],
-          [60.6, 1360, HIDE, 0.95], [61.4, 1360, 590, 0.95]],
-    wave: [[61.6, 64.2]],
+    who: "Uday", el: document.getElementById("uday"),
+    pos: [[0, OFF_R, HIDE, 1.2], [39.9, OFF_R, HIDE, 1.2], [40, OFF_R, 590, 1.2], [41.2, 1620, 590, 1.2], [46.4, 1620, 590, 1.2], [47.3, OFF_R, 590, 1.2],
+          [47.4, OFF_L, HIDE, 0.95], [60.1, OFF_L, HIDE, 0.95], [60.2, OFF_L, 590, 0.95], [61.6, 1300, 590, 0.95]],
+    wave: [[62.0, 66.5]],
   },
   {
-    who: "Abdullah Rizwan", el: document.getElementById("abdullah"), waveRest: 6, waveUp: -160,
-    pos: [[54.2, 1560, HIDE, 1.2], [55, 1560, 590, 1.2], [60, 1560, 590, 1.2], [60.5, 1560, HIDE, 1.2],
-          [60.9, 1600, HIDE, 0.95], [61.7, 1600, 590, 0.95]],
-    wave: [[55.0, 56.2], [61.8, 64.2]],
+    who: "Abdullah Rizwan", el: document.getElementById("abdullah"),
+    pos: [[0, OFF_R, HIDE, 1.2], [53.9, OFF_R, HIDE, 1.2], [54.0, OFF_R, 590, 1.2], [55.2, 1560, 590, 1.2], [60.0, 1560, 590, 1.2], [61.8, 1565, 590, 0.95]],
+    wave: [[55.4, 56.8], [62.2, 66.5]],
   },
 ];
 for (const a of ACTORS) {
@@ -425,7 +433,8 @@ for (const a of ACTORS) {
   a.glow = a.el.querySelector(".glow");
   a.fig = a.el.querySelector(".fig");
   if (a.fig) {
-    a.poses = { stand: a.el.querySelector(".stand"), wave: a.el.querySelector(".wave"), talk: a.el.querySelector(".talk") };
+    a.poses = { stand: a.el.querySelector(".pose.stand"), wave: a.el.querySelector(".pose.wave"), talk: a.el.querySelector(".pose.talk") };
+    a.heads = [...a.el.querySelectorAll(".head")];
     a.closed = a.el.querySelector(".closed");
   }
   a.last = "";
@@ -450,11 +459,14 @@ function renderActor(a, t, i) {
   a.el.style.visibility = y > 1200 ? "hidden" : "visible";
 
   if (a.fig) {
-    // Image characters: gentle breathing and sway, a small nod with the voice.
-    a.el.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
-    const sway = Math.sin(t * 0.9 + i) * 0.8;
-    const breathe = 1 + Math.sin(t * 2.1 + i) * 0.006;
-    a.fig.style.transform = `translateY(${v * 2}px) rotate(${sway}deg) scale(1, ${breathe})`;
+    const off = x > 1950 || x < -330;
+    a.el.style.visibility = y > 1200 || off ? "hidden" : "visible";
+    // Walking: how fast the character is moving sideways right now.
+    const speed = Math.abs(kf(a.kx, t + 0.03) - kf(a.kx, t - 0.03)) / 0.06;
+    const walk = Math.min(1, speed / 500);
+    const step = Math.sin(t * 11);
+    const hop = -Math.abs(step) * 26 * walk;
+    a.el.style.transform = `translate(${x}px, ${y + hop}px) scale(${s})`;
 
     // Which pose: waving, talking (while speaking) or standing, with soft crossfades.
     const talkW = Math.max(0, ...a.lines.map((l) => ramp(t, l.start - 0.3, l.start - 0.05) * (1 - ramp(t, l.end + 0.15, l.end + 0.45))));
@@ -463,8 +475,18 @@ function renderActor(a, t, i) {
     a.poses.wave.style.opacity = wave;
     a.poses.talk.style.opacity = talk;
     a.poses.stand.style.opacity = 1;
-    // Closed mouth over the talking face; it fades away as the voice gets louder.
-    a.closed.style.opacity = talk * (1 - Math.min(1, v * 1.25));
+    a.closed.style.opacity = 1 - Math.min(1, v * 1.25);
+
+    // Body: breathing, weight shift, sway; a rock while waving, a lean and bounce while talking.
+    const breathe = 1 + Math.sin(t * 2.2 + i) * 0.012;
+    const shift = Math.sin(t * 0.8 + i) * 5;
+    const sway = Math.sin(t * 1.1 + i) * 1.6 + step * 4 * walk + wave * Math.sin(t * 8) * 2.6 + talk * 1.4;
+    a.fig.style.transform = `translate(${shift}px, ${v * 4}px) rotate(${sway}deg) scale(${2 - breathe}, ${breathe})`;
+
+    // Head: idle tilt, nods with the voice, bobs while waving.
+    const tilt = Math.sin(t * 1.5 + i * 2) * 3 + (speaking ? Math.sin(t * 7.5) * 4 * v : 0) - wave * Math.sin(t * 8) * 3;
+    const nod = (speaking ? v * 3 : 0) + walk * Math.abs(step) * 2;
+    for (const h of a.heads) h.style.transform = `translateY(${nod}px) rotate(${tilt}deg)`;
   } else {
     // Veri, the drawn robot
     const breathe = Math.sin(t * 2.1 + i) * 5;
@@ -524,7 +546,36 @@ function render(t) {
   ACTORS.forEach((a, i) => renderActor(a, t, i));
 }
 
-window.render = render;
+// ── Camera: every scene slowly pushes in and drifts, like a real camera move ──
+const SCENES = [0, 6.4, 14, 22, 32, 40, 47, 54, 60, 66];
+const cam = document.createElement("div");
+cam.id = "cam";
+cam.style.cssText = "position:absolute;inset:0;transform-origin:50% 50%;will-change:transform";
+const stage = document.getElementById("stage");
+const KEEP_OUT = new Set(["g1", "g2", "dots", "sweep", "fade"]);
+for (const el of [...stage.children]) {
+  if (!KEEP_OUT.has(el.id) && !el.classList.contains("grid")) cam.appendChild(el);
+}
+stage.insertBefore(cam, document.getElementById("sweep"));
+const sweep = document.getElementById("sweep");
+
+const baseRender = render;
+window.render = (t) => {
+  baseRender(t);
+  const k = Math.max(0, SCENES.findIndex((s, j) => t >= s && t < (SCENES[j + 1] ?? 99)));
+  const p = ease.inOut(Math.min(1, (t - SCENES[k]) / (SCENES[k + 1] - SCENES[k])));
+  const dir = k % 2 ? -1 : 1;
+  cam.style.transform = `translate(${dir * 14 * p}px, ${-6 * p}px) scale(${1 + 0.03 * p})`;
+  // Light sweep across the screen at each scene change.
+  const change = SCENES.slice(1, -1).find((s) => t > s - 0.45 && t < s + 0.45);
+  if (change !== undefined) {
+    const q = (t - (change - 0.45)) / 0.9;
+    sweep.style.opacity = Math.sin(Math.PI * q);
+    sweep.style.transform = `translateX(${-600 + q * 3100}px) skewX(-18deg)`;
+  } else {
+    sweep.style.opacity = 0;
+  }
+};
 window.DURATION = DURATION;
 
 // Live preview when opened directly in a browser (the recorder sets ?record=1).
