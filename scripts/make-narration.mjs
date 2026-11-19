@@ -1,12 +1,13 @@
 /**
  * Builds the intro video's soundtrack: every line in video/narration.json is
- * spoken with a free macOS voice (`say`), placed at its start time, and mixed
+ * spoken with a free Microsoft neural voice (edge-tts) or a macOS voice (`say`),
+ * placed at its start time, and mixed
  * with music and sound effects composed by scripts/make-music.mjs (the music dips
  * while someone is talking).
  *
  *   npm run video:audio   → video/narration.m4a (npm run video then adds it to the MP4)
  *
- * macOS only (uses `say`). Needs ffmpeg.
+ * Needs ffmpeg, plus edge-tts for neural voices (see EDGE_TTS below).
  */
 import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -16,6 +17,8 @@ import { fileURLToPath } from "node:url";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const { rate, lines } = JSON.parse(readFileSync(resolve(root, "video/narration.json"), "utf8"));
 const DURATION = 66;
+// Neural voices come from the free edge-tts tool: python3 -m venv .venv-tts && .venv-tts/bin/pip install edge-tts
+const EDGE_TTS = resolve(root, ".venv-tts/bin/edge-tts");
 const work = resolve(root, "video/voice");
 rmSync(work, { recursive: true, force: true });
 mkdirSync(work, { recursive: true });
@@ -26,14 +29,30 @@ const RATE = 16000;
 const timeline = [];
 const clips = lines.map((line, i) => {
   const file = resolve(work, `line-${String(i).padStart(2, "0")}.aiff`);
-  // `say` sometimes returns a cut-off or stretched take, so record until two takes match.
-  const probe = (f) => Number(execFileSync("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", f]).toString());
-  let previous = -1;
-  for (let take = 0; take < 6; take++) {
-    execFileSync("say", ["-v", line.voice, "-r", String(rate), "-o", file, line.text]);
-    const length = probe(file);
-    if (Math.abs(length - previous) < 0.03) break;
-    previous = length;
+  if (line.voice.endsWith("Neural")) {
+    // Microsoft neural voice via edge-tts (free, natural). Retry if the network drops.
+    const mp3 = file.replace(/\.aiff$/, ".mp3");
+    for (let attempt = 1; ; attempt++) {
+      try {
+        execFileSync(EDGE_TTS, ["--voice", line.voice, `--rate=${rate}`, "--text", line.text, "--write-media", mp3], { stdio: "ignore" });
+        break;
+      } catch (error) {
+        if (attempt >= 6) throw error;
+      }
+    }
+    // Trim the silence edge-tts adds before and after each line.
+    const trim = "silenceremove=start_periods=1:start_threshold=-45dB,areverse,silenceremove=start_periods=1:start_threshold=-45dB,areverse";
+    execFileSync("ffmpeg", ["-v", "error", "-y", "-i", mp3, "-af", trim, file]);
+  } else {
+    // Built-in macOS voice. `say` sometimes returns a cut-off take, so record until two takes match.
+    const probe = (f) => Number(execFileSync("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", f]).toString());
+    let previous = -1;
+    for (let take = 0; take < 6; take++) {
+      execFileSync("say", ["-v", line.voice, "-r", String(rate), "-o", file, line.text]);
+      const length = probe(file);
+      if (Math.abs(length - previous) < 0.03) break;
+      previous = length;
+    }
   }
   const pcm = execFileSync("ffmpeg", ["-v", "error", "-i", file, "-ac", "1", "-ar", String(RATE), "-f", "f32le", "-"], { maxBuffer: 1 << 28 });
   const samples = new Float32Array(pcm.buffer, pcm.byteOffset, pcm.byteLength / 4);

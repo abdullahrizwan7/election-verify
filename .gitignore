@@ -62,3 +62,4 @@ next-env.d.ts
 /video/stills/
 /video/voice/
 /video/characters/raw/
+/.venv-tts/
