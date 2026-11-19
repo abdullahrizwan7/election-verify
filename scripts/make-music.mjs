@@ -13,7 +13,7 @@ import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const RATE = 44100;
-const DURATION = 66;
+const DURATION = 94;
 const N = RATE * DURATION;
 const BEAT = 60 / 100; // 100 BPM
 const BAR = BEAT * 4;
@@ -36,10 +36,10 @@ const chordAt = (t) => CHORDS[Math.floor(t / BAR) % 4];
 // Arrangement: when each part plays (seconds).
 const has = {
   bass: (t) => t > 6.4,
-  kick: (t) => (t > 6.4 && t < 59.6) || (t > 60.8 && t < 64),
-  hat: (t) => t > 14 && t < 64,
-  clap: (t) => t > 22 && t < 59.6,
-  arp: (t) => t > 1.2 && t < 64.5,
+  kick: (t) => (t > 6.4 && t < 87.6) || (t > 88.8 && t < 92),
+  hat: (t) => t > 14 && t < 92,
+  clap: (t) => t > 22 && t < 87.6,
+  arp: (t) => t > 1.2 && t < 92.5,
 };
 
 const L = new Float32Array(N), R = new Float32Array(N);
@@ -122,7 +122,7 @@ const whoosh = (t) => {
   lp += (noise() - lp) * (0.04 + 0.25 * Math.sin(Math.PI * Math.min(1, t / 0.7)));
   return lp * Math.sin(Math.PI * Math.min(1, t / 0.7)) * 0.5;
 };
-for (const at of [6.15, 13.8, 21.8, 31.8, 39.8, 46.8, 53.8, 59.9]) add(at, 0.7, whoosh, 0.2);
+for (const at of [6.15, 13.8, 21.8, 31.8, 39.8, 46.8, 53.8, 59.8, 69.8, 78.8, 87.9]) add(at, 0.7, whoosh, 0.2);
 // Pop when a character's speech bubble appears.
 const narration = JSON.parse(readFileSync(resolve(root, "video/narration.json"), "utf8")).lines;
 for (const line of narration.filter((l) => l.who !== "Narrator")) {
@@ -133,7 +133,7 @@ for (let k = 0; k < 6; k++) add(23.2 + k * 1.15, 0.08, (t) => Math.sin(TAU * 176
 // Stamp thump for "FALSE".
 add(43.6, 0.5, (t) => (Math.sin(TAU * (60 + 80 * Math.exp(-t * 25)) * t) * 0.6 + noise() * 0.25 * Math.exp(-t * 30)) * Math.exp(-t * 7) * 0.7);
 // End chime: a bright A major arpeggio.
-[81, 85, 88, 93].forEach((m, k) => add(61.0 + k * 0.09, 2.2, (t) => (Math.sin(TAU * freq(m) * t) + 0.3 * Math.sin(TAU * freq(m) * 2 * t)) * Math.exp(-t * 2.2) * 0.07, (k - 1.5) * 0.15));
+[81, 85, 88, 93].forEach((m, k) => add(89.0 + k * 0.09, 2.2, (t) => (Math.sin(TAU * freq(m) * t) + 0.3 * Math.sin(TAU * freq(m) * 2 * t)) * Math.exp(-t * 2.2) * 0.07, (k - 1.5) * 0.15));
 
 // ── Write 16-bit stereo WAV files ──
 function wav(path, left, right, gain) {

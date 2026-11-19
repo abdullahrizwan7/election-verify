@@ -147,6 +147,33 @@
   <div class="abs lead" id="s8-sub" style="left:0;width:1920px;top:250px;text-align:center">Admins choose the reviewers and the sources. Every action is logged.</div>
   <div class="abs" id="s8-grid" style="left:110px;top:380px;width:1340px;display:flex;flex-wrap:wrap;gap:24px;justify-content:flex-start"></div>
 
+  <!-- 10. Photos and screenshots -->
+  <div class="abs chip" id="s10-chip" style="left:140px;top:150px">Images too</div>
+  <h2 class="abs" id="s10-title" style="left:140px;top:230px;width:620px">Photos and<br/><span class="grad">screenshots too.</span></h2>
+  <div class="abs pill" id="s10-p1" style="left:140px;top:450px">🔤 Text in the image</div>
+  <div class="abs pill" id="s10-p2" style="left:140px;top:540px">📷 Photo details (EXIF)</div>
+  <div class="abs pill" id="s10-p3" style="left:140px;top:630px">🕘 Older copies online</div>
+  <div class="abs frame" id="s10-frame" style="left:760px;top:170px;width:820px">
+    <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><div class="url">Image forensics</div></div>
+    <div class="shot" style="height:470px"><img id="s10-img" src="../docs/screenshots/forensics.png" /></div>
+  </div>
+
+  <!-- 11. Analytics -->
+  <div class="abs chip" id="s11-chip" style="left:140px;top:150px">For reviewers</div>
+  <h2 class="abs" id="s11-title" style="left:140px;top:230px;width:620px">Spot what's<br/><span class="grad">spreading.</span></h2>
+  <div class="abs pill" id="s11-p1" style="left:140px;top:450px">🔁 Duplicates merged</div>
+  <div class="abs pill" id="s11-p2" style="left:140px;top:540px">🔥 Most-shared first</div>
+  <div class="abs pill" id="s11-p3" style="left:140px;top:630px">⏱️ 10 per hour per person</div>
+  <div class="abs frame" id="s11-frame" style="left:760px;top:170px;width:820px">
+    <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><div class="url">Review analytics</div></div>
+    <div class="shot" style="height:470px"><img id="s11-img" src="../docs/screenshots/analytics.png" /></div>
+  </div>
+
+  <!-- 12. Built with -->
+  <h2 class="abs" id="s12-title" style="left:0;width:1920px;top:150px;text-align:center">Built with <span class="grad">free, modern tools</span></h2>
+  <div class="abs lead" id="s12-sub" style="left:0;width:1920px;top:250px;text-align:center">Made in one week. Every service runs on a free plan.</div>
+  <div class="abs" id="s12-grid" style="left:110px;top:380px;width:1340px;display:flex;flex-wrap:wrap;gap:24px;justify-content:flex-start"></div>
+
   <!-- 9. Outro -->
   <div class="abs" id="s9-logo" style="left:200px;top:300px;width:120px;height:120px;border-radius:32px;background:linear-gradient(135deg,#2f7cf6,#8b5cf6);display:grid;place-items:center;box-shadow:0 30px 80px -20px rgba(47,124,246,.8)">
     <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
@@ -193,7 +220,7 @@
 
 <script src="narration.js"></script>
 <script>
-const DURATION = 66;
+const DURATION = 94;
 const ease = {
   out: (x) => 1 - Math.pow(1 - x, 3),
   inOut: (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2),
@@ -341,11 +368,43 @@ SOURCES.forEach(([name, kind], i) => {
 rise("s8-title", 54.2, 59.4);
 rise("s8-sub", 54.6, 59.4);
 
-// ── 9. Outro (60 – 66) ──
-pop("s9-logo", 60.2, 99);
-rise("s9-title", 60.5, 99, 60);
-A("s9-url", { o: [[61.3, 0], [61.8, 1]], y: [[61.3, 40], [62, 0]], s: [[61.3, 0.9], [62, 1, "back"]] });
-A("fade", { o: [[0, 1], [0.6, 0], [65.2, 0], [66, 1, "inOut"]] });
+// ── 10. Photos and screenshots (60 – 70) ──
+rise("s10-chip", 60.2, 69.5, 30);
+rise("s10-title", 60.4, 69.5);
+pop("s10-p1", 61.4, 69.5); pop("s10-p2", 62.4, 69.5); pop("s10-p3", 63.4, 69.5);
+frameIn("s10-frame", 60.6, 69.5);
+zoom("s10-img", 61, 69.5, 1.12, -30);
+
+// ── 11. Analytics (70 – 79) ──
+rise("s11-chip", 70.2, 78.5, 30);
+rise("s11-title", 70.4, 78.5);
+pop("s11-p1", 71.4, 78.5); pop("s11-p2", 72.2, 78.5); pop("s11-p3", 73.0, 78.5);
+frameIn("s11-frame", 70.6, 78.5);
+zoom("s11-img", 71, 78.5, 1.1, -40);
+
+// ── 12. Built with (79 – 88) ──
+const TOOLS = [
+  ["Next.js 16", "Website and server"], ["Supabase", "Database and login"], ["Gemini AI", "Claims and summaries"],
+  ["Google Fact Check", "Existing fact-checks"], ["Tavily", "Trusted web search"], ["Vercel", "Free hosting"],
+  ["English · हिन्दी · اردو", "Three languages"], ["Roles and audit log", "Safe by design"],
+];
+const toolGrid = document.getElementById("s12-grid");
+TOOLS.forEach(([name, kind], i) => {
+  const t = document.createElement("div");
+  t.className = "tile";
+  t.innerHTML = `<b>${name}</b><span>${kind}</span>`;
+  toolGrid.appendChild(t);
+  const s0 = 79.9 + i * 0.18;
+  A(t, { o: [[s0, 0], [s0 + 0.35, 1], [87.4, 1], [87.8, 0]], y: [[s0, 50], [s0 + 0.6, 0]], s: [[s0, 0.9], [s0 + 0.6, 1, "back"]] });
+});
+rise("s12-title", 79.2, 87.4);
+rise("s12-sub", 79.6, 87.4);
+
+// ── 9. Outro (88 – 94) ──
+pop("s9-logo", 88.2, 199);
+rise("s9-title", 88.5, 199, 60);
+A("s9-url", { o: [[89.3, 0], [89.8, 1]], y: [[89.3, 40], [90, 0]], s: [[89.3, 0.9], [90, 1, "back"]] });
+A("fade", { o: [[0, 1], [0.6, 0], [93.2, 0], [94, 1, "inOut"]] });
 
 // ── Characters: Veri (the app's guide) and the team ──
 /**
@@ -400,26 +459,29 @@ const ACTORS = [
     who: "Veri", el: document.getElementById("veri"), robot: true, waveRest: -10, waveUp: -60, up: [1.8],
     pos: [[0, 1560, HIDE, 1.1], [1.4, 1560, 620, 1.1], [5.8, 1560, 620, 1.1], [6.5, 1560, HIDE, 1.1],
           [22.2, 1640, HIDE, 0.62], [23, 1640, 730, 0.62], [39.2, 1640, 730, 0.62], [39.9, 1640, HIDE, 0.62],
-          [60.2, 1500, HIDE, 0.75], [61, 1500, 120, 0.75]],
-    wave: [[1.4, 4.2], [61.2, 64.2]],
+          [88.2, 1500, HIDE, 0.75], [89, 1500, 120, 0.75]],
+    wave: [[1.4, 4.2], [89.2, 92.2]],
   },
   {
     who: "Sandeep", el: document.getElementById("sandeep"),
     pos: [[6.4, OFF_R, 590, 1.2], [7.6, 1660, 590, 1.2], [13.4, 1660, 590, 1.2], [14.3, 1610, 600, 1.05], [21.6, 1610, 600, 1.05], [22.6, OFF_R, 600, 1.05],
           [22.7, OFF_R, HIDE, 1.12], [47.1, OFF_L, HIDE, 1.12], [47.2, OFF_L, 590, 1.12], [48.4, 690, 590, 1.12], [53.3, 690, 590, 1.12], [54.3, OFF_L, 590, 1.12],
-          [54.4, OFF_L, HIDE, 0.95], [60.5, OFF_L, HIDE, 0.95], [60.6, OFF_L, 590, 0.95], [62.0, 1040, 590, 0.95]],
-    wave: [[62.2, 66.5]],
+          [54.4, OFF_L, HIDE, 1.05], [59.9, OFF_R, HIDE, 1.05], [60.0, OFF_R, 600, 1.05], [61.2, 1630, 600, 1.05], [69.4, 1630, 600, 1.05], [70.2, OFF_R, 600, 1.05],
+          [70.25, OFF_R, HIDE, 0.95], [88.4, OFF_L, HIDE, 0.95], [88.5, OFF_L, 590, 0.95], [90.0, 1040, 590, 0.95]],
+    wave: [[90.2, 94.5]],
   },
   {
     who: "Uday", el: document.getElementById("uday"),
     pos: [[0, OFF_R, HIDE, 1.2], [39.9, OFF_R, HIDE, 1.2], [40, OFF_R, 590, 1.2], [41.2, 1620, 590, 1.2], [46.4, 1620, 590, 1.2], [47.3, OFF_R, 590, 1.2],
-          [47.4, OFF_L, HIDE, 0.95], [60.1, OFF_L, HIDE, 0.95], [60.2, OFF_L, 590, 0.95], [61.6, 1300, 590, 0.95]],
-    wave: [[62.0, 66.5]],
+          [47.35, OFF_R, HIDE, 1.05], [70.3, OFF_R, HIDE, 1.05], [70.35, OFF_R, 600, 1.05], [71.5, 1630, 600, 1.05], [78.3, 1630, 600, 1.05], [79.2, OFF_R, 600, 1.05],
+          [79.25, OFF_R, HIDE, 0.95], [88.1, OFF_L, HIDE, 0.95], [88.2, OFF_L, 590, 0.95], [89.6, 1300, 590, 0.95]],
+    wave: [[90.0, 94.5]],
   },
   {
     who: "Abdullah Rizwan", el: document.getElementById("abdullah"),
-    pos: [[0, OFF_R, HIDE, 1.2], [53.9, OFF_R, HIDE, 1.2], [54.0, OFF_R, 590, 1.2], [55.2, 1560, 590, 1.2], [60.0, 1560, 590, 1.2], [61.8, 1565, 590, 0.95]],
-    wave: [[55.4, 56.8], [62.2, 66.5]],
+    pos: [[0, OFF_R, HIDE, 1.2], [53.9, OFF_R, HIDE, 1.2], [54.0, OFF_R, 590, 1.2], [55.2, 1560, 590, 1.2], [59.4, 1560, 590, 1.2], [60.3, OFF_R, 590, 1.2],
+          [60.35, OFF_R, HIDE, 1.2], [78.9, OFF_R, HIDE, 1.2], [79.0, OFF_R, 590, 1.2], [80.2, 1560, 590, 1.2], [88.0, 1560, 590, 1.2], [89.8, 1565, 590, 0.95]],
+    wave: [[55.4, 56.8], [90.2, 94.5]],
   },
 ];
 for (const a of ACTORS) {
@@ -441,7 +503,7 @@ for (const a of ACTORS) {
   }
   a.last = "";
 }
-rise("s9-credit", 62.2, 99, 30);
+rise("s9-credit", 90.2, 199, 30);
 
 /** How open the mouth is (0–1) at time t, from the measured loudness of the voice. */
 function mouthOpen(line, t) {
@@ -555,7 +617,7 @@ function render(t) {
 }
 
 // ── Camera: every scene slowly pushes in and drifts, like a real camera move ──
-const SCENES = [0, 6.4, 14, 22, 32, 40, 47, 54, 60, 66];
+const SCENES = [0, 6.4, 14, 22, 32, 40, 47, 54, 60, 70, 79, 88, 94];
 const cam = document.createElement("div");
 cam.id = "cam";
 cam.style.cssText = "position:absolute;inset:0;transform-origin:50% 50%;will-change:transform";

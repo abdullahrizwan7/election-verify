@@ -87,7 +87,43 @@
       "text": "I manage reviewers and trusted sources."
     },
     {
-      "start": 61.1,
+      "start": 60.4,
+      "voice": "en-IN-NeerjaExpressiveNeural",
+      "who": "Narrator",
+      "text": "Got a screenshot? We read the text inside it, check the photo's details, and search for older copies."
+    },
+    {
+      "start": 66.9,
+      "voice": "ta-IN-ValluvarNeural",
+      "who": "Sandeep",
+      "text": "So even an old photo can't fool us now!"
+    },
+    {
+      "start": 70.5,
+      "voice": "en-IN-NeerjaExpressiveNeural",
+      "who": "Narrator",
+      "text": "The dashboard shows which claims are spreading fastest, and merges duplicates."
+    },
+    {
+      "start": 75.9,
+      "voice": "hi-IN-MadhurNeural",
+      "who": "Uday",
+      "text": "So we always check the most-shared claims first."
+    },
+    {
+      "start": 79.5,
+      "voice": "en-IN-NeerjaExpressiveNeural",
+      "who": "Narrator",
+      "text": "Built in one week with free tools: Next.js, Supabase, Gemini and Vercel."
+    },
+    {
+      "start": 84.9,
+      "voice": "en-IN-PrabhatNeural",
+      "who": "Abdullah Rizwan",
+      "text": "Every key stays private, and every action is logged."
+    },
+    {
+      "start": 89.1,
       "voice": "en-IN-NeerjaExpressiveNeural",
       "who": "Veri",
       "text": "ElectionVerify. Check before you forward. Try it now!"

@@ -16,7 +16,7 @@ import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const { rate, lines } = JSON.parse(readFileSync(resolve(root, "video/narration.json"), "utf8"));
-const DURATION = 66;
+const DURATION = 94;
 // Neural voices come from the free edge-tts tool: python3 -m venv .venv-tts && .venv-tts/bin/pip install edge-tts
 const EDGE_TTS = resolve(root, ".venv-tts/bin/edge-tts");
 const work = resolve(root, "video/voice");
