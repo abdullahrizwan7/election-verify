@@ -60,3 +60,4 @@ next-env.d.ts
 
 # Still frames for checking the intro video
 /video/stills/
+/video/voice/

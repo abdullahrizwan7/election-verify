@@ -34,7 +34,7 @@
   .step { display: flex; align-items: center; gap: 22px; font-size: 30px; font-weight: 500; }
   .tick { width: 46px; height: 46px; border-radius: 50%; border: 2px solid #33405f; display: grid; place-items: center; flex: none; }
   .tick svg { width: 26px; height: 26px; }
-  .bubble { position: absolute; right: 88%; bottom: 82%; white-space: nowrap; background: #fff; color: #0b1324; font-size: 34px; font-weight: 600; padding: 20px 30px; border-radius: 28px; border-bottom-right-radius: 8px; box-shadow: 0 20px 60px -15px rgba(0,0,0,.6); transform-origin: 100% 100%; }
+  .bubble { position: absolute; right: 88%; bottom: 82%; width: max-content; max-width: 920px; line-height: 1.3; background: #fff; color: #0b1324; font-size: 34px; font-weight: 600; padding: 20px 30px; border-radius: 28px; border-bottom-right-radius: 8px; box-shadow: 0 20px 60px -15px rgba(0,0,0,.6); transform-origin: 100% 100%; }
   .bubble.up { right: 4%; bottom: 102%; transform-origin: 90% 100%; }
   .stamp { font-size: 120px; font-weight: 900; letter-spacing: 8px; color: #ff4d5e; border: 10px solid #ff4d5e; border-radius: 24px; padding: 6px 40px; background: rgba(255,77,94,.08); }
   .tile { width: 400px; height: 120px; border-radius: 22px; background: #0f172b; border: 1px solid var(--line); display: flex; flex-direction: column; justify-content: center; padding: 0 30px; }
@@ -181,6 +181,7 @@
   <div class="abs" id="fade" style="inset:0;background:#000;pointer-events:none"></div>
 </div>
 
+<script src="narration.js"></script>
 <script>
 const DURATION = 66;
 const ease = {
@@ -307,7 +308,7 @@ A("s6-stamp", { o: [[43.6, 0], [43.7, 1], [46.5, 1], [46.9, 0]], s: [[43.6, 2.6]
 rise("s7-chip", 47.2, 53.5, 30);
 rise("s7-title", 47.4, 53.5);
 rise("s7-sub", 48, 53.5);
-pop("s7-p1", 48.8, 53.5); pop("s7-p2", 49.1, 53.5); pop("s7-p3", 49.4, 53.5);
+pop("s7-p1", 48.8, 50.2); pop("s7-p2", 49.1, 50.2); pop("s7-p3", 49.4, 50.2);
 frameIn("s7-frame", 47.6, 53.5);
 zoom("s7-img", 48, 53.5, 1.12, -40);
 A("s7-phone", { o: [[49, 0], [49.5, 1], [53.5, 1], [53.9, 0]], y: [[49, 260], [50, 0], [53.5, -14, "lin"]], r: [[49, 8], [50, 4]] });
@@ -337,35 +338,80 @@ A("s9-url", { o: [[61.3, 0], [61.8, 1]], y: [[61.3, 40], [62, 0]], s: [[61.3, 0.
 A("fade", { o: [[0, 1], [0.6, 0], [65.2, 0], [66, 1, "inOut"]] });
 
 // ── Characters: Veri (the app's guide) and the team ──
-/** A simple cartoon person drawn in SVG. Illustrated, not a real likeness. */
-function personSVG({ skin, hair, shirt, beard, glasses, wavy, broad }) {
-  // Broad = wider shoulders and thicker arms (a more muscular build).
-  const torsoX = broad ? 42 : 56, torsoW = broad ? 156 : 128, armW = broad ? 42 : 34;
-  const armLX = broad ? 16 : 30, armRX = broad ? 182 : 176;
-  const top = wavy
-    ? `M56 116 C50 64 86 44 120 46 C158 44 192 66 184 116 C176 98 168 92 160 96 C150 84 134 86 124 92 C112 82 96 84 88 94 C78 88 64 96 56 116Z`
-    : `M58 112 C58 60 92 46 120 46 C152 46 184 60 182 112 C170 90 150 82 120 82 C92 82 70 92 58 112Z`;
-  return `<svg width="240" height="400" viewBox="0 0 240 400">
-    <ellipse cx="120" cy="392" rx="84" ry="9" fill="#000" opacity=".35"/>
-    <g class="arm-l" style="transform-origin:${armLX + armW / 2}px 222px"><rect x="${armLX}" y="206" width="${armW}" height="124" rx="${armW / 2}" fill="${shirt}"/><circle cx="${armLX + armW / 2}" cy="330" r="${broad ? 19 : 16}" fill="${skin}"/></g>
-    <g class="arm-r" style="transform-origin:${armRX + armW / 2}px 222px"><rect x="${armRX}" y="206" width="${armW}" height="124" rx="${armW / 2}" fill="${shirt}"/><circle cx="${armRX + armW / 2}" cy="330" r="${broad ? 19 : 16}" fill="${skin}"/></g>
-    <rect x="${torsoX}" y="192" width="${torsoW}" height="200" rx="${broad ? 52 : 44}" fill="${shirt}"/>
-    <path d="M100 196 L120 226 L140 196" fill="none" stroke="#ffffff" stroke-opacity=".5" stroke-width="5" stroke-linejoin="round"/>
-    <rect x="104" y="166" width="32" height="40" rx="12" fill="${skin}"/>
-    <circle cx="58" cy="124" r="12" fill="${skin}"/><circle cx="182" cy="124" r="12" fill="${skin}"/>
-    <circle cx="120" cy="120" r="62" fill="${skin}"/>
-    <path d="${top}" fill="${hair}"/>
-    ${beard ? `<path d="M64 128 C68 176 98 190 120 190 C142 190 172 176 176 128 C166 158 148 166 120 166 C92 166 74 158 64 128Z" fill="${hair}"/>` : ""}
-    <path d="M90 106 Q98 100 106 106 M134 106 Q142 100 150 106" fill="none" stroke="${hair}" stroke-width="5" stroke-linecap="round"/>
-    <g class="eyes" style="transform-origin:120px 122px"><ellipse cx="98" cy="122" rx="7" ry="9" fill="#1b1b24"/><ellipse cx="142" cy="122" rx="7" ry="9" fill="#1b1b24"/><circle cx="100" cy="119" r="2.4" fill="#fff"/><circle cx="144" cy="119" r="2.4" fill="#fff"/></g>
-    ${glasses ? `<g fill="none" stroke="#2b2f3a" stroke-width="4"><circle cx="98" cy="122" r="18"/><circle cx="142" cy="122" r="18"/><path d="M116 120 Q120 116 124 120"/></g>` : ""}
-    <path class="mouth" d="M104 150 Q120 162 136 150" fill="${beard ? "#7a3b3b" : "none"}" stroke="#7a3b3b" stroke-width="4" stroke-linecap="round"/>
+/** Lighten (f > 0) or darken (f < 0) a hex colour, for shading. */
+function shade(hex, f) {
+  const n = parseInt(hex.slice(1), 16);
+  const m = (c) => Math.round(f >= 0 ? c + (255 - c) * f : c * (1 + f));
+  return `rgb(${m(n >> 16)},${m((n >> 8) & 255)},${m(n & 255)})`;
+}
+
+/**
+ * A semi-3D animated person drawn in SVG: shaded skin, layered hair, eyes with
+ * irises and highlights, glasses with reflections, a shirt with folds.
+ * Illustrated from the team's descriptions, not a real likeness.
+ */
+function personSVG(id, { skin, hair, shirt, glasses, wavy, broad }) {
+  const sh = broad ? 1.18 : 1;
+  const L = 120 - 70 * sh, R = 120 + 70 * sh, armW = broad ? 42 : 32;
+  const dark = shade(skin, -0.45);
+  const front = wavy
+    ? "M58 124 C46 70 84 38 122 40 C166 40 194 72 182 124 C178 104 170 94 160 96 C154 82 138 80 128 90 C118 78 100 80 92 92 C80 86 68 96 64 110 C61 114 59 119 58 124Z"
+    : "M60 120 C54 72 86 44 122 46 C160 46 186 70 180 120 C174 100 164 88 150 84 C136 92 104 94 86 86 C74 94 64 104 60 120Z";
+  const eye = (cx) => `
+      <ellipse cx="${cx}" cy="115" rx="11" ry="8" fill="#fbfbff"/>
+      <g class="iris"><circle cx="${cx}" cy="115.5" r="6.4" fill="url(#${id}-iris)"/><circle cx="${cx}" cy="115.5" r="3" fill="#0b0705"/><circle cx="${cx + 2}" cy="112.6" r="1.9" fill="#fff"/></g>
+      <path d="M${cx - 12} 113 Q${cx} 103 ${cx + 12} 113" fill="none" stroke="${dark}" stroke-width="2.6" stroke-linecap="round"/>`;
+  const arm = (x, cls) => `
+    <g class="${cls}" style="transform-origin:${x + armW / 2}px 234px">
+      <rect x="${x}" y="222" width="${armW}" height="84" rx="${armW / 2}" fill="url(#${id}-shirt)"/>
+      <rect x="${x + 3}" y="282" width="${armW - 6}" height="50" rx="${(armW - 6) / 2}" fill="url(#${id}-skin)"/>
+      <circle cx="${x + armW / 2}" cy="334" r="${armW / 2 + 1}" fill="url(#${id}-skin)"/>
+    </g>`;
+  return `<svg width="240" height="400" viewBox="0 0 240 400" overflow="visible">
+    <defs>
+      <radialGradient id="${id}-skin" cx="42%" cy="36%" r="72%"><stop offset="0" stop-color="${shade(skin, 0.22)}"/><stop offset=".55" stop-color="${skin}"/><stop offset="1" stop-color="${shade(skin, -0.3)}"/></radialGradient>
+      <linearGradient id="${id}-neck" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${shade(skin, -0.38)}"/><stop offset="1" stop-color="${shade(skin, -0.08)}"/></linearGradient>
+      <linearGradient id="${id}-shirt" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${shade(shirt, 0.2)}"/><stop offset=".6" stop-color="${shirt}"/><stop offset="1" stop-color="${shade(shirt, -0.38)}"/></linearGradient>
+      <linearGradient id="${id}-hair" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${shade(hair, 0.28)}"/><stop offset="1" stop-color="${hair}"/></linearGradient>
+      <radialGradient id="${id}-iris" cx="50%" cy="38%" r="62%"><stop offset="0" stop-color="#8a5530"/><stop offset="1" stop-color="#2a170c"/></radialGradient>
+    </defs>
+    <ellipse cx="120" cy="394" rx="${92 * sh}" ry="8" fill="#000" opacity=".35"/>
+    ${arm(L - armW + 10, "arm-l")}
+    ${arm(R - 10, "arm-r")}
+    <path d="M${L + 8} 394 L${L + 3} 266 C${L + 3} 230 84 214 120 214 C156 214 ${R - 3} 230 ${R - 3} 266 L${R - 8} 394 Z" fill="url(#${id}-shirt)"/>
+    ${broad ? `<path d="M86 270 Q103 282 117 270 M123 270 Q137 282 154 270" fill="none" stroke="${shade(shirt, -0.32)}" stroke-width="3" stroke-linecap="round" opacity=".7"/>` : ""}
+    <path d="M${L + 22} 330 Q${L + 30} 360 ${L + 26} 392 M${R - 22} 330 Q${R - 30} 360 ${R - 26} 392" fill="none" stroke="${shade(shirt, -0.25)}" stroke-width="2.5" opacity=".6"/>
+    <rect x="${broad ? 98 : 102}" y="156" width="${broad ? 44 : 36}" height="66" rx="15" fill="url(#${id}-neck)"/>
+    <path d="M100 215 L120 248 L140 215 Z" fill="url(#${id}-neck)"/>
+    <path d="M96 214 L120 250 L144 214" fill="none" stroke="${shade(shirt, -0.3)}" stroke-width="4" stroke-linejoin="round"/>
+    <g class="head" style="transform-origin:120px 178px">
+      <ellipse cx="63" cy="124" rx="10" ry="14" fill="url(#${id}-skin)"/><ellipse cx="177" cy="124" rx="10" ry="14" fill="url(#${id}-skin)"/>
+      <path d="M62 120 q4 -6 3 6 M178 120 q-4 -6 -3 6" fill="none" stroke="${dark}" stroke-width="2" opacity=".6"/>
+      <path d="M120 52 C157 52 179 80 179 118 C179 157 155 186 120 186 C85 186 61 157 61 118 C61 80 83 52 120 52 Z" fill="url(#${id}-skin)"/>
+      <ellipse cx="90" cy="148" rx="11" ry="6" fill="#e0705f" opacity=".16"/><ellipse cx="150" cy="148" rx="11" ry="6" fill="#e0705f" opacity=".16"/>
+      <path d="${front}" fill="url(#${id}-hair)"/>
+      <path d="M94 62 Q120 50 150 62" fill="none" stroke="${shade(hair, 0.45)}" stroke-width="4" stroke-linecap="round" opacity=".45"/>
+      <rect x="60" y="104" width="8" height="22" rx="4" fill="${hair}"/><rect x="172" y="104" width="8" height="22" rx="4" fill="${hair}"/>
+      <path d="M84 99 Q98 90 111 98 M129 98 Q142 90 156 99" fill="none" stroke="${hair}" stroke-width="5.5" stroke-linecap="round"/>
+      <g class="eyes" style="transform-origin:120px 115px">${eye(98)}${eye(142)}</g>
+      <path d="M120 120 C117 132 113 139 116 143 C119 146 124 146 127 143" fill="none" stroke="${dark}" stroke-width="2.8" stroke-linecap="round" opacity=".75"/>
+      <g class="mouth-g">
+        <ellipse class="mouth-in" cx="120" cy="161" rx="10" ry="0.5" fill="#4a1414"/>
+        <path class="mouth-line" d="M106 158 Q120 166 134 158" fill="none" stroke="${shade(skin, -0.55)}" stroke-width="3" stroke-linecap="round"/>
+      </g>
+      ${glasses ? `<g>
+        <rect x="80" y="102" width="37" height="27" rx="11" fill="rgba(210,235,255,.10)" stroke="#1d212b" stroke-width="3.5"/>
+        <rect x="123" y="102" width="37" height="27" rx="11" fill="rgba(210,235,255,.10)" stroke="#1d212b" stroke-width="3.5"/>
+        <path d="M117 113 Q120 110 123 113 M80 112 L66 117 M160 112 L174 117" fill="none" stroke="#1d212b" stroke-width="3"/>
+        <path d="M87 108 L96 105 M130 108 L139 105" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity=".55"/>
+      </g>` : ""}
+    </g>
   </svg>`;
 }
 
 const PEOPLE = {
-  // Looks as described by the team: Abdullah fair, no glasses; Sandeep brown;
-  // Uday light brown and muscular; Uday and Sandeep wear glasses.
+  // Looks as described by the team: Abdullah fair, no glasses; Sandeep (South
+  // Indian) brown with glasses; Uday light brown, muscular, with glasses.
   sandeep: { name: "Sandeep", role: "Citizen", look: { skin: "#9c6238", hair: "#120c08", shirt: "#f08a3c", wavy: true, glasses: true } },
   uday: { name: "Uday", role: "Reviewer", look: { skin: "#c08456", hair: "#16100c", shirt: "#7c5cf6", broad: true, glasses: true } },
   abdullah: { name: "Abdullah Rizwan", role: "Admin", look: { skin: "#f2cfa9", hair: "#1c140e", shirt: "#14a38b" } },
@@ -375,56 +421,59 @@ for (const [key, p] of Object.entries(PEOPLE)) {
   el.className = "abs";
   el.id = key;
   el.style.cssText = "left:0;top:0;width:240px;height:440px;transform-origin:50% 100%;";
-  el.innerHTML = `<div class="bubble"></div>${personSVG(p.look)}<div class="tag">${p.name}<span>${p.role}</span></div>`;
+  el.innerHTML = `<div class="bubble"></div>${personSVG(key, p.look)}<div class="tag">${p.name}<span>${p.role}</span></div>`;
   document.getElementById("people").appendChild(el);
 }
 
+/** Lines each character says, with their real timing and loudness (from video/narration.js). */
+const LINES = window.NARRATION || [];
+function linesFor(who) { return LINES.filter((l) => l.who === who); }
+
 /**
- * Each actor: where it stands over time [time, x, y, scale, opacity],
- * what it says [from, to, text], and when it waves [from, to].
+ * Each actor: where it stands over time [time, x, y, scale], who it is in the
+ * narration, and when it waves [from, to]. Bubbles and mouths follow the voice.
  */
 const HIDE = 1300; // below the screen
 const ACTORS = [
   {
-    el: document.getElementById("veri"), mouthOpen: "M114 164 Q130 186 146 164", mouthShut: "M114 166 Q130 178 146 166", waveRest: -10, waveUp: -60,
-    pos: [[0, 1560, HIDE, 1.1, 1], [1.6, 1560, 620, 1.1, 1], [5.8, 1560, 620, 1.1, 1], [6.5, 1560, HIDE, 1.1, 1],
-          [22.2, 1640, HIDE, 0.62, 1], [23, 1640, 730, 0.62, 1], [39.2, 1640, 730, 0.62, 1], [39.9, 1640, HIDE, 0.62, 1],
-          [60.2, 1500, HIDE, 0.75, 1], [61, 1500, 120, 0.75, 1]],
-    say: [[2.4, 5.6, "Hi! I'm Veri, your fact-check guide.", "up"], [27.4, 31.0, "I gather evidence from trusted sources."],
-          [35.6, 38.8, "The AI suggests. A human decides."], [61.6, 64.8, "Try it now!"]],
-    wave: [[1.8, 4.4], [61.2, 64.2]],
+    who: "Veri", el: document.getElementById("veri"), robot: true, waveRest: -10, waveUp: -60, up: [1.8],
+    pos: [[0, 1560, HIDE, 1.1], [1.4, 1560, 620, 1.1], [5.8, 1560, 620, 1.1], [6.5, 1560, HIDE, 1.1],
+          [22.2, 1640, HIDE, 0.62], [23, 1640, 730, 0.62], [39.2, 1640, 730, 0.62], [39.9, 1640, HIDE, 0.62],
+          [60.2, 1500, HIDE, 0.75], [61, 1500, 120, 0.75]],
+    wave: [[1.4, 4.2], [61.2, 64.2]],
   },
   {
-    el: document.getElementById("sandeep"), mouthOpen: "M104 148 Q120 172 136 148", mouthShut: "M104 150 Q120 162 136 150", waveRest: 6, waveUp: -160,
-    pos: [[6.6, 1560, HIDE, 0.72, 1], [7.4, 1560, 590, 0.72, 1], [13.5, 1560, 590, 0.72, 1], [14.3, 1640, 600, 0.62, 1], [21.5, 1640, 600, 0.62, 1], [22.2, 1640, HIDE, 0.62, 1],
-          [47.4, 700, HIDE, 0.68, 1], [48.2, 700, 590, 0.68, 1], [53.4, 700, 590, 0.68, 1], [54.1, 700, HIDE, 0.68, 1],
-          [60.4, 1180, HIDE, 0.66, 1], [61.2, 1180, 590, 0.66, 1]],
-    say: [[7.8, 10.2, "Wait... is this even true?"], [10.7, 13.3, "Everyone is forwarding it!"], [16.8, 21.0, "I'll send it to ElectionVerify."],
-          [49.6, 53.0, "Now I know the truth. Sharing it!"]],
+    who: "Sandeep", el: document.getElementById("sandeep"), waveRest: 6, waveUp: -160,
+    pos: [[6.6, 1560, HIDE, 0.82], [7.4, 1560, 590, 0.82], [13.5, 1560, 590, 0.82], [14.3, 1640, 600, 0.7], [21.9, 1640, 600, 0.7], [22.5, 1640, HIDE, 0.7],
+          [47.4, 700, HIDE, 0.76], [48.2, 700, 590, 0.76], [53.4, 700, 590, 0.76], [54.1, 700, HIDE, 0.76],
+          [60.4, 1180, HIDE, 0.72], [61.2, 1180, 590, 0.72]],
     wave: [[61.4, 64.2]],
   },
   {
-    el: document.getElementById("uday"), mouthOpen: "M104 148 Q120 172 136 148", mouthShut: "M104 150 Q120 162 136 150", waveRest: 6, waveUp: -160,
-    pos: [[40.2, 1600, HIDE, 0.72, 1], [41, 1600, 590, 0.72, 1], [46.4, 1600, 590, 0.72, 1], [47.1, 1600, HIDE, 0.72, 1],
-          [60.6, 1420, HIDE, 0.66, 1], [61.4, 1420, 590, 0.66, 1]],
-    say: [[42.4, 46.2, "I check the evidence, then publish."]],
+    who: "Uday", el: document.getElementById("uday"), waveRest: 6, waveUp: -160,
+    pos: [[40.2, 1600, HIDE, 0.82], [41, 1600, 590, 0.82], [46.4, 1600, 590, 0.82], [47.1, 1600, HIDE, 0.82],
+          [60.6, 1420, HIDE, 0.72], [61.4, 1420, 590, 0.72]],
     wave: [[61.6, 64.2]],
   },
   {
-    el: document.getElementById("abdullah"), mouthOpen: "M104 148 Q120 172 136 148", mouthShut: "M104 150 Q120 162 136 150", waveRest: 6, waveUp: -160,
-    pos: [[54.2, 1620, HIDE, 0.72, 1], [55, 1620, 590, 0.72, 1], [59.4, 1620, 590, 0.72, 1], [60, 1620, HIDE, 0.72, 1],
-          [60.8, 1660, HIDE, 0.66, 1], [61.6, 1660, 590, 0.66, 1]],
-    say: [[55.6, 59.2, "I manage reviewers and trusted sources."]],
-    wave: [[54.8, 55.8], [61.8, 64.2]],
+    who: "Abdullah Rizwan", el: document.getElementById("abdullah"), waveRest: 6, waveUp: -160,
+    pos: [[54.2, 1620, HIDE, 0.82], [55, 1620, 590, 0.82], [60, 1620, 590, 0.82], [60.5, 1620, HIDE, 0.82],
+          [60.9, 1660, HIDE, 0.72], [61.7, 1660, 590, 0.72]],
+    wave: [[55.0, 56.2], [61.8, 64.2]],
   },
 ];
 for (const a of ACTORS) {
   a.kx = a.pos.map(([t, x]) => [t, x, "inOut"]);
   a.ky = a.pos.map(([t, , y]) => [t, y, "inOut"]);
   a.ks = a.pos.map(([t, , , s]) => [t, s, "inOut"]);
+  a.lines = linesFor(a.who);
   a.bubble = a.el.querySelector(".bubble");
   a.eyes = a.el.querySelector(".eyes");
+  a.irises = [...a.el.querySelectorAll(".iris")];
+  a.head = a.el.querySelector(".head");
   a.mouth = a.el.querySelector(".mouth");
+  a.mouthIn = a.el.querySelector(".mouth-in");
+  a.mouthLine = a.el.querySelector(".mouth-line");
   a.armR = a.el.querySelector(".arm-r");
   a.armL = a.el.querySelector(".arm-l");
   a.glow = a.el.querySelector(".glow");
@@ -432,27 +481,57 @@ for (const a of ACTORS) {
 }
 rise("s9-credit", 62.2, 99, 30);
 
+/** How open the mouth is (0–1) at time t, from the measured loudness of the voice. */
+function mouthOpen(line, t) {
+  const f = (t - line.start) * 30;
+  const i = Math.floor(f);
+  const a = line.env[i] ?? 0, b = line.env[i + 1] ?? 0;
+  return a + (b - a) * (f - i);
+}
+
 function renderActor(a, t, i) {
   const x = kf(a.kx, t), y = kf(a.ky, t), s = kf(a.ks, t);
-  const bob = Math.sin(t * 2.4 + i) * 7;
+  const breathe = Math.sin(t * 2.1 + i) * 5;
   a.el.style.visibility = y > 1200 ? "hidden" : "visible";
-  a.el.style.transform = `translate(${x}px, ${y + bob}px) scale(${s})`;
-  a.eyes.style.transform = `scaleY(${(t + i * 0.9) % 3.3 < 0.14 ? 0.12 : 1})`;
+  a.el.style.transform = `translate(${x}px, ${y + breathe}px) scale(${s})`;
+
+  // Blink every few seconds, glance around, and look at the viewer while talking.
+  a.eyes.style.transform = `scaleY(${(t + i * 0.9) % 3.6 < 0.13 ? 0.1 : 1})`;
+  const speaking = a.lines.find((l) => t >= l.start && t < l.end);
+  const v = speaking ? mouthOpen(speaking, t) : 0;
+  const look = speaking ? 0 : Math.round(Math.sin(t * 0.55 + i * 2.1) * 1.6) * 2;
+  for (const iris of a.irises) iris.style.transform = `translate(${look}px, 0)`;
+
+  if (a.head) {
+    const tilt = Math.sin(t * 1.1 + i) * 2.2 + (speaking ? Math.sin(t * 6.5) * 2.4 * v : 0);
+    const nod = speaking ? v * 2.5 : 0;
+    a.head.style.transform = `translateY(${nod}px) rotate(${tilt}deg)`;
+  }
+
+  // Lip-sync
+  if (a.robot) {
+    a.mouth.setAttribute("d", `M114 166 Q130 ${178 + v * 16} 146 166`);
+  } else {
+    a.mouthIn.setAttribute("ry", (0.5 + v * 9).toFixed(2));
+    a.mouthIn.setAttribute("rx", (9 + v * 3).toFixed(2));
+    a.mouthLine.style.opacity = v > 0.2 ? 0.25 : 1;
+  }
+
   const waving = a.wave.some(([w0, w1]) => t >= w0 && t <= w1);
-  a.armR.style.transform = `rotate(${waving ? a.waveUp + Math.sin(t * 14) * 24 : a.waveRest + Math.sin(t * 2.4 + i) * 5}deg)`;
-  a.armL.style.transform = `rotate(${(a.waveRest > 0 ? -6 : 12) + Math.sin(t * 2.4 + i + 1) * 5}deg)`;
-  if (a.glow) a.glow.style.opacity = 0.5 + 0.5 * Math.sin(t * 4);
-  const line = a.say.find(([s0, s1]) => t >= s0 && t <= s1 + 0.35);
+  a.armR.style.transform = `rotate(${waving ? a.waveUp + Math.sin(t * 14) * 24 : a.waveRest + Math.sin(t * 2.1 + i) * 4 + (speaking ? -v * 10 : 0)}deg)`;
+  a.armL.style.transform = `rotate(${(a.robot ? 12 : -6) + Math.sin(t * 2.1 + i + 1) * 4}deg)`;
+  if (a.glow) a.glow.style.opacity = 0.5 + 0.5 * Math.sin(t * 4) + v * 0.5;
+
+  // Speech bubble: shows exactly what is being said, while it is said.
+  const line = a.lines.find((l) => t >= l.start - 0.15 && t <= l.end + 0.45);
   if (line) {
-    const [s0, s1, text, side] = line;
-    if (text !== a.last) { a.bubble.textContent = text; a.last = text; }
-    a.bubble.classList.toggle("up", side === "up");
+    if (line.text !== a.last) { a.bubble.textContent = line.text; a.last = line.text; }
+    a.bubble.classList.toggle("up", (a.up || []).includes(line.start));
+    const s0 = line.start - 0.15, s1 = line.end + 0.1;
     a.bubble.style.opacity = kf([[s0, 0], [s0 + 0.25, 1], [s1, 1], [s1 + 0.35, 0]], t);
     a.bubble.style.transform = `scale(${kf([[s0, 0.5], [s0 + 0.45, 1, "back"], [s1, 1], [s1 + 0.35, 0.85]], t)})`;
-    a.mouth.setAttribute("d", t < s1 && Math.floor(t * 9) % 2 === 0 ? a.mouthOpen : a.mouthShut);
   } else {
     a.bubble.style.opacity = 0;
-    a.mouth.setAttribute("d", a.mouthShut);
   }
 }
 

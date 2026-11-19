@@ -1,0 +1,21 @@
+{
+  "_about": "Voice-over for the intro video. start = second in the video. Voices are the free macOS voices (say -v). Speech bubbles in intro.html use the same times.",
+  "rate": 182,
+  "lines": [
+    { "start": 1.8, "voice": "Tara", "who": "Veri", "text": "Hi! I'm Veri, your fact-check guide." },
+    { "start": 6.9, "voice": "Tara", "who": "Narrator", "text": "During elections, fake news spreads in seconds." },
+    { "start": 9.9, "voice": "Rishi", "who": "Sandeep", "text": "Wait... is this even true?" },
+    { "start": 11.9, "voice": "Rishi", "who": "Sandeep", "text": "Everyone is forwarding it!" },
+    { "start": 14.3, "voice": "Tara", "who": "Narrator", "text": "Step one. Send it to ElectionVerify. A link, a message, or a screenshot." },
+    { "start": 19.6, "voice": "Rishi", "who": "Sandeep", "text": "I'll send it to ElectionVerify." },
+    { "start": 23.3, "voice": "Tara", "who": "Veri", "text": "In about a minute, I check the source, pull out the claims, and search fact-checkers and trusted news." },
+    { "start": 33.0, "voice": "Tara", "who": "Veri", "text": "The AI suggests a verdict, and cites every source. But it never decides." },
+    { "start": 40.5, "voice": "Tara", "who": "Narrator", "text": "Step two. A human reviewer makes the call." },
+    { "start": 43.4, "voice": "Aman", "who": "Uday", "text": "I check the evidence, then publish." },
+    { "start": 47.4, "voice": "Tara", "who": "Narrator", "text": "Step three. A verified answer, free for everyone." },
+    { "start": 50.7, "voice": "Rishi", "who": "Sandeep", "text": "Now I know the truth. Sharing it!" },
+    { "start": 54.4, "voice": "Tara", "who": "Narrator", "text": "Built on trusted sources like the Election Commission." },
+    { "start": 57.4, "voice": "Daniel", "who": "Abdullah Rizwan", "text": "I manage reviewers and trusted sources." },
+    { "start": 61.3, "voice": "Tara", "who": "Veri", "text": "ElectionVerify. Check before you forward. Try it now!" }
+  ]
+}

@@ -5,10 +5,12 @@
  *   npm run video                      → public/videos/electionverify-intro.mp4 (+ poster.jpg)
  *   npm run video -- --stills 3,12,40  → PNG stills of those seconds in video/stills/ (for checking)
  *
+ * If video/narration.m4a exists (npm run video:audio), it is added as the soundtrack.
+ *
  * Needs ffmpeg (brew install ffmpeg) and Playwright's Chromium (npx playwright install chromium).
  */
 import { spawn } from "node:child_process";
-import { mkdirSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { chromium } from "@playwright/test";
@@ -40,12 +42,16 @@ if (stillsArg !== -1) {
 const outDir = resolve(root, "public/videos");
 mkdirSync(outDir, { recursive: true });
 const out = resolve(outDir, "electionverify-intro.mp4");
+const audio = resolve(root, "video/narration.m4a");
+const withAudio = existsSync(audio);
 const ffmpeg = spawn("ffmpeg", [
   "-y", "-loglevel", "error",
   "-f", "image2pipe", "-framerate", String(FPS), "-i", "-",
-  "-c:v", "libx264", "-preset", "slow", "-crf", "21", "-pix_fmt", "yuv420p", "-movflags", "+faststart",
+  ...(withAudio ? ["-i", audio, "-c:a", "aac", "-b:a", "160k", "-shortest"] : []),
+  "-c:v", "libx264", "-preset", "slow", "-crf", "22", "-pix_fmt", "yuv420p", "-movflags", "+faststart",
   out,
 ], { stdio: ["pipe", "inherit", "inherit"] });
+console.log(withAudio ? "Adding the narration soundtrack." : "No video/narration.m4a found: the video will be silent.");
 
 const total = Math.round(duration * FPS);
 const started = Date.now();

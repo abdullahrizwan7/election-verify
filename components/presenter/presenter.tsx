@@ -203,13 +203,12 @@ export function StartTourButton({ className }: { className?: string }) {
         <DialogDescription className="sr-only">
           An animated video showing how a claim is submitted, checked with evidence and reviewed by a person.
         </DialogDescription>
-        {/* The video has no sound: everything it says is on screen as text. */}
+        {/* Narrated video; every spoken line also appears on screen as a speech bubble. */}
         <video
           src="/videos/electionverify-intro.mp4"
           poster="/videos/electionverify-intro-poster.jpg"
           controls
           autoPlay
-          muted
           playsInline
           preload="metadata"
           className="aspect-video w-full bg-black"
