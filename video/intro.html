@@ -376,6 +376,8 @@ for (const [key, p] of Object.entries(PEOPLE)) {
         const closed = pose === "talk"
           ? `<img class="closed" src="characters/${key}-1.png" style="transform:translate(${p.dx}px,${p.dy}px);-webkit-mask-image:radial-gradient(ellipse 24px 15px at ${mx}px ${my}px,#000 50%,transparent 100%);mask-image:radial-gradient(ellipse 24px 15px at ${mx}px ${my}px,#000 50%,transparent 100%)" />`
           : "";
+        // The waving hand crosses the neck line, so that pose stays one whole image.
+        if (pose === "wave") return `<div class="pose wave"><img src="${file}" /></div>`;
         return `<div class="pose ${pose}"><img class="body" src="${file}" /><div class="head"><img src="${file}" />${closed}</div></div>`;
       }).join("")}
     </div>
@@ -468,20 +470,26 @@ function renderActor(a, t, i) {
     const hop = -Math.abs(step) * 26 * walk;
     a.el.style.transform = `translate(${x}px, ${y + hop}px) scale(${s})`;
 
-    // Which pose: waving, talking (while speaking) or standing, with soft crossfades.
-    const talkW = Math.max(0, ...a.lines.map((l) => ramp(t, l.start - 0.3, l.start - 0.05) * (1 - ramp(t, l.end + 0.15, l.end + 0.45))));
-    const waveW = Math.max(0, ...a.wave.map(([w0, w1]) => ramp(t, w0 - 0.2, w0 + 0.1) * (1 - ramp(t, w1 - 0.1, w1 + 0.2))));
-    const wave = waveW * (1 - talkW), talk = talkW;
-    a.poses.wave.style.opacity = wave;
+    // Exactly one pose is visible at a time (never two sets of arms): talking while
+    // speaking, waving during a wave, otherwise standing. Changes are instant cuts
+    // hidden by a small bounce, like in cartoon animation.
+    const talkWindows = a.lines.map((l) => [l.start - 0.1, l.end + 0.25]);
+    const inTalk = talkWindows.some(([w0, w1]) => t >= w0 && t < w1);
+    const inWave = !inTalk && a.wave.some(([w0, w1]) => t >= w0 && t < w1);
+    const talk = inTalk ? 1 : 0, wave = inWave ? 1 : 0;
     a.poses.talk.style.opacity = talk;
-    a.poses.stand.style.opacity = 1;
+    a.poses.wave.style.opacity = wave;
+    a.poses.stand.style.opacity = inTalk || inWave ? 0 : 1;
+    const cuts = [...talkWindows, ...a.wave].flat().filter((c) => c <= t);
+    const sinceCut = cuts.length ? t - Math.max(...cuts) : 9;
+    const pop = sinceCut < 0.2 ? 1 - 0.045 * (1 - sinceCut / 0.2) : 1;
     a.closed.style.opacity = 1 - Math.min(1, v * 1.25);
 
     // Body: breathing, weight shift, sway; a rock while waving, a lean and bounce while talking.
     const breathe = 1 + Math.sin(t * 2.2 + i) * 0.012;
     const shift = Math.sin(t * 0.8 + i) * 5;
     const sway = Math.sin(t * 1.1 + i) * 1.6 + step * 4 * walk + wave * Math.sin(t * 8) * 2.6 + talk * 1.4;
-    a.fig.style.transform = `translate(${shift}px, ${v * 4}px) rotate(${sway}deg) scale(${2 - breathe}, ${breathe})`;
+    a.fig.style.transform = `translate(${shift}px, ${v * 4}px) rotate(${sway}deg) scale(${(2 - breathe) * pop}, ${breathe * pop})`;
 
     // Head: idle tilt, nods with the voice, bobs while waving.
     const tilt = Math.sin(t * 1.5 + i * 2) * 3 + (speaking ? Math.sin(t * 7.5) * 4 * v : 0) - wave * Math.sin(t * 8) * 3;
