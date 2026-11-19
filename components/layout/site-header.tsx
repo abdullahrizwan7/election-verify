@@ -36,7 +36,8 @@ export function SiteHeader() {
           <CommandPalette />
           <LanguageSwitcher />
           <ThemeToggle />
-          <Button size="sm" asChild>
+          {/* On small phones this lives in the menu instead, so the header fits. */}
+          <Button size="sm" className="hidden min-[400px]:inline-flex" asChild>
             <Link href="/submit">
               <T k="nav.submit" />
             </Link>

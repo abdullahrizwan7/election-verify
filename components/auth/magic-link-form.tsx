@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { ArrowRight, Loader2, Mail, MailCheck } from "lucide-react";
 import { sendMagicLink, type MagicLinkState } from "@/app/(auth)/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,10 +14,13 @@ export function MagicLinkForm({ next }: { next: string }) {
 
   if (state.status === "sent") {
     return (
-      <p className="flex gap-2 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-900 dark:bg-emerald-950 dark:text-emerald-100">
-        <CheckCircle2 className="mt-0.5 size-4 shrink-0" aria-hidden />
-        {state.message}
-      </p>
+      <div className="flex gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm" role="status">
+        <MailCheck className="mt-0.5 size-5 shrink-0 text-emerald-500" aria-hidden />
+        <div>
+          <p className="font-medium text-foreground">Check your inbox</p>
+          <p className="mt-0.5 text-muted-foreground">{state.message}</p>
+        </div>
+      </div>
     );
   }
 
@@ -25,13 +28,26 @@ export function MagicLinkForm({ next }: { next: string }) {
     <form action={formAction} className="space-y-3">
       <input type="hidden" name="next" value={next} />
       <div className="space-y-1.5">
-        <Label htmlFor="email">Email</Label>
-        <Input id="email" name="email" type="email" autoComplete="email" placeholder="you@example.com" required />
+        <Label htmlFor="email">Email address</Label>
+        <div className="relative">
+          <Mail className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@example.com"
+            required
+            className="h-12 rounded-xl pl-10 text-[15px]"
+            aria-invalid={state.status === "error" || undefined}
+          />
+        </div>
         {state.status === "error" && <p className="text-sm text-destructive">{state.message}</p>}
       </div>
-      <Button type="submit" className="w-full" disabled={pending}>
-        {pending && <Loader2 className="animate-spin" aria-hidden />}
-        Email me a sign-in link
+      <Button type="submit" className="group h-12 w-full rounded-xl text-[15px]" disabled={pending}>
+        {pending ? <Loader2 className="animate-spin" aria-hidden /> : null}
+        {pending ? "Sending link…" : "Email me a sign-in link"}
+        {!pending && <ArrowRight className="transition-transform group-hover:translate-x-0.5" aria-hidden />}
       </Button>
     </form>
   );
