@@ -23,12 +23,18 @@ const ACCOUNTS = [
   },
 ] as const;
 
+const TONES = {
+  citizen: "bg-tint-coral text-tint-coral-foreground",
+  reviewer: "bg-tint-sky text-tint-sky-foreground",
+  admin: "bg-tint-lime text-tint-lime-foreground",
+} as const;
+
 /** Shown instead of real login while Supabase keys are not set. */
 export function DemoLoginPanel({ next }: { next: string }) {
   return (
-    <Card className="glow">
+    <Card className="rounded-[2.5rem] py-7 shadow-[0_40px_100px_-40px_rgba(10,14,12,0.5)]">
       <CardHeader>
-        <CardTitle className="text-xl">Choose a demo account</CardTitle>
+        <CardTitle className="text-3xl">Choose a demo account</CardTitle>
         <CardDescription>
           Real email and Google sign-in switch on when Supabase keys are added. For now, pick a role to explore.
         </CardDescription>
@@ -40,13 +46,13 @@ export function DemoLoginPanel({ next }: { next: string }) {
             <input type="hidden" name="next" value={next} />
             <button
               type="submit"
-              className="flex w-full items-start gap-3 rounded-lg border bg-card/50 p-3 text-left transition hover:border-glow/50 hover:bg-glow/10 hover:shadow-[0_0_24px_-8px] hover:shadow-glow/60 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+              className="group flex w-full items-center gap-3.5 rounded-[1.5rem] bg-foreground/[0.04] p-3.5 text-left transition duration-300 hover:-translate-y-0.5 hover:bg-foreground/[0.07] focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
             >
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-glow/20 to-glow-2/20 text-glow ring-1 ring-glow/25">
+              <span className={`flex size-11 shrink-0 items-center justify-center rounded-2xl transition-transform duration-500 ease-(--ease-pop) group-hover:-rotate-6 ${TONES[role]}`}>
                 <Icon className="size-4" aria-hidden />
               </span>
               <span>
-                <span className="block font-medium">Continue as {title}</span>
+                <span className="block font-bold">Continue as {title}</span>
                 <span className="block text-sm text-muted-foreground">{text}</span>
               </span>
             </button>

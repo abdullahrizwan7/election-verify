@@ -31,8 +31,8 @@ type Params = Promise<{ id: string }>;
 
 export default function ReviewSubmissionPage({ params }: { params: Params }) {
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8">
-      <Button variant="ghost" size="sm" asChild className="mb-4 -ml-2">
+    <main className="page-enter mx-auto max-w-7xl px-4 py-8">
+      <Button variant="outline" size="sm" asChild className="mb-6 h-10 rounded-full px-4">
         <Link href="/review">
           <ArrowLeft aria-hidden /> Back to queue
         </Link>
@@ -58,7 +58,7 @@ async function Workspace({ params }: { params: Params }) {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-2">
           <StatusBadge status={submission.status} />
-          <h1 className="text-2xl font-semibold tracking-tight text-pretty">{submission.title}</h1>
+          <h1 className="max-w-4xl text-3xl leading-[1.05] font-bold tracking-tight text-balance md:text-5xl">{submission.title}</h1>
           <p className="text-sm text-muted-foreground">
             Submitted {formatDateTime(submission.createdAt)}
             {submission.reportCount > 1 && ` · sent to us ${submission.reportCount} times`}

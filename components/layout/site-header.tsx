@@ -1,57 +1,48 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { ShieldCheck } from "lucide-react";
 import { CommandPalette } from "@/components/command-palette";
 import { HeaderAccount } from "@/components/layout/header-account";
-import { LanguageSwitcher, T } from "@/components/i18n";
-import { MobileNav } from "@/components/layout/mobile-nav";
-import { NAV_LINKS } from "@/components/layout/nav-links";
+import { HeaderShell } from "@/components/layout/header-shell";
+import { Logo } from "@/components/layout/logo";
+import { PillNav } from "@/components/layout/pill-nav";
+import { LanguageSwitcher } from "@/components/i18n";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { CtaButton } from "@/components/ui/cta-button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * A floating pill navigation bar (Cognify-inspired): logo on the left, links in
- * the middle, tools and the main call-to-action on the right.
+ * Three floating "islands" over the page: the logo, the pill navigation in the
+ * middle and a tools pill (search, language, theme, account) on the right.
+ * On phones the navigation wraps onto its own row.
  */
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 px-3 pt-3 sm:px-4">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 rounded-full border bg-background/70 py-1.5 pr-1.5 pl-2 shadow-[0_10px_40px_-18px_rgba(0,0,0,0.55)] backdrop-blur-xl md:gap-4 md:pl-3">
-        <MobileNav />
-        <Link href="/" className="flex items-center gap-2.5 rounded-full pr-2 font-semibold tracking-tight">
-          <span className="flex size-9 items-center justify-center rounded-full bg-brand text-brand-foreground shadow-brand">
-            <ShieldCheck className="size-[18px]" aria-hidden />
-          </span>
-          <span className="hidden text-[17px] min-[400px]:inline">ElectionVerify</span>
-        </Link>
+    <HeaderShell>
+      <Link
+        href="/"
+        className="group glass flex items-center gap-2.5 justify-self-start rounded-full bg-card py-1 pr-4 pl-1 ring-1 ring-foreground/[0.07]"
+        aria-label="ElectionVerify home"
+      >
+        <Logo className="size-9 transition-transform duration-500 ease-(--ease-pop) group-hover:scale-105 group-hover:-rotate-8" />
+        <span className="text-[17px] font-bold tracking-tight">ElectionVerify</span>
+      </Link>
 
-        <nav className="mx-auto hidden items-center gap-1 text-sm md:flex" aria-label="Main">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="rounded-full px-3.5 py-2 font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              <T k={link.key} />
-            </Link>
-          ))}
-        </nav>
-
-        <div className="ml-auto flex items-center gap-1 md:ml-0">
-          <CommandPalette />
-          <LanguageSwitcher />
-          <ThemeToggle />
-          {/* Reads the login cookie, so it loads separately from the rest of the page. */}
-          <Suspense fallback={<Skeleton className="h-9 w-16 rounded-full" />}>
-            <HeaderAccount />
-          </Suspense>
-          {/* On small phones this lives in the menu instead, so the header fits. */}
-          <CtaButton href="/submit" size="sm" className="ml-1 hidden min-[480px]:inline-flex">
-            <T k="nav.submit" />
-          </CtaButton>
-        </div>
+      <div className="hidden md:block">
+        <PillNav />
       </div>
-    </header>
+
+      <div className="glass flex items-center gap-0.5 justify-self-end rounded-full bg-card p-1 ring-1 ring-foreground/[0.07]">
+        <CommandPalette />
+        <LanguageSwitcher />
+        <ThemeToggle />
+        {/* Reads the login cookie, so it loads separately from the rest of the page. */}
+        <Suspense fallback={<Skeleton className="h-9 w-20 rounded-full" />}>
+          <HeaderAccount />
+        </Suspense>
+      </div>
+
+      <div className="order-last flex w-full justify-center md:hidden">
+        <PillNav />
+      </div>
+    </HeaderShell>
   );
 }

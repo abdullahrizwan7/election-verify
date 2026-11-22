@@ -14,9 +14,9 @@ export const metadata: Metadata = { title: "Activity log" };
 
 export default function ActivityPage() {
   return (
-    <main className="mx-auto max-w-6xl space-y-6 px-4 py-10">
+    <main className="page-enter mx-auto max-w-7xl sm:px-6 space-y-6 px-4 py-10">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+        <h1 className="text-4xl leading-[1.02] font-bold tracking-tight sm:text-5xl md:text-6xl">
           <span className="text-gradient">Admin</span>
         </h1>
         <p className="mt-1 text-muted-foreground">Every important action is recorded here and never edited.</p>

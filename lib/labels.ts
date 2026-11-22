@@ -12,7 +12,7 @@ import type {
 /** Text and colors for each verdict. Used by badges, filters and the ratings legend. */
 export const VERDICTS: Record<
   Verdict,
-  { label: string; description: string; className: string; dotClassName: string; rgb: string }
+  { label: string; description: string; className: string; dotClassName: string; rgb: string; tone: string }
 > = {
   ACCURATE: {
     label: "Accurate",
@@ -20,6 +20,7 @@ export const VERDICTS: Record<
     className: "bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-900",
     dotClassName: "bg-emerald-500",
     rgb: "16 185 129", // for glows
+    tone: "bg-tint-lime text-tint-lime-foreground",
   },
   MISLEADING: {
     label: "Misleading",
@@ -27,6 +28,7 @@ export const VERDICTS: Record<
     className: "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950 dark:text-amber-200 dark:border-amber-900",
     dotClassName: "bg-amber-500",
     rgb: "245 158 11", // for glows
+    tone: "bg-[oklch(0.9_0.11_85)] text-[oklch(0.3_0.07_70)] dark:bg-[oklch(0.42_0.09_80)] dark:text-[oklch(0.95_0.06_85)]",
   },
   MISSING_CONTEXT: {
     label: "Missing context",
@@ -34,6 +36,7 @@ export const VERDICTS: Record<
     className: "bg-orange-50 text-orange-800 border-orange-200 dark:bg-orange-950 dark:text-orange-200 dark:border-orange-900",
     dotClassName: "bg-orange-500",
     rgb: "249 115 22", // for glows
+    tone: "bg-[oklch(0.88_0.08_60)] text-[oklch(0.3_0.08_50)] dark:bg-[oklch(0.42_0.09_55)] dark:text-[oklch(0.95_0.05_60)]",
   },
   FALSE: {
     label: "False",
@@ -41,6 +44,7 @@ export const VERDICTS: Record<
     className: "bg-red-50 text-red-800 border-red-200 dark:bg-red-950 dark:text-red-200 dark:border-red-900",
     dotClassName: "bg-red-500",
     rgb: "239 68 68", // for glows
+    tone: "bg-tint-coral text-tint-coral-foreground",
   },
   UNVERIFIED: {
     label: "Unverified",
@@ -48,6 +52,7 @@ export const VERDICTS: Record<
     className: "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700",
     dotClassName: "bg-slate-400",
     rgb: "148 163 184", // for glows
+    tone: "bg-tint-sky text-tint-sky-foreground",
   },
   SATIRE: {
     label: "Satire",
@@ -55,6 +60,7 @@ export const VERDICTS: Record<
     className: "bg-violet-50 text-violet-800 border-violet-200 dark:bg-violet-950 dark:text-violet-200 dark:border-violet-900",
     dotClassName: "bg-violet-500",
     rgb: "139 92 246", // for glows
+    tone: "bg-[oklch(0.86_0.07_300)] text-[oklch(0.3_0.08_300)] dark:bg-[oklch(0.4_0.08_300)] dark:text-[oklch(0.95_0.04_300)]",
   },
 };
 

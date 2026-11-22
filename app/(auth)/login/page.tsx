@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { AlertCircle, ClipboardCheck, LockKeyhole, ShieldCheck, UserRound, UsersRound } from "lucide-react";
+import { AlertCircle, ClipboardCheck, LockKeyhole, UserRound, UsersRound } from "lucide-react";
+import { Logo } from "@/components/layout/logo";
 import { DemoLoginPanel } from "@/components/auth/demo-login-panel";
 import { GoogleButton } from "@/components/auth/google-button";
 import { MagicLinkForm } from "@/components/auth/magic-link-form";
@@ -29,10 +30,10 @@ type SearchParams = Promise<{ next?: string; error?: string }>;
 
 export default function LoginPage({ searchParams }: { searchParams: SearchParams }) {
   return (
-    <main className="mx-auto grid w-full max-w-6xl items-stretch gap-6 px-4 py-8 sm:py-12 lg:grid-cols-[1.1fr_1fr] lg:gap-10">
+    <main className="page-enter mx-auto grid w-full max-w-7xl items-stretch gap-5 px-4 pt-6 pb-12 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:pt-10">
       <BrandPanel />
       <div className="flex flex-col justify-center">
-        <Suspense fallback={<Skeleton className="mx-auto h-[30rem] w-full max-w-md rounded-3xl" />}>
+        <Suspense fallback={<Skeleton className="mx-auto h-[30rem] w-full max-w-md rounded-[2.5rem]" />}>
           <LoginContent searchParams={searchParams} />
         </Suspense>
       </div>
@@ -40,45 +41,43 @@ export default function LoginPage({ searchParams }: { searchParams: SearchParams
   );
 }
 
-/** The left side on large screens: what ElectionVerify is and who signs in. Hidden on phones. */
+const ROLE_TONES = ["bg-tint-coral text-tint-coral-foreground", "bg-tint-sky text-tint-sky-foreground", "bg-tint-lime text-tint-lime-foreground"];
+const ROLE_PEOPLE = ["sandeep", "uday", "abdullah"];
+
+/** The left side on large screens: a dark card with the three roles. Hidden on phones. */
 function BrandPanel() {
   return (
-    <section className="border-gradient relative hidden overflow-hidden rounded-3xl p-10 lg:flex lg:min-h-[36rem] lg:flex-col">
-      <div className="bg-grid absolute inset-0 -z-10 opacity-60" aria-hidden />
-      <div className="pointer-events-none absolute -right-44 -bottom-48 size-[26rem] opacity-80" aria-hidden>
-        <div className="absolute inset-[10%] rounded-full bg-glow/25 blur-3xl" />
+    <section className="relative hidden overflow-hidden rounded-[2.5rem] bg-tint-ink p-10 text-tint-ink-foreground lg:flex lg:min-h-[40rem] lg:flex-col xl:p-12">
+      <div aria-hidden className="pointer-events-none absolute inset-0">
+        <div className="orb absolute -top-24 -right-20 size-96 rounded-full bg-brand/35 blur-[110px]" />
+        <div className="orb absolute -bottom-32 -left-20 size-96 rounded-full bg-ai/30 blur-[120px] [animation-delay:-9s]" />
+      </div>
+      <div className="pointer-events-none absolute -right-40 -bottom-44 size-[26rem] opacity-60" aria-hidden>
         <Globe className="absolute inset-0" />
       </div>
 
-      <div className="flex items-center gap-2.5">
-        <span className="grid size-10 place-items-center rounded-xl bg-glow/15 text-glow ring-1 ring-glow/30">
-          <ShieldCheck className="size-5" aria-hidden />
-        </span>
-        <span className="text-lg font-semibold tracking-tight">ElectionVerify</span>
-      </div>
-
-      <h2 className="mt-10 max-w-md text-4xl leading-tight font-semibold tracking-tight">
-        Check before <span className="text-gradient">you forward.</span>
+      <p className="relative text-xs font-bold tracking-[0.2em] text-brand uppercase">Welcome</p>
+      <h2 className="relative mt-4 max-w-md text-5xl leading-[1.02] font-bold tracking-tight xl:text-6xl">
+        Check before <span className="text-white/45">you forward.</span>
       </h2>
-      <p className="mt-4 max-w-sm text-muted-foreground">
-        AI gathers the evidence in about a minute. A trained human reviewer always makes the final call.
-      </p>
+      <p className="relative mt-5 max-w-sm text-lg text-white/65">AI gathers the evidence in about a minute. A trained human reviewer always makes the final call.</p>
 
-      <ul className="relative mt-10 max-w-[21rem] space-y-5">
-        {ROLES.map(({ icon: Icon, title, text }) => (
-          <li key={title} className="flex gap-3.5">
-            <span className="grid size-9 shrink-0 place-items-center rounded-lg border bg-background/60 backdrop-blur">
-              <Icon className="size-4 text-glow" aria-hidden />
-            </span>
-            <div>
-              <p className="text-sm font-medium">{title}</p>
-              <p className="text-sm text-muted-foreground">{text}</p>
+      <ul className="relative mt-10 grid max-w-lg gap-3">
+        {ROLES.map(({ icon: Icon, title, text }, i) => (
+          <li key={title} className="flex items-center gap-4 rounded-[1.5rem] bg-white/[0.06] p-3.5 pr-5 ring-1 ring-white/10 backdrop-blur">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`/team/${ROLE_PEOPLE[i]}.png`} alt="" className={`size-12 shrink-0 rounded-2xl object-cover ${ROLE_TONES[i]}`} />
+            <div className="min-w-0">
+              <p className="flex items-center gap-2 font-bold">
+                <Icon className="size-4 text-brand" aria-hidden /> {title}
+              </p>
+              <p className="text-sm text-white/60">{text}</p>
             </div>
           </li>
         ))}
       </ul>
 
-      <p className="relative mt-auto max-w-[18rem] pt-10 text-xs text-muted-foreground">
+      <p className="relative mt-auto max-w-[20rem] pt-10 text-xs text-white/50">
         Evidence from the Election Commission of India, PIB and IFCN-certified fact-checkers.
       </p>
     </section>
@@ -99,15 +98,11 @@ async function LoginContent({ searchParams }: { searchParams: SearchParams }) {
   }
 
   return (
-    <div className="glow relative mx-auto w-full max-w-md overflow-hidden rounded-3xl border bg-card/80 p-7 backdrop-blur-xl sm:p-9">
-      <div className="pointer-events-none absolute -top-24 left-1/2 h-48 w-72 -translate-x-1/2 rounded-full bg-glow/20 blur-3xl" aria-hidden />
-
+    <div className="glass relative mx-auto w-full max-w-md overflow-hidden rounded-[2.5rem] bg-card p-7 shadow-[0_40px_100px_-40px_rgba(10,14,12,0.5)] ring-1 ring-foreground/10 sm:p-10">
       <div className="relative">
-        <span className="grid size-12 place-items-center rounded-2xl bg-glow/15 text-glow ring-1 ring-glow/30 lg:hidden">
-          <ShieldCheck className="size-6" aria-hidden />
-        </span>
-        <h1 className="mt-5 text-2xl font-semibold tracking-tight lg:mt-0">Welcome to ElectionVerify</h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">Sign in to submit claims and follow every check.</p>
+        <Logo className="size-12" />
+        <h1 className="mt-7 text-4xl leading-[1.05] font-bold tracking-tight">Sign in</h1>
+        <p className="mt-2 text-muted-foreground">Submit claims and follow every check. No passwords needed.</p>
 
         {errorInfo && (
           <div className="mt-6">
@@ -120,7 +115,7 @@ async function LoginContent({ searchParams }: { searchParams: SearchParams }) {
           <GoogleButton />
         </form>
 
-        <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
+        <div className="my-6 flex items-center gap-3 text-xs font-semibold text-muted-foreground">
           <span className="h-px flex-1 bg-border" />
           or use your email
           <span className="h-px flex-1 bg-border" />
@@ -128,7 +123,7 @@ async function LoginContent({ searchParams }: { searchParams: SearchParams }) {
 
         <MagicLinkForm next={next} />
 
-        <div className="mt-7 space-y-2 border-t pt-5 text-xs text-muted-foreground">
+        <div className="mt-7 space-y-2 border-t border-foreground/[0.07] pt-5 text-xs text-muted-foreground">
           <p className="flex items-start gap-2">
             <LockKeyhole className="mt-px size-3.5 shrink-0" aria-hidden />
             No passwords. We only use your name and email, and never post anything for you.
@@ -145,7 +140,7 @@ async function LoginContent({ searchParams }: { searchParams: SearchParams }) {
 
 function ErrorAlert({ title, text }: { title: string; text: string }) {
   return (
-    <Alert variant="destructive" className="rounded-xl">
+    <Alert variant="destructive" className="rounded-2xl">
       <AlertCircle aria-hidden />
       <AlertTitle>{title}</AlertTitle>
       <AlertDescription>{text}</AlertDescription>

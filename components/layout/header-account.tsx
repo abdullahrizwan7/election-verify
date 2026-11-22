@@ -8,7 +8,7 @@ export async function HeaderAccount() {
 
   if (!user) {
     return (
-      <Button variant="ghost" size="sm" asChild className="rounded-full px-3.5">
+      <Button size="sm" asChild className="ml-0.5 h-9 rounded-full px-4">
         <Link href="/login">Sign in</Link>
       </Button>
     );
@@ -17,8 +17,8 @@ export async function HeaderAccount() {
   return (
     <>
       {hasRole(user, "REVIEWER") && (
-        <Button variant="ghost" size="sm" asChild className="hidden rounded-full px-3.5 lg:inline-flex">
-          <Link href="/review">Review queue</Link>
+        <Button size="sm" asChild className="mx-0.5 hidden h-9 rounded-full px-4 lg:inline-flex">
+          <Link href="/review">Workspace</Link>
         </Button>
       )}
       <UserMenu user={user} isAdmin={hasRole(user, "ADMIN")} />

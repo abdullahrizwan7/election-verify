@@ -1,110 +1,134 @@
+"use client";
+
+import { motion } from "motion/react";
 import { Bot, Globe2, ImageIcon, Layers, UserCheck } from "lucide-react";
-import { Reveal } from "@/components/fx/reveal";
+import { InView, SplitReveal, Stagger, StaggerItem } from "@/components/motion/reveal";
+import { EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
-/**
- * "Engineered for trusted answers": a bento grid of tinted feature cards
- * (Cognify-inspired), each with a small visual.
- */
-export function FeatureBento() {
-  return (
-    <section className="mx-auto max-w-6xl px-4 py-20">
-      <Reveal className="mb-12 text-center">
-        <h2 className="text-4xl leading-[1.05] font-bold tracking-tight sm:text-6xl">
-          Engineered for
-          <br />
-          <span className="text-muted-foreground/70">answers you can trust.</span>
-        </h2>
-      </Reveal>
+const FEATURES = [
+  {
+    title: "Smart claim checks",
+    text: "Every link, message or screenshot is read, split into separate claims and matched against trusted sources.",
+    icon: Layers,
+    tone: "bg-tint-lime text-tint-lime-foreground",
+    span: "md:col-span-2",
+    visual: "chips",
+  },
+  {
+    title: "AI with citations",
+    text: "Gemini suggests a verdict and cites every piece of evidence. It never publishes on its own.",
+    icon: Bot,
+    tone: "bg-tint-sky text-tint-sky-foreground",
+    span: "",
+    visual: "lines",
+  },
+  {
+    title: "Image forensics",
+    text: "Reads the text in screenshots, checks photo details and looks for older copies of the image.",
+    icon: ImageIcon,
+    tone: "bg-tint-coral text-tint-coral-foreground",
+    span: "",
+    visual: "bars",
+  },
+  {
+    title: "A human makes the call",
+    text: "Trained reviewers read the evidence, choose the verdict and explain it in plain words. Every action is logged.",
+    icon: UserCheck,
+    tone: "bg-tint-ink text-tint-ink-foreground",
+    span: "md:col-span-2",
+    visual: "nodes",
+  },
+] as const;
 
-      <div className="grid gap-4 md:grid-cols-3 md:grid-rows-2">
-        {/* Big card: source and claim checks */}
-        <Reveal className="md:col-span-2">
-          <Card tint="olive" icon={Layers} title="Smart claim checks" text="Every link, message or screenshot is read, split into separate claims and matched against trusted sources.">
-            <div className="mt-6 flex flex-wrap gap-2">
-              {["Source reputation", "Domain age", "Claims", "Fact-checks", "Web evidence"].map((chip) => (
-                <span key={chip} className="rounded-full bg-black/15 px-3 py-1.5 text-xs font-medium dark:bg-white/10">
-                  {chip}
-                </span>
-              ))}
-            </div>
-          </Card>
-        </Reveal>
-
-        <Reveal delay={100}>
-          <Card tint="steel" icon={Bot} title="AI with citations" text="Gemini suggests a verdict and cites every piece of evidence it used. It never publishes on its own.">
-            <div className="mt-6 space-y-2" aria-hidden>
-              {[90, 70, 82].map((w, i) => (
-                <div key={i} className="h-2.5 rounded-full bg-black/15 dark:bg-white/15" style={{ width: `${w}%` }} />
-              ))}
-            </div>
-          </Card>
-        </Reveal>
-
-        <Reveal delay={150}>
-          <Card tint="rust" icon={ImageIcon} title="Image forensics" text="Reads the text in screenshots, checks photo details and looks for older copies of the image.">
-            <div className="mt-6 flex h-14 items-end gap-2" aria-hidden>
-              {[40, 70, 50, 95, 60].map((h, i) => (
-                <div key={i} className="flex-1 rounded-md bg-black/15 dark:bg-white/15" style={{ height: `${h}%` }} />
-              ))}
-            </div>
-          </Card>
-        </Reveal>
-
-        <Reveal delay={200} className="md:col-span-2">
-          <Card tint="ink" icon={UserCheck} title="A human makes the call" text="Trained reviewers read the evidence, choose the verdict and explain it in plain words. Every action is logged.">
-            <svg viewBox="0 0 400 60" className="mt-6 h-12 w-full max-w-md" aria-hidden>
-              <path d="M10 40 C 80 10, 140 55, 200 30 S 320 10, 390 35" fill="none" stroke="currentColor" strokeOpacity=".35" strokeWidth="2" strokeDasharray="4 6" />
-              {[10, 110, 200, 300, 390].map((x, i) => (
-                <circle key={i} cx={x} cy={[40, 26, 30, 18, 35][i]} r="6" fill="var(--glow)" opacity={i === 4 ? 1 : 0.55} />
-              ))}
-            </svg>
-          </Card>
-        </Reveal>
-      </div>
-
-      <Reveal delay={250} className="mt-4">
-        <div className="flex flex-col items-start gap-4 rounded-[1.75rem] border bg-card p-6 sm:flex-row sm:items-center">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-brand/15 text-brand">
-            <Globe2 className="size-5" aria-hidden />
+function Visual({ kind }: { kind: (typeof FEATURES)[number]["visual"] }) {
+  if (kind === "chips") {
+    return (
+      <div className="mt-8 flex flex-wrap gap-2">
+        {["Source reputation", "Domain age", "Claims", "Fact-checks", "Web evidence"].map((chip, i) => (
+          <span
+            key={chip}
+            className={cn("rounded-full bg-current/10 px-3.5 py-1.5 text-xs font-bold transition-transform duration-500 ease-(--ease-pop) group-hover:-translate-y-1", i % 2 && "group-hover:translate-y-0")}
+            style={{ transitionDelay: `${i * 40}ms` }}
+          >
+            {chip}
           </span>
-          <p className="text-muted-foreground">
-            <span className="font-semibold text-foreground">English, हिन्दी and اردو.</span> Results are free to read, search and share, on any phone.
-          </p>
-        </div>
-      </Reveal>
-    </section>
+        ))}
+      </div>
+    );
+  }
+  if (kind === "lines") {
+    return (
+      <div className="mt-8 space-y-2.5">
+        {["w-full", "w-5/6", "w-2/3"].map((w, i) => (
+          <span key={i} className={cn("block h-2.5 rounded-full bg-current/15 transition-all duration-700 ease-(--ease-out-soft) group-hover:bg-current/30", w)} />
+        ))}
+      </div>
+    );
+  }
+  if (kind === "bars") {
+    return (
+      <div className="mt-8 flex h-14 items-end gap-2">
+        {[40, 70, 52, 90, 64].map((h, i) => (
+          <span key={i} className="w-full rounded-t-lg bg-current/20 transition-all duration-700 ease-(--ease-pop) group-hover:bg-current/35" style={{ height: `${h}%`, transitionDelay: `${i * 50}ms` }} />
+        ))}
+      </div>
+    );
+  }
+  return (
+    <svg viewBox="0 0 300 70" className="mt-8 h-16 w-full max-w-md" fill="none" aria-hidden>
+      <path d="M20 45 C80 5, 120 65, 170 30 S 260 10, 285 40" stroke="currentColor" strokeOpacity=".35" strokeWidth="2" strokeDasharray="4 5" />
+      {[[20, 45], [100, 38], [170, 30], [285, 40]].map(([x, y], i) => (
+        <circle key={i} cx={x} cy={y} r="9" fill={i === 3 ? "var(--glow)" : "currentColor"} fillOpacity={i === 3 ? 1 : 0.18} stroke="currentColor" strokeOpacity=".5" />
+      ))}
+    </svg>
   );
 }
 
-const TINTS = {
-  olive: "bg-tint-olive text-tint-olive-foreground",
-  rust: "bg-tint-rust text-tint-rust-foreground",
-  steel: "bg-tint-steel text-tint-steel-foreground",
-  ink: "bg-tint-ink text-tint-ink-foreground",
-} as const;
-
-function Card({
-  tint,
-  icon: Icon,
-  title,
-  text,
-  children,
-}: {
-  tint: keyof typeof TINTS;
-  icon: typeof Bot;
-  title: string;
-  text: string;
-  children?: React.ReactNode;
-}) {
+/** "Engineered for answers you can trust": tinted feature cards that pop in and lift on hover. */
+export function FeatureBento() {
   return (
-    <div className={cn("flex h-full flex-col rounded-[1.75rem] p-7 transition-transform duration-500 ease-(--ease-out-soft) hover:-translate-y-1", TINTS[tint])}>
-      <span className="flex size-11 items-center justify-center rounded-2xl bg-black/15 dark:bg-white/12">
-        <Icon className="size-5" aria-hidden />
-      </span>
-      <h3 className="mt-6 text-2xl font-bold tracking-tight">{title}</h3>
-      <p className="mt-2 max-w-md text-[15px] opacity-80">{text}</p>
-      {children}
-    </div>
+    <section id="features" className="relative scroll-mt-24 py-20 md:py-28">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="mx-auto mb-14 max-w-4xl text-center md:mb-20">
+          <h2 className="text-4xl leading-[1] font-bold tracking-tight md:text-7xl">
+            <SplitReveal inView text="Engineered for" />
+            <br />
+            <SplitReveal inView text="answers you can trust." delay={0.12} className="text-muted-foreground/70" />
+          </h2>
+        </div>
+
+        <Stagger className="mx-auto grid max-w-5xl grid-cols-1 gap-4 md:grid-cols-3 md:gap-5" gap={0.09}>
+          {FEATURES.map((feature) => (
+            <StaggerItem key={feature.title} variant="pop" className={feature.span}>
+              <motion.div
+                whileHover={{ y: -8, transition: { duration: 0.45, ease: EASE_OUT } }}
+                className={cn("group relative flex h-full min-h-[260px] flex-col justify-between overflow-hidden rounded-[2rem] p-8 md:p-10", feature.tone)}
+              >
+                <div>
+                  <div className="mb-6 flex size-14 items-center justify-center rounded-2xl bg-current/10 transition-transform duration-500 ease-(--ease-pop) group-hover:scale-110 group-hover:rotate-6">
+                    <feature.icon className="size-7" aria-hidden />
+                  </div>
+                  <h3 className="mb-2 text-2xl font-bold tracking-tight md:text-3xl">{feature.title}</h3>
+                  <p className="max-w-sm text-base leading-relaxed font-medium opacity-75">{feature.text}</p>
+                </div>
+                <Visual kind={feature.visual} />
+              </motion.div>
+            </StaggerItem>
+          ))}
+        </Stagger>
+
+        <InView className="mx-auto mt-5 max-w-5xl">
+          <div className="glass flex flex-col items-start gap-4 rounded-[2rem] bg-card p-6 ring-1 ring-foreground/[0.07] sm:flex-row sm:items-center md:px-8">
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-brand text-brand-foreground">
+              <Globe2 className="size-5" aria-hidden />
+            </span>
+            <p className="text-base text-muted-foreground md:text-lg">
+              <span className="font-bold text-foreground">English, हिन्दी and اردو.</span> Results are free to read, search and share, on any phone.
+            </p>
+          </div>
+        </InView>
+      </div>
+    </section>
   );
 }

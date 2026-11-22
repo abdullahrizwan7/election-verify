@@ -1,36 +1,31 @@
-import { BadgeCheck, Landmark, Newspaper } from "lucide-react";
-
 const SOURCES = [
-  { name: "Election Commission of India", icon: Landmark },
-  { name: "PIB Fact Check", icon: Landmark },
-  { name: "Alt News", icon: BadgeCheck },
-  { name: "BOOM", icon: BadgeCheck },
-  { name: "FACTLY", icon: BadgeCheck },
-  { name: "Newschecker", icon: BadgeCheck },
-  { name: "Vishvas News", icon: BadgeCheck },
-  { name: "AFP Fact Check", icon: BadgeCheck },
-  { name: "The Hindu", icon: Newspaper },
-  { name: "Indian Express", icon: Newspaper },
-  { name: "Reuters", icon: Newspaper },
+  "Election Commission of India",
+  "PIB Fact Check",
+  "Alt News",
+  "BOOM",
+  "FACTLY",
+  "Newschecker",
+  "Vishvas News",
+  "AFP Fact Check",
+  "The Hindu",
+  "Indian Express",
+  "Reuters",
 ];
 
-/** A slowly scrolling strip of the trusted sources we search (pauses on hover). */
+/** A slowly scrolling row of the trusted sources we search (pauses on hover). */
 export function SourceStrip() {
   const row = [...SOURCES, ...SOURCES];
   return (
-    <section className="py-14" aria-label="Trusted sources we check against">
-      <p className="mb-6 text-center text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
-        Evidence from trusted Indian sources
-      </p>
+    <section className="py-16" aria-label="Trusted sources we check against">
+      <p className="mb-8 text-center text-xs font-bold tracking-[0.2em] text-muted-foreground uppercase">Evidence from 33 trusted Indian sources</p>
       <div className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
-        <ul className="flex w-max animate-marquee gap-3 hover:[animation-play-state:paused]">
-          {row.map(({ name, icon: Icon }, i) => (
+        <ul className="flex w-max animate-marquee items-center gap-12 hover:[animation-play-state:paused] md:gap-16">
+          {row.map((name, i) => (
             <li
               key={`${name}-${i}`}
               aria-hidden={i >= SOURCES.length}
-              className="flex items-center gap-2.5 rounded-full border bg-card px-5 py-3 text-base font-semibold whitespace-nowrap"
+              className="text-2xl font-bold tracking-tight whitespace-nowrap text-foreground/35 transition-colors duration-300 hover:text-foreground md:text-3xl"
             >
-              <Icon className="size-4 text-brand" aria-hidden />
               {name}
             </li>
           ))}

@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, PlayCircle, Presentation, X } from "lucide-react";
 import { isTyping } from "@/components/command-palette";
 import { TOUR } from "@/components/presenter/steps";
+import { cn } from "@/lib/utils";
 import { T } from "@/components/i18n";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -194,8 +195,11 @@ export function StartTourButton({ className }: { className?: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className={className}>
-          <PlayCircle aria-hidden /> <T k="hero.tour" />
+        <Button variant="ghost" className={cn("glass h-11 gap-2.5 rounded-full bg-card pr-5 pl-1.5 ring-1 ring-foreground/[0.07] hover:bg-card hover:text-foreground", className)}>
+          <span className="flex size-8 items-center justify-center rounded-full bg-foreground text-background">
+            <PlayCircle className="size-4" aria-hidden />
+          </span>
+          <T k="hero.tour" />
         </Button>
       </DialogTrigger>
       <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-4xl">

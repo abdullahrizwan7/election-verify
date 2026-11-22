@@ -119,15 +119,15 @@ export function CommandPalette() {
   return (
     <>
       <Button
-        variant="outline"
+        variant="ghost"
         size="sm"
         onClick={() => setOpen(true)}
-        className="hidden w-44 justify-start gap-2 bg-card/50 text-muted-foreground backdrop-blur lg:inline-flex"
+        className="hidden h-9 w-40 justify-start gap-2 rounded-full bg-foreground/[0.05] px-3 font-medium text-muted-foreground hover:bg-foreground/[0.08] xl:inline-flex"
       >
         <Search aria-hidden /> Search…
-        <kbd className="ml-auto rounded border bg-muted px-1.5 font-mono text-[10px]">⌘K</kbd>
+        <kbd className="ml-auto rounded-md bg-background/70 px-1.5 font-mono text-[10px]">⌘K</kbd>
       </Button>
-      <Button variant="ghost" size="icon" onClick={() => setOpen(true)} className="lg:hidden" aria-label="Search and commands">
+      <Button variant="ghost" size="icon" onClick={() => setOpen(true)} className="rounded-full xl:hidden" aria-label="Search and commands">
         <Search aria-hidden />
       </Button>
 

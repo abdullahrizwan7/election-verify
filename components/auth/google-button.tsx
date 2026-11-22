@@ -27,7 +27,7 @@ export function GoogleButton({ className }: { className?: string }) {
       type="submit"
       disabled={pending}
       className={cn(
-        "group relative flex h-12 w-full items-center justify-center gap-3 rounded-xl border bg-white px-4 text-[15px] font-medium text-neutral-800 shadow-sm transition",
+        "group relative flex h-13 w-full items-center justify-center gap-3 rounded-full bg-white px-4 text-[15px] font-semibold text-neutral-800 shadow-[0_10px_30px_-14px_rgba(10,14,12,0.45)] ring-1 ring-black/10 transition duration-300",
         "hover:-translate-y-px hover:shadow-md focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
         "disabled:pointer-events-none disabled:opacity-70 dark:border-white/10",
         className,

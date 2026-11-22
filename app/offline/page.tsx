@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "You're offline" };
 /** Shown by the service worker when there is no internet connection. */
 export default function OfflinePage() {
   return (
-    <main className="mx-auto flex max-w-md flex-col items-center gap-4 px-4 py-24 text-center">
+    <main className="page-enter mx-auto flex max-w-md flex-col items-center gap-4 px-4 py-24 text-center">
       <WifiOff className="size-10 text-glow" aria-hidden />
       <h1 className="text-2xl font-semibold">You’re offline</h1>
       <p className="text-muted-foreground">

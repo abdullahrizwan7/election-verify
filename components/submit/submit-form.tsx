@@ -37,7 +37,7 @@ export function SubmitForm() {
       <input type="hidden" name="type" value={type} />
 
       <Tabs value={type} onValueChange={(value) => setType(value as InputType)}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid h-12! w-full grid-cols-3">
           <TabsTrigger value="URL">
             <Link2 aria-hidden /> <T k="submit.link" />
           </TabsTrigger>
@@ -114,11 +114,11 @@ export function SubmitForm() {
 
       <FieldError message={errors.form ?? errors.type} />
 
-      <div className="flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col-reverse gap-3 border-t border-foreground/[0.07] pt-5 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-muted-foreground">
           Don’t include personal details such as phone numbers or home addresses.
         </p>
-        <Button type="submit" disabled={pending} className="h-9 px-4">
+        <Button type="submit" variant="brand" disabled={pending} className="h-12 px-6 text-[15px]">
           {pending ? <Loader2 className="animate-spin" aria-hidden /> : <Send aria-hidden />}
           {pending ? "Sending…" : <T k="submit.button" />}
         </Button>

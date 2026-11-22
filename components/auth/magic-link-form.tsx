@@ -14,7 +14,7 @@ export function MagicLinkForm({ next }: { next: string }) {
 
   if (state.status === "sent") {
     return (
-      <div className="flex gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm" role="status">
+      <div className="flex gap-3 rounded-2xl bg-tint-lime p-4 text-sm text-tint-lime-foreground" role="status">
         <MailCheck className="mt-0.5 size-5 shrink-0 text-emerald-500" aria-hidden />
         <div>
           <p className="font-medium text-foreground">Check your inbox</p>
@@ -30,7 +30,7 @@ export function MagicLinkForm({ next }: { next: string }) {
       <div className="space-y-1.5">
         <Label htmlFor="email">Email address</Label>
         <div className="relative">
-          <Mail className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+          <Mail className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
           <Input
             id="email"
             name="email"
@@ -38,13 +38,13 @@ export function MagicLinkForm({ next }: { next: string }) {
             autoComplete="email"
             placeholder="you@example.com"
             required
-            className="h-12 rounded-xl pl-10 text-[15px]"
+            className="h-13 rounded-2xl pl-11 text-[15px]"
             aria-invalid={state.status === "error" || undefined}
           />
         </div>
         {state.status === "error" && <p className="text-sm text-destructive">{state.message}</p>}
       </div>
-      <Button type="submit" className="group h-12 w-full rounded-xl text-[15px]" disabled={pending}>
+      <Button type="submit" className="group h-13 w-full rounded-full text-[15px]" disabled={pending}>
         {pending ? <Loader2 className="animate-spin" aria-hidden /> : null}
         {pending ? "Sending link…" : "Email me a sign-in link"}
         {!pending && <ArrowRight className="transition-transform group-hover:translate-x-0.5" aria-hidden />}

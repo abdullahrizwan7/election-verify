@@ -51,6 +51,12 @@ export function useLang(): Lang {
   return useSyncExternalStore(subscribe, readLang, () => "en");
 }
 
+/** Returns a translate function for the current language (for strings passed as props). */
+export function useT() {
+  const lang = useLang();
+  return (k: MessageKey) => translate(lang, k);
+}
+
 /** Renders a translated piece of text. Usable inside server components too. */
 export function T({ k }: { k: MessageKey }) {
   const lang = useLang();
@@ -81,7 +87,7 @@ export function LanguageSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Change language">
+        <Button variant="ghost" size="icon" className="rounded-full" aria-label="Change language">
           <Languages aria-hidden />
         </Button>
       </DropdownMenuTrigger>

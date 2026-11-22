@@ -3,11 +3,12 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { AlertTriangle, BarChart3, CheckCircle2, ClipboardCheck, Loader2 } from "lucide-react";
 import { CountUp } from "@/components/fx/count-up";
-import { TiltCard } from "@/components/fx/tilt-card";
 import { QueueKeys } from "@/components/review/queue-keys";
 import { ReviewQueueTable } from "@/components/review/review-queue-table";
 import { TableSkeleton } from "@/components/skeletons";
+import { PageHeader } from "@/components/layout/page-header";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { requireRole } from "@/lib/auth";
 import { getStats, listForReview } from "@/lib/data";
@@ -44,18 +45,21 @@ function queueHref(status: Status | undefined, sort: ReviewSort) {
 
 export default function ReviewPage({ searchParams }: { searchParams: SearchParams }) {
   return (
-    <main className="mx-auto max-w-6xl space-y-6 px-4 py-10">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          <span className="text-gradient">Review queue</span>
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          Check the evidence the system collected, then publish a verdict. Nothing is public until you do.
-        </p>
-        <Link href="/review/analytics" className="mt-2 inline-flex items-center gap-1 text-sm text-primary hover:underline">
-          <BarChart3 className="size-4" aria-hidden /> Open analytics
-        </Link>
-      </div>
+    <main className="page-enter mx-auto max-w-7xl space-y-8 px-4 pt-8 pb-16 sm:px-6 md:pt-12">
+      <PageHeader
+        eyebrow="Reviewer workspace"
+        icon={ClipboardCheck}
+        title="Review"
+        muted="queue."
+        description="Check the evidence the system collected, then publish a verdict. Nothing is public until you do."
+        actions={
+          <Button variant="outline" asChild className="h-11 rounded-full px-5">
+            <Link href="/review/analytics">
+              <BarChart3 aria-hidden /> Analytics
+            </Link>
+          </Button>
+        }
+      />
       <Suspense
         fallback={
           <div className="space-y-6">
@@ -81,10 +85,10 @@ async function ReviewDashboard({ searchParams }: { searchParams: SearchParams })
 
   // Tinted stat tiles (same style as the home page dashboard preview).
   const cards = [
-    { label: "Needs review", value: stats.needsReview, icon: ClipboardCheck, className: "bg-tint-olive text-tint-olive-foreground" },
-    { label: "Being analyzed", value: stats.processing, icon: Loader2, className: "bg-tint-steel text-tint-steel-foreground" },
+    { label: "Needs review", value: stats.needsReview, icon: ClipboardCheck, className: "bg-tint-lime text-tint-lime-foreground" },
+    { label: "Being analyzed", value: stats.processing, icon: Loader2, className: "bg-tint-sky text-tint-sky-foreground" },
     { label: "Published", value: stats.published, icon: CheckCircle2, className: "bg-tint-ink text-tint-ink-foreground" },
-    { label: "Failed", value: stats.failed, icon: AlertTriangle, className: "bg-tint-rust text-tint-rust-foreground" },
+    { label: "Failed", value: stats.failed, icon: AlertTriangle, className: "bg-tint-coral text-tint-coral-foreground" },
   ];
 
   return (
@@ -97,24 +101,24 @@ async function ReviewDashboard({ searchParams }: { searchParams: SearchParams })
         </Alert>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="stagger grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
         {cards.map(({ label, value, icon: Icon, className }) => (
-          <TiltCard key={label} max={5}>
-            <div className={cn("flex h-full flex-col justify-between rounded-2xl p-5", className)}>
-              <div className="flex items-start justify-between gap-2">
-                <p className="text-sm font-medium opacity-80">{label}</p>
-                <Icon className="size-4 opacity-70" aria-hidden />
-              </div>
-              <p className="mt-6 text-4xl font-bold tracking-tight">
-                <CountUp value={value} />
-              </p>
+          <div key={label} className={cn("flex h-36 flex-col justify-between rounded-[1.75rem] p-5 transition-transform duration-500 ease-(--ease-pop) hover:-translate-y-1 md:h-40 md:p-6", className)}>
+            <div className="flex items-start justify-between gap-2">
+              <p className="text-sm font-semibold opacity-80">{label}</p>
+              <span className="flex size-9 items-center justify-center rounded-full bg-current/10">
+                <Icon className="size-4" aria-hidden />
+              </span>
             </div>
-          </TiltCard>
+            <p className="text-5xl leading-none font-bold tracking-tight">
+              <CountUp value={value} />
+            </p>
+          </div>
         ))}
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <nav className="flex flex-wrap gap-2" aria-label="Filter by status">
+      <div className="glass flex flex-wrap items-center justify-between gap-3 rounded-[2rem] bg-card p-2 ring-1 ring-foreground/[0.07]">
+        <nav className="no-scrollbar flex gap-1 overflow-x-auto" aria-label="Filter by status">
           {FILTERS.map((filter) => {
             const active = filter.status === status;
             return (
@@ -123,8 +127,8 @@ async function ReviewDashboard({ searchParams }: { searchParams: SearchParams })
                 href={queueHref(filter.status, sort)}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "rounded-full border px-3 py-1 text-sm transition",
-                  active ? "border-primary bg-primary text-primary-foreground" : "hover:bg-muted",
+                  "inline-flex h-10 shrink-0 items-center rounded-full px-4 text-sm font-semibold whitespace-nowrap transition-colors duration-300",
+                  active ? "bg-foreground text-background shadow-[0_6px_16px_-6px_rgba(0,0,0,0.45)]" : "text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground",
                 )}
               >
                 {filter.label}
@@ -132,16 +136,16 @@ async function ReviewDashboard({ searchParams }: { searchParams: SearchParams })
             );
           })}
         </nav>
-        <nav className="flex items-center gap-1 text-sm" aria-label="Sort">
-          <span className="mr-1 text-muted-foreground">Sort:</span>
+        <nav className="flex items-center gap-1 rounded-full bg-foreground/[0.05] p-1 text-sm" aria-label="Sort">
+          <span className="mr-1 pl-3 text-xs font-semibold text-muted-foreground">Sort</span>
           {SORTS.map((option) => (
             <Link
               key={option.value}
               href={queueHref(status, option.value)}
               aria-current={option.value === sort ? "true" : undefined}
               className={cn(
-                "rounded-md px-2 py-1 transition",
-                option.value === sort ? "bg-muted font-medium" : "text-muted-foreground hover:text-foreground",
+                "rounded-full px-3 py-1.5 font-semibold transition-colors",
+                option.value === sort ? "bg-background shadow-sm dark:bg-white/15" : "text-muted-foreground hover:text-foreground",
               )}
             >
               {option.label}

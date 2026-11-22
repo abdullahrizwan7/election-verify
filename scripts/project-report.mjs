@@ -6,7 +6,7 @@
  *   node scripts/project-report.mjs
  *
  * Screenshots of the current design are read from private/shots/ (take them with
- * the app running); older screens come from docs/screenshots/.
+ * the app running); reviewer screens come from docs/screenshots/ (npm run docs:pdf).
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -349,12 +349,12 @@ npm run check:services      # verify every key works</code></pre>
 
 <section class="page">
   <h2><span class="num">09</span>Reviewer tools</h2>
-  ${figure(shots.queue, "Review queue (earlier theme screenshot): claims waiting, sorted by urgency or reports.", "", 78)}
+  ${figure(shots.queue, "Review queue: claims waiting, sorted by urgency or reports.", "", 78)}
   <div class="grid2">
-    ${figure(shots.board, "Evidence board (earlier theme): how evidence relates to the claims.", "", 48)}
-    ${figure(shots.forensics, "Image forensics (earlier theme): OCR boxes and photo details.", "", 48)}
+    ${figure(shots.board, "Evidence board: how evidence relates to the claims.", "", 48)}
+    ${figure(shots.forensics, "Image forensics: OCR boxes and photo details.", "", 48)}
   </div>
-  ${figure(shots.analytics, "Analytics (earlier theme): verdict mix, trends and review speed.", "", 70)}
+  ${figure(shots.analytics, "Analytics: verdict mix, trends and review speed.", "", 70)}
   <div class="foot"><span>ElectionVerify · Project report</span><span>10</span></div>
 </section>
 

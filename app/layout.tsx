@@ -33,8 +33,8 @@ export const metadata: Metadata = {
 /** The browser and phone status bar take the app's colors. */
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#0f0e0d" },
-    { media: "(prefers-color-scheme: light)", color: "#fbfaf7" },
+    { media: "(prefers-color-scheme: dark)", color: "#16181c" },
+    { media: "(prefers-color-scheme: light)", color: "#eef3ef" },
   ],
 };
 
@@ -43,7 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     // next-themes sets the "dark" class before the page shows, so the browser's HTML can differ from the server's.
     <html lang="en" className={`${urbanist.variable} ${geistMono.variable} ${devanagari.variable} ${naskh.variable} h-full antialiased`} suppressHydrationWarning>
       <body className="flex min-h-full flex-col">
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <TooltipProvider>
             <DemoBanner />
             <SiteHeader />

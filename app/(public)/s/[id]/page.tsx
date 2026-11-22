@@ -18,11 +18,12 @@ import { SubmittedContent } from "@/components/submitted-content";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { VerdictBadge } from "@/components/verdict-badge";
 import { getSubmission } from "@/lib/data";
 import { formatDate } from "@/lib/format";
 import { VERDICTS } from "@/lib/labels";
+import type { MessageKey } from "@/lib/i18n/dictionaries";
 import type { SubmissionDetail } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 /** The page title and link preview show the verdict, e.g. "False: Polling stations will close at 2 PM". */
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -45,8 +46,8 @@ type Props = {
 
 export default function ResultPage({ params, searchParams }: Props) {
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8">
-      <Button variant="ghost" size="sm" asChild className="mb-4 -ml-2">
+    <main className="page-enter mx-auto max-w-7xl px-4 pt-8 pb-16 sm:px-6">
+      <Button variant="outline" size="sm" asChild className="mb-6 h-10 rounded-full px-4">
         <Link href="/verified">
           <ArrowLeft aria-hidden /> All verified claims
         </Link>
@@ -89,14 +90,16 @@ async function Result({ params, searchParams }: Props) {
         </Alert>
       )}
 
-      <div className="space-y-2">
+      <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
           <StatusBadge status={submission.status} />
           {submission.reportCount > 1 && (
-            <span className="text-xs text-muted-foreground">Sent to us {submission.reportCount} times</span>
+            <span className="glass rounded-full bg-card px-3 py-1 text-xs font-semibold text-muted-foreground ring-1 ring-foreground/[0.07]">
+              Sent to us {submission.reportCount} times
+            </span>
           )}
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight text-pretty md:text-3xl">{submission.title}</h1>
+        <h1 className="max-w-5xl text-4xl leading-[1.04] font-bold tracking-tight text-balance md:text-6xl">{submission.title}</h1>
       </div>
 
       {isPublished ? <VerdictPanel submission={submission} /> : <ProgressPanel submission={submission} />}
@@ -113,7 +116,7 @@ async function Result({ params, searchParams }: Props) {
         </Card>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+      <div className="grid gap-5 lg:grid-cols-[1fr_380px]">
         <div className="space-y-6">
           <SubmittedContent submission={submission} />
           {isPublished && submission.imageUrl && <ForensicsViewer imageUrl={submission.imageUrl} evidence={submission.evidence} />}
@@ -148,31 +151,46 @@ async function Result({ params, searchParams }: Props) {
 
 function VerdictPanel({ submission }: { submission: SubmissionDetail }) {
   const verdict = submission.finalVerdict!;
-  const rgb = VERDICTS[verdict].rgb;
+  const meta = VERDICTS[verdict];
+  const sources = new Set(submission.evidence.map((e) => e.publisher ?? e.url).filter(Boolean)).size;
+  const facts = [
+    { label: "Claims checked", value: submission.claims.length },
+    { label: "Pieces of evidence", value: submission.evidence.length },
+    { label: "Sources consulted", value: sources },
+    { label: "Times reported", value: submission.reportCount },
+  ];
   return (
-    <section
-      data-tour="verdict-panel"
-      className="relative overflow-hidden rounded-2xl border bg-card p-6 backdrop-blur-xl"
-      style={{ boxShadow: `0 0 0 1px rgb(${rgb} / 0.35), 0 30px 80px -30px rgb(${rgb} / 0.7)` }}
-    >
-      {/* Verdict-colored light along the top and in the corner */}
-      <div aria-hidden className="absolute inset-x-8 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, rgb(${rgb}), transparent)` }} />
-      <div aria-hidden className="pointer-events-none absolute -top-24 -left-24 size-64 rounded-full blur-3xl" style={{ background: `rgb(${rgb} / 0.18)` }} />
-      <div className="relative flex flex-wrap items-center gap-3">
-        <VerdictBadge verdict={verdict} size="lg" />
-        <span className="text-sm text-muted-foreground">{VERDICTS[verdict].description}</span>
+    <section data-tour="verdict-panel" className="stagger grid gap-4 lg:grid-cols-[1.6fr_1fr]">
+      <div className={cn("sheen relative overflow-hidden rounded-[2.5rem] p-7 md:p-10", meta.tone)}>
+        <span aria-hidden className="pointer-events-none absolute -right-16 -bottom-20 size-72 rounded-full bg-current/10" />
+        <p className="relative text-xs font-bold tracking-[0.2em] uppercase opacity-70">Our verdict</p>
+        <p className="relative mt-2 text-6xl leading-none font-bold tracking-tight md:text-8xl">
+          <T k={`verdict.${verdict}` as MessageKey} />
+        </p>
+        <p className="relative mt-3 text-base font-semibold opacity-75">{meta.description}</p>
+        {submission.publicNote && <p className="relative mt-6 max-w-3xl text-lg leading-relaxed font-medium text-pretty md:text-xl">{submission.publicNote}</p>}
+        <p className="relative mt-6 flex items-center gap-2 text-sm font-semibold opacity-75">
+          <UserCheck className="size-4" aria-hidden />
+          <T k="result.reviewed" /> {formatDate(submission.publishedAt)}
+        </p>
       </div>
-      {submission.publicNote && <p className="relative mt-4 max-w-3xl text-lg leading-relaxed text-pretty">{submission.publicNote}</p>}
-      <p className="relative mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-        <UserCheck className="size-4" aria-hidden />
-        <T k="result.reviewed" /> {formatDate(submission.publishedAt)}
-      </p>
-      <div className="relative mt-5 border-t pt-4">
-        <ShareButtons
-          path={`/s/${submission.id}`}
-          downloadPath={`/s/${submission.id}/card`}
-          text={`Fact-check: “${submission.title}” is rated ${VERDICTS[verdict].label.toUpperCase()}.`}
-        />
+      <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-2 gap-3">
+          {facts.map((fact, i) => (
+            <div key={fact.label} className={cn("rounded-[1.75rem] p-5", i === 0 ? "bg-tint-ink text-tint-ink-foreground" : "glass bg-card ring-1 ring-foreground/[0.07]")}>
+              <p className="text-4xl font-bold tracking-tight tabular-nums">{fact.value}</p>
+              <p className={cn("mt-1 text-xs font-semibold", i === 0 ? "text-white/60" : "text-muted-foreground")}>{fact.label}</p>
+            </div>
+          ))}
+        </div>
+        <div className="glass flex-1 rounded-[1.75rem] bg-card p-5 ring-1 ring-foreground/[0.07]">
+          <p className="mb-3 text-sm font-bold">Share the answer</p>
+          <ShareButtons
+            path={`/s/${submission.id}`}
+            downloadPath={`/s/${submission.id}/card`}
+            text={`Fact-check: “${submission.title}” is rated ${meta.label.toUpperCase()}.`}
+          />
+        </div>
       </div>
     </section>
   );
@@ -182,16 +200,16 @@ function ProgressPanel({ submission }: { submission: SubmissionDetail }) {
   const stillRunning = submission.status === "QUEUED" || submission.status === "PROCESSING";
 
   return (
-    <section className="border-gradient relative grid gap-6 overflow-hidden rounded-2xl p-6 md:grid-cols-[1fr_1.2fr]" data-tour="pipeline">
-      <div aria-hidden className="bg-grid pointer-events-none absolute inset-0 opacity-50" />
-      <div aria-hidden className="pointer-events-none absolute -top-20 -right-20 size-60 rounded-full bg-glow/15 blur-3xl" />
+    <section className="glass relative grid gap-6 overflow-hidden rounded-[2.5rem] bg-card p-6 ring-1 ring-foreground/[0.07] md:grid-cols-[1fr_1.2fr] md:p-9" data-tour="pipeline">
+      <div aria-hidden className="orb pointer-events-none absolute -top-24 -right-24 size-72 rounded-full bg-tint-sky/60 blur-3xl" />
+      <div aria-hidden className="orb pointer-events-none absolute -bottom-24 -left-24 size-72 rounded-full bg-tint-lime/50 blur-3xl [animation-delay:-8s]" />
       {stillRunning && <AutoRefresh />}
       <PipelineMap steps={submission.steps} className="relative mb-2 md:col-span-2" />
       <div className="relative space-y-3">
         {submission.status === "FAILED" ? (
           <>
             <AlertTriangle className="size-6 text-destructive" aria-hidden />
-            <h2 className="text-lg font-medium">We couldn’t finish checking this</h2>
+            <h2 className="text-2xl font-bold tracking-tight">We couldn’t finish checking this</h2>
             <p className="text-sm text-muted-foreground">{submission.error ?? "Something went wrong."}</p>
             <Button variant="outline" asChild>
               <Link href="/submit">Submit it another way</Link>
@@ -200,7 +218,7 @@ function ProgressPanel({ submission }: { submission: SubmissionDetail }) {
         ) : submission.status === "NEEDS_REVIEW" ? (
           <>
             <UserCheck className="size-6 text-amber-600" aria-hidden />
-            <h2 className="text-lg font-medium">
+            <h2 className="text-2xl font-bold tracking-tight">
               <T k="result.waiting" />
             </h2>
             <p className="text-sm text-muted-foreground">
@@ -211,7 +229,7 @@ function ProgressPanel({ submission }: { submission: SubmissionDetail }) {
         ) : (
           <>
             <Clock className="size-6 text-primary" aria-hidden />
-            <h2 className="text-lg font-medium">
+            <h2 className="text-2xl font-bold tracking-tight">
               <T k="result.checking" />
             </h2>
             <p className="text-sm text-muted-foreground">

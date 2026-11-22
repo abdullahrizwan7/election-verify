@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { CheckCircle2, LogIn } from "lucide-react";
+import { Bot, CheckCircle2, LogIn, Megaphone, Send, UserCheck } from "lucide-react";
+import { PageHeader } from "@/components/layout/page-header";
 import { SubmitForm } from "@/components/submit/submit-form";
 import { T } from "@/components/i18n";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -18,55 +18,58 @@ const TIPS = [
   "One claim per submission gives the clearest answer.",
 ];
 
+const NEXT = [
+  { icon: Send, title: "You send it", text: "Right now", tone: "bg-tint-lime text-tint-lime-foreground" },
+  { icon: Bot, title: "AI gathers evidence", text: "About a minute", tone: "bg-tint-sky text-tint-sky-foreground" },
+  { icon: UserCheck, title: "A reviewer decides", text: "Usually the same day", tone: "bg-tint-coral text-tint-coral-foreground" },
+  { icon: Megaphone, title: "Verdict is public", text: "Ready to share", tone: "bg-brand text-brand-foreground" },
+];
+
 export default function SubmitPage() {
   return (
-    <main className="mx-auto grid max-w-6xl gap-8 px-4 py-10 lg:grid-cols-[1fr_320px]">
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            <span className="text-gradient">
-              <T k="submit.title" />
-            </span>
-          </h1>
-          <p className="mt-1 text-muted-foreground">
-            <T k="submit.subtitle" />
-          </p>
-        </div>
-        <Card data-tour="submit-form">
-          <CardContent className="pt-6">
-            <Suspense fallback={<Skeleton className="h-80 w-full rounded-lg" />}>
-              <SubmitGate />
-            </Suspense>
-          </CardContent>
-        </Card>
-      </div>
+    <main className="page-enter mx-auto max-w-7xl space-y-10 px-4 pt-10 pb-16 sm:px-6 md:pt-16">
+      <PageHeader eyebrow="Ten seconds" icon={Send} title="Check it" muted="before you forward it." description={<T k="submit.subtitle" />} />
 
-      <aside className="space-y-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Tips for a quick answer</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-3 text-sm">
+      <div className="grid gap-5 lg:grid-cols-[1fr_380px]">
+        <div className="glass rounded-[2.5rem] bg-card p-6 ring-1 ring-foreground/[0.07] shadow-[0_40px_100px_-50px_rgba(10,14,12,0.45)] sm:p-9" data-tour="submit-form">
+          <Suspense fallback={<Skeleton className="h-80 w-full rounded-3xl" />}>
+            <SubmitGate />
+          </Suspense>
+        </div>
+
+        <aside className="space-y-5">
+          <div className="relative overflow-hidden rounded-[2.5rem] bg-tint-ink p-7 text-tint-ink-foreground">
+            <div aria-hidden className="orb pointer-events-none absolute -top-20 -right-16 size-56 rounded-full bg-brand/35 blur-[80px]" />
+            <h2 className="relative text-xl font-bold tracking-tight">What happens next</h2>
+            <ol className="relative mt-5 space-y-3">
+              {NEXT.map(({ icon: Icon, title, text, tone }, index) => (
+                <li key={title} className="flex items-center gap-3.5 rounded-2xl bg-white/[0.06] p-3 ring-1 ring-white/10">
+                  <span className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${tone}`}>
+                    <Icon className="size-[18px]" aria-hidden />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="font-semibold">{title}</p>
+                    <p className="text-xs text-white/55">
+                      Step {index + 1} · {text}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <div className="rounded-[2.5rem] bg-tint-lime p-7 text-tint-lime-foreground">
+            <h2 className="text-xl font-bold tracking-tight">Tips for a quick answer</h2>
+            <ul className="mt-4 space-y-3 text-[15px] font-medium">
               {TIPS.map((tip) => (
-                <li key={tip} className="flex gap-2">
-                  <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-600" aria-hidden />
+                <li key={tip} className="flex gap-2.5">
+                  <CheckCircle2 className="mt-0.5 size-[18px] shrink-0 opacity-70" aria-hidden />
                   {tip}
                 </li>
               ))}
             </ul>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">What happens next</CardTitle>
-            <CardDescription>
-              Our system collects evidence in about a minute. Then a human reviewer checks it and publishes the
-              verdict. You can follow every step on the result page.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      </aside>
+          </div>
+        </aside>
+      </div>
     </main>
   );
 }
@@ -77,15 +80,13 @@ async function SubmitGate() {
   if (user) return <SubmitForm />;
 
   return (
-    <div className="flex flex-col items-center gap-3 py-12 text-center">
-      <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-        <LogIn className="size-5" aria-hidden />
+    <div className="flex flex-col items-center gap-4 py-14 text-center">
+      <span className="flex size-16 items-center justify-center rounded-full bg-tint-sky text-tint-sky-foreground">
+        <LogIn className="size-7" aria-hidden />
       </span>
-      <h2 className="text-lg font-medium">Sign in to submit</h2>
-      <p className="max-w-sm text-sm text-muted-foreground">
-        Signing in helps us stop spam and lets you follow the progress of what you send.
-      </p>
-      <Button asChild>
+      <h2 className="text-3xl font-bold tracking-tight">Sign in to submit</h2>
+      <p className="max-w-sm text-muted-foreground">Signing in helps us stop spam and lets you follow the progress of what you send.</p>
+      <Button asChild size="lg" className="mt-2 rounded-full px-7">
         <Link href="/login?next=/submit">Sign in</Link>
       </Button>
     </div>
