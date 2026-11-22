@@ -11,12 +11,17 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
     console.error(error);
   }, [error]);
 
+  // A dropped connection while sending (for example a weak mobile signal) gets its own message.
+  const offline = /fetch|network|load failed|connection/i.test(error.message ?? "");
+
   return (
     <main className="page-enter mx-auto flex max-w-md flex-col items-center gap-4 px-4 py-24 text-center">
       <TriangleAlert className="size-10 text-destructive" aria-hidden />
-      <h1 className="text-2xl font-semibold">Something went wrong</h1>
+      <h1 className="text-2xl font-semibold">{offline ? "Couldn’t reach the server" : "Something went wrong"}</h1>
       <p className="text-muted-foreground">
-        This page couldn’t load. Try again, and if it keeps happening, come back in a few minutes.
+        {offline
+          ? "Your internet connection dropped while sending. Check your connection (Wi-Fi or mobile data) and try again."
+          : "This page couldn’t load. Try again, and if it keeps happening, come back in a few minutes."}
       </p>
       {error.digest && <p className="text-xs text-muted-foreground">Error reference: {error.digest}</p>}
       <div className="flex gap-2">

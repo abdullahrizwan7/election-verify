@@ -93,7 +93,14 @@ export async function createSubmissionAction(_prev: SubmitState, formData: FormD
   }
 
   // Only store the image once we know it's new.
-  if (input.type === "IMAGE") submission.imagePath = await saveImage(input.image);
+  if (input.type === "IMAGE") {
+    try {
+      submission.imagePath = await saveImage(input.image);
+    } catch (error) {
+      console.error("Image upload to storage failed", error);
+      return { errors: { image: "We couldn't save your image. Please try again in a moment." }, values };
+    }
+  }
 
   // 6. Save it, start the checks in the background, and show the progress page.
   const { id } = await createSubmission(submission);
