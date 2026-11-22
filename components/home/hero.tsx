@@ -7,6 +7,9 @@ import { Magnetic } from "@/components/motion/reveal";
 import { SplitText } from "@/components/motion/split-text";
 import { StartTourButton } from "@/components/presenter/presenter";
 import { CtaButton } from "@/components/ui/cta-button";
+import { cn } from "@/lib/utils";
+
+const LONG_WORDS = ["ta", "ml"];
 
 /** Delay for a CSS entrance (see .rise-in in globals.css). */
 const d = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
@@ -35,7 +38,14 @@ export function Hero({ children }: { children?: React.ReactNode }) {
           </span>
         </div>
 
-        <h1 className="mx-auto mb-7 max-w-5xl text-5xl leading-[0.98] font-bold tracking-tight text-balance sm:text-6xl md:text-7xl lg:text-[5.75rem]" key={lang}>
+        <h1
+          className={cn(
+            "mx-auto mb-7 max-w-5xl leading-[0.98] font-bold tracking-tight text-balance",
+            // Tamil and Malayalam have long words, so their headline starts smaller on phones.
+            LONG_WORDS.includes(lang) ? "text-[2.1rem] sm:text-5xl md:text-6xl lg:text-7xl" : "text-5xl sm:text-6xl md:text-7xl lg:text-[5.75rem]",
+          )}
+          key={lang}
+        >
           <SplitText text={t("hero.title1")} delay={60} />
           <br />
           <SplitText text={t("hero.title2")} delay={180} className="text-brand" />

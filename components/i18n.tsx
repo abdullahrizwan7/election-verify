@@ -8,12 +8,13 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LANGS, translate, type Lang, type MessageKey } from "@/lib/i18n/dictionaries";
+import { LANGS, isLang, translate, type Lang, type MessageKey } from "@/lib/i18n/dictionaries";
 
 /**
- * Language switching for the public pages (English, Hindi, Urdu).
+ * Language switching for the public pages: English and Hindi first, then eight more Indian languages.
  * The choice is saved in the browser. Pages are rendered in English on the
  * server, then switch to the chosen language in the browser, so pages stay fast.
  */
@@ -23,7 +24,7 @@ const listeners = new Set<() => void>();
 function readLang(): Lang {
   try {
     const saved = localStorage.getItem(KEY);
-    return saved === "hi" || saved === "ur" ? saved : "en";
+    return isLang(saved) ? saved : "en";
   } catch {
     return "en";
   }
@@ -91,17 +92,31 @@ export function LanguageSwitcher() {
           <Languages aria-hidden />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="max-h-[70vh] w-56 overflow-y-auto">
         <DropdownMenuLabel>
           <T k="lang.label" />
         </DropdownMenuLabel>
-        {LANGS.map((option) => (
-          <DropdownMenuItem key={option.code} onSelect={() => setLang(option.code)}>
-            <span lang={option.code}>{option.name}</span>
-            {option.code === lang && <Check className="ml-auto" aria-hidden />}
-          </DropdownMenuItem>
+        {LANGS.filter((l) => l.main).map((option) => (
+          <LangItem key={option.code} option={option} current={lang} />
+        ))}
+        <DropdownMenuSeparator />
+        <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">More languages</DropdownMenuLabel>
+        {LANGS.filter((l) => !l.main).map((option) => (
+          <LangItem key={option.code} option={option} current={lang} />
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+function LangItem({ option, current }: { option: (typeof LANGS)[number]; current: Lang }) {
+  return (
+    <DropdownMenuItem onSelect={() => setLang(option.code)}>
+      <span lang={option.code} dir={option.dir}>
+        {option.name}
+      </span>
+      {option.code !== "en" && <span className="text-xs text-muted-foreground">{option.english}</span>}
+      {option.code === current && <Check className="ml-auto" aria-hidden />}
+    </DropdownMenuItem>
   );
 }

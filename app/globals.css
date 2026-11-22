@@ -204,11 +204,20 @@
   html {
     @apply font-sans;
     scroll-behavior: smooth;
-    /* Hindi and Urdu letters fall back to these fonts automatically. */
-    font-family: var(--font-sans), var(--font-devanagari), var(--font-naskh), ui-sans-serif, system-ui, sans-serif;
+    /* Letters in Indian scripts fall back to the matching Noto font automatically. */
+    font-family: var(--font-sans), var(--font-devanagari), var(--font-bengali), var(--font-telugu), var(--font-tamil), var(--font-gujarati), var(--font-kannada), var(--font-malayalam), var(--font-gurmukhi), var(--font-naskh), ui-sans-serif, system-ui, sans-serif;
   }
   h1, h2, h3, h4 {
     letter-spacing: -0.02em;
+  }
+  /* Some Indian-language words are longer than a phone is wide at heading size.
+     They may break only when they cannot fit on the line (English never needs it). */
+  h1, h2, h3, h4, dt {
+    overflow-wrap: anywhere;
+  }
+  /* Safety net: the page itself never scrolls sideways (clip keeps sticky headers working). */
+  html, body {
+    overflow-x: clip;
   }
   :lang(ur) {
     line-height: 1.9;

@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 type Item = { href: string; label: string; key?: MessageKey; icon: typeof House; match?: (path: string) => boolean };
 
 const PUBLIC: Item[] = [
-  { href: "/", label: "Home", icon: House, match: (p) => p === "/" },
+  { href: "/", label: "Home", key: "nav.home", icon: House, match: (p) => p === "/" },
   { href: "/verified", label: "Verified", key: "nav.verified", icon: BadgeCheck, match: (p) => p.startsWith("/verified") || p.startsWith("/s/") },
   { href: "/submit", label: "Submit", key: "nav.submit", icon: Send, match: (p) => p.startsWith("/submit") || p.startsWith("/my") },
   { href: "/about", label: "Method", key: "nav.method", icon: BookOpen },
@@ -86,7 +86,7 @@ export function PillNav({ className }: { className?: string }) {
             )}
           >
             <item.icon className="size-4 shrink-0" aria-hidden />
-            <span className={cn("sm:inline", on ? "inline" : "hidden")}>{item.key ? <T k={item.key} /> : item.label}</span>
+            <span className={cn("max-w-[8.5rem] truncate sm:inline sm:max-w-none", on ? "inline-block" : "hidden")}>{item.key ? <T k={item.key} /> : item.label}</span>
             {on && <span className="size-1.5 rounded-full bg-brand" aria-hidden />}
           </Link>
         );

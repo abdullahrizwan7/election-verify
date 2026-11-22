@@ -1,17 +1,41 @@
 /**
- * Translations for the public pages. English is the source; Hindi and Urdu
- * fall back to English for any key that is missing.
+ * Translations for the public pages. English is the source; every other language
+ * falls back to English for any key that is missing.
+ * English and Hindi are the main languages; the rest are offered under "More languages".
  * Text that people submit (claims, explanations) is never translated.
  */
-export type Lang = "en" | "hi" | "ur";
+import { bn } from "@/lib/i18n/locales/bn";
+import { gu } from "@/lib/i18n/locales/gu";
+import { kn } from "@/lib/i18n/locales/kn";
+import { ml } from "@/lib/i18n/locales/ml";
+import { mr } from "@/lib/i18n/locales/mr";
+import { pa } from "@/lib/i18n/locales/pa";
+import { ta } from "@/lib/i18n/locales/ta";
+import { te } from "@/lib/i18n/locales/te";
 
-export const LANGS: { code: Lang; name: string; dir: "ltr" | "rtl" }[] = [
-  { code: "en", name: "English", dir: "ltr" },
-  { code: "hi", name: "हिन्दी", dir: "ltr" },
-  { code: "ur", name: "اردو", dir: "rtl" },
+export type Lang = "en" | "hi" | "bn" | "mr" | "te" | "ta" | "gu" | "kn" | "ml" | "pa" | "ur";
+
+export const LANGS: { code: Lang; name: string; english: string; dir: "ltr" | "rtl"; main?: boolean }[] = [
+  { code: "en", name: "English", english: "English", dir: "ltr", main: true },
+  { code: "hi", name: "हिन्दी", english: "Hindi", dir: "ltr", main: true },
+  { code: "bn", name: "বাংলা", english: "Bengali", dir: "ltr" },
+  { code: "mr", name: "मराठी", english: "Marathi", dir: "ltr" },
+  { code: "te", name: "తెలుగు", english: "Telugu", dir: "ltr" },
+  { code: "ta", name: "தமிழ்", english: "Tamil", dir: "ltr" },
+  { code: "gu", name: "ગુજરાતી", english: "Gujarati", dir: "ltr" },
+  { code: "kn", name: "ಕನ್ನಡ", english: "Kannada", dir: "ltr" },
+  { code: "ml", name: "മലയാളം", english: "Malayalam", dir: "ltr" },
+  { code: "pa", name: "ਪੰਜਾਬੀ", english: "Punjabi", dir: "ltr" },
+  { code: "ur", name: "اردو", english: "Urdu", dir: "rtl" },
 ];
 
+export function isLang(value: unknown): value is Lang {
+  return LANGS.some((l) => l.code === value);
+}
+
 const en = {
+  "nav.home": "Home",
+  "nav.signin": "Sign in",
   "nav.verified": "Verified claims",
   "nav.how": "How it works",
   "nav.method": "Our method",
@@ -80,9 +104,11 @@ const en = {
 } as const;
 
 export type MessageKey = keyof typeof en;
-type Dictionary = Partial<Record<MessageKey, string>>;
+export type Dictionary = Partial<Record<MessageKey, string>>;
 
 const hi: Dictionary = {
+  "nav.home": "होम",
+  "nav.signin": "साइन इन",
   "nav.verified": "सत्यापित दावे",
   "nav.how": "यह कैसे काम करता है",
   "nav.method": "हमारी पद्धति",
@@ -151,6 +177,8 @@ const hi: Dictionary = {
 };
 
 const ur: Dictionary = {
+  "nav.home": "ہوم",
+  "nav.signin": "سائن ان",
   "nav.verified": "تصدیق شدہ دعوے",
   "nav.how": "یہ کیسے کام کرتا ہے",
   "nav.method": "ہمارا طریقہ",
@@ -218,7 +246,7 @@ const ur: Dictionary = {
   "lang.label": "زبان",
 };
 
-export const DICTIONARIES: Record<Lang, Dictionary> = { en, hi, ur };
+export const DICTIONARIES: Record<Lang, Dictionary> = { en, hi, bn, mr, te, ta, gu, kn, ml, pa, ur };
 
 export function translate(lang: Lang, key: MessageKey): string {
   return DICTIONARIES[lang][key] ?? en[key];

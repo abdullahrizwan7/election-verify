@@ -101,7 +101,7 @@ export function HeroPreview({ data }: { data: PreviewData }) {
 
             <div>
               <p className="text-[11px] font-medium text-muted-foreground">Reviewer workspace</p>
-              <p className="text-2xl leading-tight font-bold tracking-tight md:text-4xl">Today's review queue</p>
+              <p className="text-2xl leading-tight font-bold tracking-tight md:text-4xl">Today&rsquo;s review queue</p>
             </div>
 
             <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4">

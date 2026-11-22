@@ -7,7 +7,9 @@ import { Fragment, type CSSProperties } from "react";
 export function SplitText({ text, className, delay = 0, step = 40 }: { text: string; className?: string; delay?: number; step?: number }) {
   const words = text.split(" ");
   // Keep the last two words together so a line never ends with one word alone ("it.").
-  if (words.length > 2) words.splice(-2, 2, `${words[words.length - 2]}\u00a0${words[words.length - 1]}`);
+  // Only when the pair is short, so long words (Tamil, Malayalam) can still wrap on phones.
+  const lastTwo = `${words[words.length - 2]} ${words[words.length - 1]}`;
+  if (words.length > 2 && lastTwo.length <= 14) words.splice(-2, 2, lastTwo.replace(" ", "\u00a0"));
   return (
     <span className={className} aria-label={text} role="text">
       {/* Real spaces between the words let the browser balance the lines. */}

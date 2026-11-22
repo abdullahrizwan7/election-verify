@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { T } from "@/components/i18n";
 import { UserMenu } from "@/components/layout/user-menu";
 import { Button } from "@/components/ui/button";
 import { getCurrentUser, hasRole } from "@/lib/auth";
@@ -9,7 +10,9 @@ export async function HeaderAccount() {
   if (!user) {
     return (
       <Button size="sm" asChild className="ml-0.5 h-9 rounded-full px-4">
-        <Link href="/login">Sign in</Link>
+        <Link href="/login">
+          <T k="nav.signin" />
+        </Link>
       </Button>
     );
   }

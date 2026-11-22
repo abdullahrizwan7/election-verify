@@ -1,5 +1,7 @@
 "use client";
 
+import { LANGS } from "@/lib/i18n/dictionaries";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -162,13 +164,9 @@ export function CommandPalette() {
               <CommandItem value="action toggle dark light theme" onSelect={() => run(() => setTheme(resolvedTheme === "dark" ? "light" : "dark"))}>
                 <MoonStar aria-hidden /> Switch light / dark mode
               </CommandItem>
-              {[
-                ["en", "English"],
-                ["hi", "हिन्दी (Hindi)"],
-                ["ur", "اردو (Urdu)"],
-              ].map(([code, name]) => (
-                <CommandItem key={code} value={`action language ${name}`} onSelect={() => run(() => window.dispatchEvent(new CustomEvent("ev:set-lang", { detail: code })))}>
-                  <Languages aria-hidden /> Language: {name}
+              {LANGS.map(({ code, name, english }) => (
+                <CommandItem key={code} value={`action language ${english} ${name}`} onSelect={() => run(() => window.dispatchEvent(new CustomEvent("ev:set-lang", { detail: code })))}>
+                  <Languages aria-hidden /> Language: {code === "en" ? name : `${name} (${english})`}
                 </CommandItem>
               ))}
               <CommandItem value="action keyboard shortcuts help" onSelect={() => run(() => setHelpOpen(true))}>
