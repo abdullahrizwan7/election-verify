@@ -309,7 +309,7 @@ proxy.ts              Runs before every request (Next.js 16 middleware)</code></
     ["CI", "GitHub Actions", "Lint, types, tests, build and browser tests on every push"],
     ["Service check", "npm run check:services", "Tests every API key with one real request"],
   ])}
-  ${figure(shots.result, "Result page: live pipeline progress while the checks run.", "small")}
+  ${figure(shots.result, "Result page: a big verdict card, the key numbers and share buttons.", "small")}
   <div class="foot"><span>ElectionVerify · Project report</span><span>7</span></div>
 </section>
 
@@ -343,7 +343,7 @@ npm run check:services      # verify every key works</code></pre>
   ${figure(shots.bento, "Home page: feature cards in the four tile colours.", "", 125)}
   <div class="grid2">
     ${figure(shots.verified, "Verified claims: search and filter by verdict.", "", 62)}
-    ${figure(shots.login, "Login: Google or email link, one page for all roles.", "", 62)}
+    ${figure(shots.login, "Login: one page for all roles (Google or email link; demo mode shows one-click accounts).", "", 62)}
   </div>
   <div class="foot"><span>ElectionVerify · Project report</span><span>9</span></div>
 </section>
