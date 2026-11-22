@@ -8,7 +8,6 @@ import { QueueKeys } from "@/components/review/queue-keys";
 import { ReviewQueueTable } from "@/components/review/review-queue-table";
 import { TableSkeleton } from "@/components/skeletons";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { requireRole } from "@/lib/auth";
 import { getStats, listForReview } from "@/lib/data";
@@ -80,11 +79,12 @@ async function ReviewDashboard({ searchParams }: { searchParams: SearchParams })
   const sort = SORTS.find((s) => s.value === rawSort)?.value ?? "newest";
   const [stats, items] = await Promise.all([getStats(), listForReview({ status, sort })]);
 
+  // Tinted stat tiles (same style as the home page dashboard preview).
   const cards = [
-    { label: "Needs review", value: stats.needsReview, icon: ClipboardCheck, className: "text-amber-500" },
-    { label: "Being analyzed", value: stats.processing, icon: Loader2, className: "text-sky-400" },
-    { label: "Published", value: stats.published, icon: CheckCircle2, className: "text-emerald-500" },
-    { label: "Failed", value: stats.failed, icon: AlertTriangle, className: "text-red-500" },
+    { label: "Needs review", value: stats.needsReview, icon: ClipboardCheck, className: "bg-tint-olive text-tint-olive-foreground" },
+    { label: "Being analyzed", value: stats.processing, icon: Loader2, className: "bg-tint-steel text-tint-steel-foreground" },
+    { label: "Published", value: stats.published, icon: CheckCircle2, className: "bg-tint-ink text-tint-ink-foreground" },
+    { label: "Failed", value: stats.failed, icon: AlertTriangle, className: "bg-tint-rust text-tint-rust-foreground" },
   ];
 
   return (
@@ -100,19 +100,15 @@ async function ReviewDashboard({ searchParams }: { searchParams: SearchParams })
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map(({ label, value, icon: Icon, className }) => (
           <TiltCard key={label} max={5}>
-            <Card className="h-full">
-              <CardContent className="flex items-center justify-between pt-2">
-                <div>
-                  <p className="text-sm text-muted-foreground">{label}</p>
-                  <p className="text-3xl font-semibold">
-                    <CountUp value={value} />
-                  </p>
-                </div>
-                <span className="flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-glow/20 to-glow-2/20 ring-1 ring-glow/25">
-                  <Icon className={cn("size-5", className)} aria-hidden />
-                </span>
-              </CardContent>
-            </Card>
+            <div className={cn("flex h-full flex-col justify-between rounded-2xl p-5", className)}>
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-sm font-medium opacity-80">{label}</p>
+                <Icon className="size-4 opacity-70" aria-hidden />
+              </div>
+              <p className="mt-6 text-4xl font-bold tracking-tight">
+                <CountUp value={value} />
+              </p>
+            </div>
           </TiltCard>
         ))}
       </div>

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Noto_Naskh_Arabic, Noto_Sans_Devanagari } from "next/font/google";
+import { Geist_Mono, Noto_Naskh_Arabic, Noto_Sans_Devanagari, Urbanist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Suspense, ViewTransition } from "react";
 import { DemoBanner } from "@/components/layout/demo-banner";
@@ -12,7 +12,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
-const geistSans = Geist({ variable: "--font-sans", subsets: ["latin"] });
+// Urbanist: the rounded geometric face used across the site (Cognify-inspired).
+const urbanist = Urbanist({ variable: "--font-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 // Fonts for Hindi and Urdu text. Only downloaded by browsers that need those letters.
 const devanagari = Noto_Sans_Devanagari({ variable: "--font-devanagari", subsets: ["devanagari"], preload: false });
@@ -32,15 +33,15 @@ export const metadata: Metadata = {
 /** The browser and phone status bar take the app's colors. */
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#0b1020" },
-    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f0e0d" },
+    { media: "(prefers-color-scheme: light)", color: "#fbfaf7" },
   ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     // next-themes sets the "dark" class before the page shows, so the browser's HTML can differ from the server's.
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${devanagari.variable} ${naskh.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="en" className={`${urbanist.variable} ${geistMono.variable} ${devanagari.variable} ${naskh.variable} h-full antialiased`} suppressHydrationWarning>
       <body className="flex min-h-full flex-col">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <TooltipProvider>

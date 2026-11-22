@@ -18,14 +18,14 @@ export function MobileNav() {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open menu">
+        <Button variant="ghost" size="icon" className="rounded-full md:hidden" aria-label="Open menu">
           <Menu aria-hidden />
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-72">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
-            <ShieldCheck className="size-4 text-primary" aria-hidden /> ElectionVerify
+            <ShieldCheck className="size-4 text-brand" aria-hidden /> ElectionVerify
           </SheetTitle>
         </SheetHeader>
         <nav className="flex flex-col gap-1 px-4" aria-label="Menu">
