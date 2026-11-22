@@ -1,23 +1,23 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import type { CSSProperties } from "react";
 import { Sparkles } from "lucide-react";
 import { T, useLang, useT } from "@/components/i18n";
-import { Magnetic, SplitReveal } from "@/components/motion/reveal";
+import { Magnetic } from "@/components/motion/reveal";
+import { SplitText } from "@/components/motion/split-text";
 import { StartTourButton } from "@/components/presenter/presenter";
 import { CtaButton } from "@/components/ui/cta-button";
-import { EASE_OUT } from "@/lib/motion";
 
-/** The home page hero: drifting colour orbs, a word-by-word headline and the two main actions. */
+/** Delay for a CSS entrance (see .rise-in in globals.css). */
+const d = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
+
+/**
+ * The home page hero: drifting colour orbs, a word-by-word headline and the two
+ * main actions. Entrances are CSS, so the hero shows at first paint even on slow phones.
+ */
 export function Hero({ children }: { children?: React.ReactNode }) {
-  const reduce = useReducedMotion();
   const t = useT();
   const lang = useLang();
-  const fade = (delay: number) => ({
-    initial: reduce ? false : { opacity: 0, y: 22 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.8, delay, ease: EASE_OUT },
-  });
 
   return (
     <section className="relative overflow-hidden pt-14 pb-16 md:pt-20 md:pb-24" data-tour="hero">
@@ -28,27 +28,24 @@ export function Hero({ children }: { children?: React.ReactNode }) {
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 text-center sm:px-6">
-        <motion.div
-          {...fade(0.05)}
-          className="glass mb-8 inline-flex items-center gap-2 rounded-full bg-card px-4 py-2 ring-1 ring-foreground/[0.08]"
-        >
+        <div className="rise-in glass mb-8 inline-flex items-center gap-2 rounded-full bg-card px-4 py-2 ring-1 ring-foreground/[0.08]">
           <Sparkles className="size-4 text-brand" aria-hidden />
           <span className="text-xs font-bold tracking-wide whitespace-nowrap text-muted-foreground uppercase">
             <T k="hero.badge" />
           </span>
-        </motion.div>
+        </div>
 
         <h1 className="mx-auto mb-7 max-w-5xl text-5xl leading-[0.98] font-bold tracking-tight text-balance sm:text-6xl md:text-7xl lg:text-[5.75rem]" key={lang}>
-          <SplitReveal text={t("hero.title1")} delay={0.15} />
+          <SplitText text={t("hero.title1")} delay={60} />
           <br />
-          <SplitReveal text={t("hero.title2")} delay={0.3} className="text-brand" />
+          <SplitText text={t("hero.title2")} delay={180} className="text-brand" />
         </h1>
 
-        <motion.p {...fade(0.6)} className="mx-auto mb-10 max-w-2xl text-base leading-relaxed font-medium text-muted-foreground md:text-lg">
+        <p className="rise-in mx-auto mb-10 max-w-2xl text-base leading-relaxed font-medium text-muted-foreground md:text-lg" style={d(280)}>
           <T k="hero.body" />
-        </motion.p>
+        </p>
 
-        <motion.div {...fade(0.75)} className="mb-5 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+        <div className="rise-in mb-5 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4" style={d(360)}>
           <Magnetic>
             <CtaButton href="/submit">
               <T k="nav.submit" />
@@ -57,10 +54,10 @@ export function Hero({ children }: { children?: React.ReactNode }) {
           <CtaButton href="/verified" variant="ghost" arrow={false}>
             <T k="hero.browse" />
           </CtaButton>
-        </motion.div>
-        <motion.div {...fade(0.9)} className="mb-14 md:mb-20">
+        </div>
+        <div className="rise-in mb-14 md:mb-20" style={d(440)}>
           <StartTourButton className="text-muted-foreground" />
-        </motion.div>
+        </div>
 
         {children}
       </div>

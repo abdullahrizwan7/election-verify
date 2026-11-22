@@ -4,7 +4,6 @@ import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } fro
 import { BarChart3, Check, ClipboardCheck, FileSearch, Inbox, Library, Plus, Sparkles, Timer } from "lucide-react";
 import { CountUp } from "@/components/motion/reveal";
 import { VerdictBadge } from "@/components/verdict-badge";
-import { EASE_OUT, EASE_POP } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import type { Verdict } from "@/lib/types";
 
@@ -45,13 +44,10 @@ export function HeroPreview({ data }: { data: PreviewData }) {
   const boards = data.latest.slice(0, 3);
 
   return (
-    <motion.div
+    <div
       aria-hidden
-      className="relative mx-auto w-full max-w-5xl"
-      initial={reduce ? false : { opacity: 0, y: 60, scale: 0.96 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 1.1, delay: 0.55, ease: EASE_OUT }}
-      style={{ perspective: 1600 }}
+      className="rise-in relative mx-auto w-full max-w-5xl"
+      style={{ perspective: 1600, "--d": "300ms" } as React.CSSProperties}
       onPointerMove={(e) => {
         if (reduce || e.pointerType !== "mouse") return;
         const r = e.currentTarget.getBoundingClientRect();
@@ -116,7 +112,7 @@ export function HeroPreview({ data }: { data: PreviewData }) {
                     <tile.icon className="size-3.5 shrink-0 opacity-70" />
                   </div>
                   <span className="text-3xl leading-none font-bold md:text-4xl">
-                    <CountUp value={tile.value} delay={0.9 + i * 0.08} />
+                    <CountUp value={tile.value} delay={0.4 + i * 0.08} />
                   </span>
                 </div>
               ))}
@@ -151,7 +147,7 @@ export function HeroPreview({ data }: { data: PreviewData }) {
         </div>
       </motion.div>
 
-      <FloatingChip className="top-28 -left-3 hidden md:flex lg:-left-12" delay={1.2} drift={-10}>
+      <FloatingChip className="top-28 -left-3 hidden md:flex lg:-left-12" delay={0.7} drift={-10}>
         <span className="flex size-7 items-center justify-center rounded-full bg-ai/15 text-ai">
           <Sparkles className="size-3.5" />
         </span>
@@ -160,7 +156,7 @@ export function HeroPreview({ data }: { data: PreviewData }) {
         </span>
       </FloatingChip>
 
-      <FloatingChip className="top-52 -right-3 hidden md:flex lg:-right-12" delay={1.5} drift={10}>
+      <FloatingChip className="top-52 -right-3 hidden md:flex lg:-right-12" delay={0.85} drift={10}>
         <span className="flex -space-x-2">
           {["abdullah", "uday", "sandeep"].map((name) => (
             // eslint-disable-next-line @next/next/no-img-element
@@ -170,24 +166,19 @@ export function HeroPreview({ data }: { data: PreviewData }) {
         <span className="text-xs font-semibold">Uday is reviewing</span>
       </FloatingChip>
 
-      <FloatingChip className="bottom-6 left-1/2 -translate-x-1/2" delay={1.8} drift={-6} dark>
+      <FloatingChip className="bottom-6 left-1/2 -translate-x-1/2" delay={1} drift={-6} dark>
         <Check className="size-3.5 text-tint-lime" />
         <span className="text-xs font-semibold whitespace-nowrap">Verdict published</span>
         <span className="rounded-full bg-brand px-2.5 py-0.5 text-[11px] font-bold text-brand-foreground">Share</span>
       </FloatingChip>
-    </motion.div>
+    </div>
   );
 }
 
 function FloatingChip({ className, delay, drift, dark, children }: { className?: string; delay: number; drift: number; dark?: boolean; children: React.ReactNode }) {
   const reduce = useReducedMotion();
   return (
-    <motion.div
-      initial={reduce ? false : { opacity: 0, scale: 0.6 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.7, delay, ease: EASE_POP }}
-      className={cn("absolute z-10", className)}
-    >
+    <div className={cn("pop-in absolute z-10", className)} style={{ "--d": `${delay * 1000}ms` } as React.CSSProperties}>
       <motion.div
         animate={reduce ? undefined : { y: [0, drift, 0] }}
         transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut", delay }}
@@ -198,6 +189,6 @@ function FloatingChip({ className, delay, drift, dark, children }: { className?:
       >
         {children}
       </motion.div>
-    </motion.div>
+    </div>
   );
 }

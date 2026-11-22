@@ -2,11 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, useReducedMotion } from "motion/react";
 import { BarChart3, History, Home, Inbox, Library, Plus, Settings2 } from "lucide-react";
 import { Magnetic } from "@/components/motion/reveal";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 const ITEMS = [
@@ -36,14 +34,10 @@ function Tip({ label, children }: { label: string; children: React.ReactNode }) 
  */
 export function WorkspaceDock() {
   const pathname = usePathname();
-  const reduce = useReducedMotion();
 
   return (
-    <motion.nav
+    <nav
       aria-label="Workspace tools"
-      initial={reduce ? false : { opacity: 0, x: -24, scale: 0.96 }}
-      animate={{ opacity: 1, x: 0, scale: 1 }}
-      transition={{ duration: 0.7, ease: EASE_OUT, delay: 0.1 }}
       className="dock-rail fixed top-1/2 left-4 z-30 hidden w-[52px] -translate-y-1/2 flex-col items-center gap-1.5 rounded-full bg-dock px-1.5 py-2 shadow-[0_18px_50px_-14px_rgba(10,14,12,0.5)] ring-1 ring-white/10 backdrop-blur-xl md:flex"
     >
       <Magnetic strength={0.25}>
@@ -78,6 +72,6 @@ export function WorkspaceDock() {
           <Home className="size-[18px]" aria-hidden />
         </Link>
       </Tip>
-    </motion.nav>
+    </nav>
   );
 }
