@@ -9,3 +9,9 @@ lib/generated/
 test-results/
 playwright-report/
 docs/workflow.html
+# Local tools and video work files (not needed to run the site)
+.venv-tts/
+video/
+scripts/
+tests/
+docs/
