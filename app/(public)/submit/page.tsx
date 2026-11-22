@@ -30,7 +30,7 @@ export default function SubmitPage() {
     <main className="page-enter mx-auto max-w-7xl space-y-10 px-4 pt-10 pb-16 sm:px-6 md:pt-16">
       <PageHeader eyebrow="Ten seconds" icon={Send} title="Check it" muted="before you forward it." description={<T k="submit.subtitle" />} />
 
-      <div className="grid gap-5 lg:grid-cols-[1fr_380px]">
+      <div className="grid gap-5 lg:grid-cols-[1fr_380px] [&>*]:min-w-0">
         <div className="glass rounded-[2.5rem] bg-card p-6 ring-1 ring-foreground/[0.07] shadow-[0_40px_100px_-50px_rgba(10,14,12,0.45)] sm:p-9" data-tour="submit-form">
           <Suspense fallback={<Skeleton className="h-80 w-full rounded-3xl" />}>
             <SubmitGate />

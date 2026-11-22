@@ -23,11 +23,11 @@ export function SubmittedContent({ submission }: { submission: SubmissionDetail 
             href={submission.url}
             target="_blank"
             rel="noopener noreferrer nofollow ugc"
-            className="flex items-center gap-2 rounded-lg border p-3 text-sm hover:bg-muted/50"
+            className="flex min-w-0 items-center gap-2 rounded-2xl border p-3 text-sm hover:bg-muted/50"
           >
             <ExternalLink className="size-4 shrink-0 text-muted-foreground" aria-hidden />
             <span className="min-w-0">
-              <span className="block font-medium">{domainOf(submission.url)}</span>
+              <span className="block truncate font-medium">{domainOf(submission.url)}</span>
               <span className="block truncate text-muted-foreground">{submission.url}</span>
             </span>
           </a>

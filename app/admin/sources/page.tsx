@@ -38,7 +38,7 @@ async function SourcesManager() {
   const sources = await listSources();
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+    <div className="grid gap-6 lg:grid-cols-[1fr_340px] [&>*]:min-w-0">
       <div className="overflow-hidden rounded-xl border bg-card">
         <Table>
           <TableHeader>

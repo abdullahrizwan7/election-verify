@@ -19,11 +19,11 @@ export function SiteHeader() {
     <HeaderShell>
       <Link
         href="/"
-        className="group glass flex items-center gap-2.5 justify-self-start rounded-full bg-card py-1 pr-4 pl-1 ring-1 ring-foreground/[0.07]"
+        className="group glass flex items-center gap-2.5 justify-self-start rounded-full bg-card p-1 ring-1 ring-foreground/[0.07] min-[420px]:pr-4"
         aria-label="ElectionVerify home"
       >
         <Logo className="size-9 transition-transform duration-500 ease-(--ease-pop) group-hover:scale-105 group-hover:-rotate-8" />
-        <span className="text-[17px] font-bold tracking-tight">ElectionVerify</span>
+        <span className="hidden text-[17px] font-bold tracking-tight min-[420px]:inline">ElectionVerify</span>
       </Link>
 
       <div className="hidden md:block">
@@ -43,9 +43,10 @@ export function SiteHeader() {
         </Suspense>
       </div>
 
-      <div className="order-last flex w-full justify-center md:hidden">
+      {/* Phones: the navigation is a floating tab bar at the bottom, within thumb reach. */}
+      <div className="fixed inset-x-0 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 flex justify-center px-3 md:hidden">
         <Suspense fallback={<Skeleton className="h-11 w-60 rounded-full" />}>
-          <PillNav />
+          <PillNav className="shadow-[0_18px_50px_-14px_rgba(10,14,12,0.5)]" />
         </Suspense>
       </div>
     </HeaderShell>

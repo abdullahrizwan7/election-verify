@@ -133,7 +133,7 @@ async function Dashboard({ searchParams }: { searchParams: SearchParams }) {
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_1.3fr]">
+      <div className="grid gap-6 lg:grid-cols-[1fr_1.3fr] [&>*]:min-w-0">
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Published verdicts</CardTitle>
@@ -157,7 +157,7 @@ async function Dashboard({ searchParams }: { searchParams: SearchParams }) {
         </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_1.3fr]">
+      <div className="grid gap-6 lg:grid-cols-[1fr_1.3fr] [&>*]:min-w-0">
         <Card>
           <CardHeader>
             <CardTitle className="text-base">What people send</CardTitle>

@@ -119,7 +119,7 @@ export function HeroPreview({ data }: { data: PreviewData }) {
             </div>
 
             {data.latest.length > 0 && (
-              <div className="grid gap-2.5 md:grid-cols-5">
+              <div className="hidden gap-2.5 md:grid md:grid-cols-5">
                 <div className="grid grid-cols-3 gap-2.5 md:col-span-2 md:grid-cols-1">
                   {boards.map((item, i) => (
                     <div key={item.id} className={cn("flex h-14 items-center rounded-2xl px-4 text-xs font-bold md:h-12", TILE_TONES[(i + 1) % 4])}>
@@ -166,7 +166,7 @@ export function HeroPreview({ data }: { data: PreviewData }) {
         <span className="text-xs font-semibold">Uday is reviewing</span>
       </FloatingChip>
 
-      <FloatingChip className="bottom-6 left-1/2 -translate-x-1/2" delay={1} drift={-6} dark>
+      <FloatingChip className="inset-x-0 -bottom-5 mx-auto w-fit md:bottom-6" delay={1} drift={-6} dark>
         <Check className="size-3.5 text-tint-lime" />
         <span className="text-xs font-semibold whitespace-nowrap">Verdict published</span>
         <span className="rounded-full bg-brand px-2.5 py-0.5 text-[11px] font-bold text-brand-foreground">Share</span>

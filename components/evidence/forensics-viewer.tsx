@@ -35,7 +35,7 @@ export function ForensicsViewer({ imageUrl, evidence }: { imageUrl: string; evid
         </CardTitle>
         <CardDescription>What the picture contains, where it came from, and whether it was seen before.</CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-5 lg:grid-cols-[1.5fr_1fr]">
+      <CardContent className="grid gap-5 lg:grid-cols-[1.5fr_1fr] [&>*]:min-w-0">
         <Tabs defaultValue="text">
           <TabsList>
             <TabsTrigger value="text">Text found ({words.length})</TabsTrigger>

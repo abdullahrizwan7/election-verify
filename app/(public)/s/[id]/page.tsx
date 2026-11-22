@@ -116,7 +116,8 @@ async function Result({ params, searchParams }: Props) {
         </Card>
       )}
 
-      <div className="grid gap-5 lg:grid-cols-[1fr_380px]">
+      {/* min-w-0 lets the columns shrink on phones, so long links get cut off instead of widening the page. */}
+      <div className="grid gap-5 lg:grid-cols-[1fr_380px] [&>*]:min-w-0">
         <div className="space-y-6">
           <SubmittedContent submission={submission} />
           {isPublished && submission.imageUrl && <ForensicsViewer imageUrl={submission.imageUrl} evidence={submission.evidence} />}
@@ -160,7 +161,7 @@ function VerdictPanel({ submission }: { submission: SubmissionDetail }) {
     { label: "Times reported", value: submission.reportCount },
   ];
   return (
-    <section data-tour="verdict-panel" className="stagger grid gap-4 lg:grid-cols-[1.6fr_1fr]">
+    <section data-tour="verdict-panel" className="stagger grid gap-4 lg:grid-cols-[1.6fr_1fr] [&>*]:min-w-0">
       <div className={cn("sheen relative overflow-hidden rounded-[2.5rem] p-7 md:p-10", meta.tone)}>
         <span aria-hidden className="pointer-events-none absolute -right-16 -bottom-20 size-72 rounded-full bg-current/10" />
         <p className="relative text-xs font-bold tracking-[0.2em] uppercase opacity-70">Our verdict</p>

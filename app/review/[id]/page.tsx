@@ -85,7 +85,7 @@ async function Workspace({ params }: { params: Params }) {
         </Card>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
+      <div className="grid gap-6 lg:grid-cols-[1fr_400px] [&>*]:min-w-0">
         {/* Left: the content and all evidence */}
         <div className="space-y-6">
           <Card className="hidden md:flex">

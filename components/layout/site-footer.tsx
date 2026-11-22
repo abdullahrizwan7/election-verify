@@ -35,7 +35,7 @@ const TEAM = [
 /** A big rounded card at the bottom of every page. */
 export function SiteFooter() {
   return (
-    <footer className="mt-auto px-3 pt-10 pb-3 sm:px-4 sm:pb-4">
+    <footer className="mt-auto px-3 pt-10 pb-24 sm:px-4 md:pb-4">
       <div className="glass mx-auto max-w-7xl rounded-[2.5rem] bg-card px-6 py-12 ring-1 ring-foreground/[0.08] sm:px-10 md:py-14">
         <div className="mb-12 grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4 lg:gap-16">
           <div className="lg:col-span-2">

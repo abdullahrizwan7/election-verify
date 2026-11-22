@@ -215,6 +215,12 @@
   }
 }
 
+/* Phones: a scrolling background (iOS can't keep it fixed) and still colour orbs, so scrolling stays smooth. */
+@media (max-width: 767px) {
+  body { background-attachment: scroll; }
+  .orb { animation: none; }
+}
+
 /* Hide scrollbars on horizontal chip rails. */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
