@@ -19,6 +19,7 @@
     "check:services": "tsx scripts/check-services.ts",
     "setup:supabase": "tsx scripts/setup-supabase.ts",
     "docs:pdf": "node scripts/workflow-pdf.mjs",
+    "docs:report": "node scripts/project-report.mjs",
     "video": "node scripts/render-video.mjs",
     "video:audio": "node scripts/make-narration.mjs"
   },
