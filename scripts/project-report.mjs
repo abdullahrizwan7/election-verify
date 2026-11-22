@@ -69,6 +69,7 @@ const STACK = [
   ["UI library", "React", v("react"), "Server Components, useActionState forms, view transitions between pages."],
   ["Language", "TypeScript", v("typescript"), "Type safety across the whole codebase."],
   ["Styling", "Tailwind CSS + shadcn/ui", v("tailwindcss"), "Design tokens, dark/light themes, accessible Radix components."],
+  ["Animation", "motion (Framer Motion)", v("motion"), "Headline reveals, magnetic buttons, staggered cards, tilting preview."],
   ["Database", "PostgreSQL on Supabase", "—", "Free hosted Postgres; stores submissions, claims, evidence, reviews."],
   ["ORM", "Prisma + pg adapter", v("prisma"), "Typed database access, migrations and seed data."],
   ["Login", "Supabase Auth", v("@supabase/ssr"), "Google sign-in and email magic links; no passwords stored by us."],
@@ -165,8 +166,8 @@ const html = `<!doctype html><html><head><meta charset="utf-8" />
   td:first-child { font-weight: 600; white-space: nowrap; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
   .card { border-radius: 16px; padding: 4mm 5mm; }
-  .olive { background: #dbe8a6; color: #2c3510; } .rust { background: #f5cdbb; color: #4a2010; }
-  .steel { background: #cfdcef; color: #1c2c45; } .ink { background: #1f1c1a; color: #f5f3ef; }
+  .olive { background: #d4f07a; color: #2a3a0c; } .rust { background: #f4b8ad; color: #4a1a12; }
+  .steel { background: #bcd3f2; color: #182b45; } .ink { background: #25282d; color: #f5f5f5; }
   .card h3 { margin-top: 0; margin-bottom: 1.5mm; } .card p { font-size: 9.4pt; margin: 0; opacity: .85; }
   figure { margin: 3mm 0 5mm; } figure img { width: 100%; border-radius: 12px; border: 1px solid #e3ddd4; display: block; }
   figcaption { font-size: 9pt; color: #78716c; margin-top: 1.5mm; }
@@ -227,7 +228,7 @@ const html = `<!doctype html><html><head><meta charset="utf-8" />
   <p>Everyone uses the same login (Google or email link). The role comes from the account: emails listed in <code>ADMIN_EMAILS</code> become admins; reviewers are set in the database. Signed-out visitors can read and search every published verdict.</p>
   <h3>Six verdicts</h3>
   <div class="chips"><span class="chip" style="background:#dcf5e5">Accurate</span><span class="chip" style="background:#fdecc8">Misleading</span><span class="chip" style="background:#fde3cf">Missing context</span><span class="chip" style="background:#fbd5d5">False</span><span class="chip" style="background:#e7e5e4">Unverified</span><span class="chip" style="background:#e9e0fb">Satire</span></div>
-  ${figure(shots.hero, "The new home page (Cognify-inspired design): pill navigation, headline, live dashboard preview from the database.", "small")}
+  ${figure(shots.hero, "The new home page: floating navigation islands, animated headline and a tilting preview of the reviewer workspace with live numbers.", "small")}
   <div class="foot"><span>ElectionVerify · Project report</span><span>2</span></div>
 </section>
 
@@ -333,13 +334,13 @@ npm test                    # unit tests
 npm run check:services      # verify every key works</code></pre>
   <div class="note">Without any keys the app runs in <b>demo mode</b>: sample data in memory and one-click sign-in as Citizen, Reviewer or Admin. Perfect for trying it out.</div>
   <h3>Design</h3>
-  <p>The current look is inspired by the Cognify project's design system: Urbanist font, warm near-black and off-white themes, an orange accent, a floating pill navigation, pill buttons with a turning arrow chip, tinted bento cards (olive, rust, steel, ink) and gentle reveal animations.</p>
+  <p>The look follows the Cognify project's "floating dock" design system: a light pastel-mesh background (with a matching ink dark mode), frosted glass cards, the Urbanist font, black pill buttons with an orange accent, and four tile colours (lime, coral, sky, ink). The header is three floating islands with a sliding black "active" pill; the reviewer workspace adds a dark dock on the left. Motion (the <code>motion</code> library) gives word-by-word headlines, magnetic buttons, staggered cards and a tilting dashboard preview, and switches off for people who turn animations off.</p>
   <div class="foot"><span>ElectionVerify · Project report</span><span>8</span></div>
 </section>
 
 <section class="page">
   <h2><span class="num">08</span>Screens</h2>
-  ${figure(shots.bento, "Home page: feature bento and how it works.", "", 125)}
+  ${figure(shots.bento, "Home page: feature cards in the four tile colours.", "", 125)}
   <div class="grid2">
     ${figure(shots.verified, "Verified claims: search and filter by verdict.", "", 62)}
     ${figure(shots.login, "Login: Google or email link, one page for all roles.", "", 62)}

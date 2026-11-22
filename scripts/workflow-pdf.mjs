@@ -18,7 +18,14 @@ async function main() {
   const browser = await chromium.launch();
 
   // ── 1. Screenshots of the real app ────────────────────────────────
-  const desktop = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1.5, colorScheme: "dark", reducedMotion: "reduce" });
+  // Screenshots for the docs leave out the "Demo mode" notice bar.
+  const hideBanner = () => document.addEventListener("DOMContentLoaded", () => {
+    const style = document.createElement("style");
+    style.textContent = "[data-demo-banner]{display:none!important}";
+    document.head.append(style);
+  });
+  const desktop = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1.5, colorScheme: "light", reducedMotion: "reduce" });
+  await desktop.addInitScript(hideBanner);
   const page = await desktop.newPage();
   const shot = async (path, file, selector) => {
     await page.goto(BASE + path, { waitUntil: "networkidle" });
@@ -45,7 +52,8 @@ async function main() {
   await shot("/review/analytics", "matrix.png", '[data-tour="analytics"]');
   await desktop.close();
 
-  const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, colorScheme: "dark", reducedMotion: "reduce", isMobile: true });
+  const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, colorScheme: "light", reducedMotion: "reduce", isMobile: true });
+  await phone.addInitScript(hideBanner);
   const phonePage = await phone.newPage();
   await phonePage.goto(BASE + "/", { waitUntil: "networkidle" });
   await phonePage.waitForTimeout(1500);

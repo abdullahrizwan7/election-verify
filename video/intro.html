@@ -11,34 +11,36 @@
 <title>ElectionVerify intro</title>
 <style>
   @font-face { font-family: Urbanist; src: url(fonts/urbanist-latin.woff2) format("woff2"); font-weight: 100 900; }
-  :root { --bg: #0f0e0d; --glow: #f07a26; --glow2: #e8553b; --text: #f6f3ee; --muted: #b3aca4; --card: #1b1917; --line: rgba(255,255,255,.1); }
+  :root { --bg: #eef3ef; --glow: #f07a26; --glow2: #e8553b; --text: #17191c; --muted: #5d6470; --card: rgba(255,255,255,.78); --line: rgba(20,30,25,.09); }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
   body { font-family: Urbanist, -apple-system, "SF Pro Display", system-ui, sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; }
-  #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+  #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; background-color: var(--bg);
+    /* The site's pastel mesh: mint, sky, amber and coral pools. */
+    background-image: radial-gradient(60% 55% at 8% 0%, rgba(196,240,214,.95), transparent 70%), radial-gradient(50% 50% at 95% 6%, rgba(205,225,250,.9), transparent 70%), radial-gradient(55% 55% at 92% 100%, rgba(252,233,190,.85), transparent 70%), radial-gradient(45% 45% at 0% 100%, rgba(250,214,206,.6), transparent 70%); }
   .abs { position: absolute; will-change: transform, opacity; }
   .bg-glow { border-radius: 50%; filter: blur(120px); }
-  .grid { inset: 0; background-image: linear-gradient(to right, rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,.05) 1px, transparent 1px); background-size: 64px 64px; mask-image: radial-gradient(ellipse at center, #000 25%, transparent 75%); }
+  .grid { inset: 0; background-image: linear-gradient(to right, rgba(20,30,25,.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(20,30,25,.05) 1px, transparent 1px); background-size: 64px 64px; mask-image: radial-gradient(ellipse at center, #000 25%, transparent 75%); }
   .dot { width: 4px; height: 4px; border-radius: 50%; background: #ffb98a; }
   h1 { font-size: 84px; font-weight: 700; letter-spacing: -2px; line-height: 1.05; }
   h2 { font-size: 64px; font-weight: 700; letter-spacing: -1.5px; line-height: 1.08; }
-  .grad { background: linear-gradient(100deg, #f07a26 0%, #ffb347 55%, #e8553b 110%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .grad { color: #ec7424; }
   .lead { font-size: 32px; color: var(--muted); line-height: 1.45; }
-  .chip { display: inline-flex; align-items: center; gap: 12px; padding: 10px 22px; border-radius: 999px; font-size: 24px; font-weight: 600; background: rgba(240,122,38,.14); color: #ffb27a; border: 1px solid rgba(240,122,38,.4); }
-  .frame { border-radius: 20px; overflow: hidden; background: var(--card); border: 1px solid var(--line); box-shadow: 0 40px 120px -30px rgba(240,122,38,.38), 0 0 0 1px rgba(255,255,255,.03); }
-  .frame .bar { height: 44px; display: flex; align-items: center; gap: 9px; padding: 0 18px; background: #151311; border-bottom: 1px solid var(--line); }
+  .chip { display: inline-flex; align-items: center; gap: 12px; padding: 10px 22px; border-radius: 999px; font-size: 24px; font-weight: 600; background: rgba(255,255,255,.78); color: #17191c; border: 1px solid rgba(20,30,25,.09); box-shadow: 0 10px 30px -14px rgba(10,14,12,.3); }
+  .frame { border-radius: 20px; overflow: hidden; background: var(--card); border: 1px solid var(--line); box-shadow: 0 50px 120px -40px rgba(10,14,12,.45), 0 0 0 1px rgba(20,30,25,.04); }
+  .frame .bar { height: 44px; display: flex; align-items: center; gap: 9px; padding: 0 18px; background: rgba(255,255,255,.9); border-bottom: 1px solid var(--line); }
   .frame .bar i { width: 13px; height: 13px; border-radius: 50%; display: block; }
-  .frame .bar .url { margin-left: 18px; flex: 1; height: 26px; border-radius: 8px; background: #24201d; font-size: 15px; color: #9a9087; display: flex; align-items: center; padding: 0 14px; }
+  .frame .bar .url { margin-left: 18px; flex: 1; height: 26px; border-radius: 8px; background: rgba(20,30,25,.06); font-size: 15px; color: #6b7078; display: flex; align-items: center; padding: 0 14px; }
   .frame .shot { overflow: hidden; }
   .frame img { display: block; width: 100%; transform-origin: 50% 0; }
-  .pill { padding: 14px 26px; border-radius: 16px; font-size: 26px; font-weight: 600; background: #1f1c19; border: 1px solid var(--line); display: flex; align-items: center; gap: 12px; }
+  .pill { padding: 14px 26px; border-radius: 16px; font-size: 26px; font-weight: 600; background: rgba(255,255,255,.8); border: 1px solid var(--line); box-shadow: 0 12px 30px -16px rgba(10,14,12,.3); display: flex; align-items: center; gap: 12px; }
   .step { display: flex; align-items: center; gap: 22px; font-size: 30px; font-weight: 500; }
-  .tick { width: 46px; height: 46px; border-radius: 50%; border: 2px solid #4a413a; display: grid; place-items: center; flex: none; }
+  .tick { width: 46px; height: 46px; border-radius: 50%; border: 2px solid #c6cbc6; display: grid; place-items: center; flex: none; }
   .tick svg { width: 26px; height: 26px; }
-  .bubble { position: absolute; right: 88%; bottom: 82%; width: max-content; max-width: 920px; line-height: 1.3; background: #fff; color: #0b1324; font-size: 34px; font-weight: 600; padding: 20px 30px; border-radius: 28px; border-bottom-right-radius: 8px; box-shadow: 0 20px 60px -15px rgba(0,0,0,.6); transform-origin: 100% 100%; }
+  .bubble { position: absolute; right: 88%; bottom: 82%; width: max-content; max-width: 920px; line-height: 1.3; background: #1f2328; color: #fff; font-size: 34px; font-weight: 600; padding: 20px 30px; border-radius: 28px; border-bottom-right-radius: 8px; box-shadow: 0 24px 60px -18px rgba(10,14,12,.55); transform-origin: 100% 100%; }
   .bubble.up { right: 4%; bottom: 102%; transform-origin: 90% 100%; }
   .stamp { font-size: 120px; font-weight: 900; letter-spacing: 8px; color: #ff4d5e; border: 10px solid #ff4d5e; border-radius: 24px; padding: 6px 40px; background: rgba(255,77,94,.08); }
-  .tile { width: 317px; height: 128px; border-radius: 22px; background: #1b1917; border: 1px solid var(--line); display: flex; flex-direction: column; justify-content: center; padding: 0 30px; }
+  .tile { width: 317px; height: 128px; border-radius: 26px; background: rgba(255,255,255,.8); box-shadow: 0 14px 34px -18px rgba(10,14,12,.35); border: 1px solid var(--line); display: flex; flex-direction: column; justify-content: center; padding: 0 30px; }
   .tile b { font-size: 26px; line-height: 1.2; } .tile span { font-size: 21px; color: var(--muted); margin-top: 4px; }
   .msg { max-width: 470px; padding: 18px 22px; border-radius: 20px; border-top-left-radius: 6px; background: #2b2623; font-size: 25px; line-height: 1.35; box-shadow: 0 14px 40px -12px rgba(0,0,0,.6); }
   .msg small { display: block; font-size: 17px; color: #b3a69a; font-style: italic; margin-bottom: 6px; }
@@ -50,23 +52,23 @@
   .pose .body { -webkit-mask-image: linear-gradient(to bottom, transparent 84px, #000 100px); mask-image: linear-gradient(to bottom, transparent 84px, #000 100px); }
   .pose .head { position: absolute; left: 0; top: 0; width: 267px; height: 400px; transform-origin: 133px 96px;
     -webkit-mask-image: linear-gradient(to bottom, #000 84px, transparent 100px); mask-image: linear-gradient(to bottom, #000 84px, transparent 100px); }
-  .shadow { position: absolute; left: 50%; top: 382px; width: 170px; height: 22px; margin-left: -85px; border-radius: 50%; background: radial-gradient(closest-side, rgba(0,0,0,.6), transparent); }
-  .tag { position: absolute; left: 50%; top: 404px; transform: translateX(-50%); white-space: nowrap; font-size: 26px; font-weight: 700; padding: 8px 20px; border-radius: 999px; background: #1b1917; border: 1px solid rgba(148,163,209,.3); }
+  .shadow { position: absolute; left: 50%; top: 382px; width: 170px; height: 22px; margin-left: -85px; border-radius: 50%; background: radial-gradient(closest-side, rgba(10,14,12,.28), transparent); }
+  .tag { position: absolute; left: 50%; top: 404px; transform: translateX(-50%); white-space: nowrap; font-size: 26px; font-weight: 700; padding: 8px 20px; border-radius: 999px; background: rgba(255,255,255,.88); border: 1px solid rgba(20,30,25,.08); box-shadow: 0 10px 26px -14px rgba(10,14,12,.35); }
   .tag span { font-weight: 500; color: var(--muted); margin-left: 8px; }
-  .phone { width: 560px; height: 860px; border-radius: 70px; background: #12100f; border: 12px solid #2a2623; box-shadow: 0 50px 140px -40px rgba(240,122,38,.45); overflow: hidden; }
+  .phone { color: #f6f3ee; width: 560px; height: 860px; border-radius: 70px; background: #12100f; border: 12px solid #2a2623; box-shadow: 0 50px 140px -40px rgba(10,14,12,.55); overflow: hidden; }
 </style>
 </head>
 <body>
 <div id="stage">
   <!-- Background -->
-  <div class="abs bg-glow" id="g1" style="width:900px;height:900px;left:-200px;top:-300px;background:rgba(240,122,38,.26)"></div>
-  <div class="abs bg-glow" id="g2" style="width:900px;height:900px;right:-250px;bottom:-350px;background:rgba(232,85,59,.18)"></div>
+  <div class="abs bg-glow" id="g1" style="width:900px;height:900px;left:-200px;top:-300px;background:rgba(200,240,140,.55)"></div>
+  <div class="abs bg-glow" id="g2" style="width:900px;height:900px;right:-250px;bottom:-350px;background:rgba(160,200,255,.5)"></div>
   <div class="abs grid"></div>
   <div id="dots"></div>
 
   <!-- 1. Title -->
-  <div class="abs" id="s1-logo" style="left:200px;top:300px;width:120px;height:120px;border-radius:32px;background:linear-gradient(135deg,#f07a26,#e8553b);display:grid;place-items:center;box-shadow:0 30px 80px -20px rgba(240,122,38,.7)">
-    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+  <div class="abs" id="s1-logo" style="left:200px;top:300px;width:120px;height:120px;border-radius:50%;background:#17191c;display:grid;place-items:center;box-shadow:0 30px 70px -24px rgba(10,14,12,.6)">
+    <svg width="70" height="70" viewBox="0 0 24 24" fill="none"><path d="M12 2.5 19.5 5.3v6.2c0 4.6-3.1 8.4-7.5 10-4.4-1.6-7.5-5.4-7.5-10V5.3L12 2.5Z" fill="#f07a26"/><path d="m8.4 12.2 2.5 2.5 4.8-5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </div>
   <h1 class="abs" id="s1-name" style="left:200px;top:460px;font-size:120px">ElectionVerify</h1>
   <div class="abs lead" id="s1-tag" style="left:204px;top:610px;font-size:44px"><span class="grad" style="font-weight:700">Check before you forward.</span></div>
@@ -106,7 +108,7 @@
     <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><div class="url">Checking your claim…</div></div>
     <div class="shot" style="height:470px"><img id="s4-img" src="../docs/screenshots/progress.png" /></div>
   </div>
-  <div class="abs" id="s4-bar" style="left:900px;top:810px;width:900px;height:10px;border-radius:5px;background:#24201d;overflow:hidden">
+  <div class="abs" id="s4-bar" style="left:900px;top:810px;width:900px;height:10px;border-radius:5px;background:rgba(20,30,25,.08);overflow:hidden">
     <div id="s4-fill" style="height:100%;width:0;background:linear-gradient(90deg,#f07a26,#ffb347)"></div>
   </div>
 
@@ -176,11 +178,11 @@
   <div class="abs" id="s12-grid" style="left:110px;top:380px;width:1340px;display:flex;flex-wrap:wrap;gap:24px;justify-content:flex-start"></div>
 
   <!-- 9. Outro -->
-  <div class="abs" id="s9-logo" style="left:200px;top:300px;width:120px;height:120px;border-radius:32px;background:linear-gradient(135deg,#f07a26,#e8553b);display:grid;place-items:center;box-shadow:0 30px 80px -20px rgba(240,122,38,.7)">
-    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+  <div class="abs" id="s9-logo" style="left:200px;top:300px;width:120px;height:120px;border-radius:50%;background:#17191c;display:grid;place-items:center;box-shadow:0 30px 70px -24px rgba(10,14,12,.6)">
+    <svg width="70" height="70" viewBox="0 0 24 24" fill="none"><path d="M12 2.5 19.5 5.3v6.2c0 4.6-3.1 8.4-7.5 10-4.4-1.6-7.5-5.4-7.5-10V5.3L12 2.5Z" fill="#f07a26"/><path d="m8.4 12.2 2.5 2.5 4.8-5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </div>
   <h1 class="abs" id="s9-title" style="left:200px;top:460px;width:1100px">Check before<br/><span class="grad">you forward.</span></h1>
-  <div class="abs" id="s9-url" style="left:204px;top:700px;font-size:40px;font-weight:600;padding:18px 34px;border-radius:20px;background:#0f172b;border:1px solid rgba(240,122,38,.55);box-shadow:0 0 60px -10px rgba(240,122,38,.55)">election-verify.vercel.app</div>
+  <div class="abs" id="s9-url" style="left:204px;top:700px;font-size:40px;font-weight:600;padding:18px 34px;border-radius:20px;background:#17191c;color:#fff;border:0;box-shadow:0 24px 60px -18px rgba(10,14,12,.5)">election-verify.vercel.app</div>
 
   <!-- Veri, the guide character -->
   <div class="abs" id="veri" style="left:0;top:0;width:260px;height:320px;transform-origin:50% 100%">
@@ -212,10 +214,10 @@
     </svg>
   </div>
 
-  <div class="abs lead" id="s9-credit" style="left:204px;top:820px;font-size:28px">Made by <b style="color:#fff">Abdullah Rizwan</b>, <b style="color:#fff">Uday</b> and <b style="color:#fff">Sandeep</b></div>
+  <div class="abs lead" id="s9-credit" style="left:204px;top:820px;font-size:28px">Made by <b style="color:#17191c">Abdullah Rizwan</b>, <b style="color:#17191c">Uday</b> and <b style="color:#17191c">Sandeep</b></div>
   <div id="people"></div>
 
-  <div class="abs" id="sweep" style="left:0;top:-200px;width:520px;height:1480px;background:linear-gradient(90deg,transparent,rgba(255,190,140,.14),rgba(255,240,225,.26),rgba(255,150,110,.14),transparent);pointer-events:none"></div>
+  <div class="abs" id="sweep" style="left:0;top:-200px;width:520px;height:1480px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),rgba(255,255,255,.42),rgba(255,255,255,.18),transparent);pointer-events:none"></div>
   <div class="abs" id="fade" style="inset:0;background:#000;pointer-events:none"></div>
 </div>
 

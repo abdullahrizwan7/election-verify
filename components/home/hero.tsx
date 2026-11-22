@@ -21,7 +21,7 @@ export function Hero({ children }: { children?: React.ReactNode }) {
 
   return (
     <section className="relative overflow-hidden pt-14 pb-16 md:pt-20 md:pb-24" data-tour="hero">
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden [mask-image:linear-gradient(to_bottom,black_55%,transparent)]">
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_20%,black_55%,transparent)]">
         <div className="orb absolute -top-24 left-[8%] size-[420px] rounded-full bg-tint-lime/60 blur-[110px]" />
         <div className="orb absolute top-40 -right-20 size-[460px] rounded-full bg-tint-sky/60 blur-[120px] [animation-delay:-6s]" />
         <div className="orb absolute bottom-10 left-1/3 size-[380px] rounded-full bg-brand/25 blur-[120px] [animation-delay:-12s]" />
@@ -38,7 +38,7 @@ export function Hero({ children }: { children?: React.ReactNode }) {
           </span>
         </motion.div>
 
-        <h1 className="mx-auto mb-7 max-w-5xl text-5xl leading-[0.98] font-bold tracking-tight sm:text-6xl md:text-7xl lg:text-[5.75rem]" key={lang}>
+        <h1 className="mx-auto mb-7 max-w-5xl text-5xl leading-[0.98] font-bold tracking-tight text-balance sm:text-6xl md:text-7xl lg:text-[5.75rem]" key={lang}>
           <SplitReveal text={t("hero.title1")} delay={0.15} />
           <br />
           <SplitReveal text={t("hero.title2")} delay={0.3} className="text-brand" />

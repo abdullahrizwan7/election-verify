@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { BrainCircuit, CheckCircle2, Clock, Inbox, Info } from "lucide-react";
+import { BarChart3, BrainCircuit, CheckCircle2, Clock, Inbox, Info } from "lucide-react";
 import { ActivityChart } from "@/components/analytics/activity-chart";
 import { AgreementMatrix } from "@/components/analytics/agreement-matrix";
 import { VerdictBars } from "@/components/analytics/verdict-bars";
 import { CountUp } from "@/components/fx/count-up";
 import { InputTypeIcon } from "@/components/input-type-icon";
+import { PageHeader } from "@/components/layout/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,18 +20,24 @@ import { cn } from "@/lib/utils";
 export const metadata: Metadata = { title: "Analytics" };
 
 const RANGES = [7, 30, 60];
+const TILE_TONES = [
+  "bg-tint-lime text-tint-lime-foreground",
+  "bg-tint-coral text-tint-coral-foreground",
+  "bg-tint-sky text-tint-sky-foreground",
+  "bg-tint-ink text-tint-ink-foreground",
+];
 type SearchParams = Promise<{ range?: string }>;
 
 export default function AnalyticsPage({ searchParams }: { searchParams: SearchParams }) {
   return (
-    <main className="page-enter mx-auto max-w-7xl sm:px-6 space-y-6 px-4 py-10">
-      <div>
-        <p className="text-sm font-medium tracking-widest text-glow uppercase">Insights</p>
-        <h1 className="text-4xl leading-[1.02] font-bold tracking-tight sm:text-5xl md:text-6xl">
-          <span className="text-gradient">Analytics</span>
-        </h1>
-        <p className="mt-1 text-muted-foreground">How many claims arrive, what we find, and how often reviewers agree with the AI.</p>
-      </div>
+    <main className="page-enter mx-auto max-w-7xl space-y-8 px-4 pt-8 pb-16 sm:px-6 md:pt-12">
+      <PageHeader
+        eyebrow="Insights"
+        icon={BarChart3}
+        title="Review"
+        muted="analytics."
+        description="How many claims arrive, what we find, and how often reviewers agree with the AI."
+      />
       <Suspense fallback={<DashboardSkeleton />}>
         <Dashboard searchParams={searchParams} />
       </Suspense>
@@ -57,13 +64,13 @@ async function Dashboard({ searchParams }: { searchParams: SearchParams }) {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <nav className="flex gap-1 rounded-lg border bg-card p-1 text-sm backdrop-blur" aria-label="Time range">
+        <nav className="glass flex gap-1 rounded-full bg-card p-1 text-sm ring-1 ring-foreground/[0.07]" aria-label="Time range">
           {RANGES.map((r) => (
             <Link
               key={r}
               href={`/review/analytics?range=${r}`}
               aria-current={r === range ? "page" : undefined}
-              className={cn("rounded-md px-3 py-1 transition", r === range ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground")}
+              className={cn("rounded-full px-4 py-2 font-semibold transition-colors", r === range ? "bg-foreground text-background shadow-[0_6px_16px_-6px_rgba(0,0,0,0.45)]" : "text-muted-foreground hover:text-foreground")}
             >
               Last {r} days
             </Link>
@@ -76,22 +83,20 @@ async function Dashboard({ searchParams }: { searchParams: SearchParams }) {
         )}
       </div>
 
-      <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {tiles.map(({ label, value, suffix, icon: Icon }) => (
-          <Card key={label}>
-            <CardContent className="flex items-start justify-between gap-3">
-              <div>
-                <dt className="text-sm text-muted-foreground">{label}</dt>
-                <dd className="mt-1 text-3xl font-semibold">
-                  <CountUp value={value} />
-                  {suffix}
-                </dd>
-              </div>
-              <span className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-glow/20 to-glow-2/20 text-glow ring-1 ring-glow/25">
-                <Icon className="size-5" aria-hidden />
+      <dl className="stagger grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
+        {tiles.map(({ label, value, suffix, icon: Icon }, i) => (
+          <div key={label} className={cn("flex h-36 flex-col justify-between rounded-[1.75rem] p-5 md:h-40 md:p-6", TILE_TONES[i])}>
+            <div className="flex items-start justify-between gap-2">
+              <dt className="text-sm font-semibold opacity-80">{label}</dt>
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-current/10">
+                <Icon className="size-4" aria-hidden />
               </span>
-            </CardContent>
-          </Card>
+            </div>
+            <dd className="text-5xl leading-none font-bold tracking-tight">
+              <CountUp value={value} />
+              {suffix}
+            </dd>
+          </div>
         ))}
       </dl>
 

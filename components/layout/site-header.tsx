@@ -27,7 +27,10 @@ export function SiteHeader() {
       </Link>
 
       <div className="hidden md:block">
-        <PillNav />
+        {/* Reads the address to highlight the current page, so it streams in. */}
+        <Suspense fallback={<Skeleton className="h-11 w-[26rem] rounded-full" />}>
+          <PillNav />
+        </Suspense>
       </div>
 
       <div className="glass flex items-center gap-0.5 justify-self-end rounded-full bg-card p-1 ring-1 ring-foreground/[0.07]">
@@ -41,7 +44,9 @@ export function SiteHeader() {
       </div>
 
       <div className="order-last flex w-full justify-center md:hidden">
-        <PillNav />
+        <Suspense fallback={<Skeleton className="h-11 w-60 rounded-full" />}>
+          <PillNav />
+        </Suspense>
       </div>
     </HeaderShell>
   );

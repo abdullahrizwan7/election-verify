@@ -14,12 +14,13 @@ export const metadata: Metadata = { title: "Activity log" };
 
 export default function ActivityPage() {
   return (
-    <main className="page-enter mx-auto max-w-7xl sm:px-6 space-y-6 px-4 py-10">
+    <main className="page-enter mx-auto max-w-7xl space-y-8 px-4 pt-8 pb-16 sm:px-6 md:pt-12">
       <div>
+        <span className="glass mb-4 inline-flex items-center gap-2 rounded-full bg-card px-3.5 py-1.5 text-[11px] font-bold tracking-[0.14em] text-muted-foreground uppercase ring-1 ring-foreground/[0.07]">Admin</span>
         <h1 className="text-4xl leading-[1.02] font-bold tracking-tight sm:text-5xl md:text-6xl">
-          <span className="text-gradient">Admin</span>
+          Activity <span className="text-muted-foreground/70">log.</span>
         </h1>
-        <p className="mt-1 text-muted-foreground">Every important action is recorded here and never edited.</p>
+        <p className="mt-3 max-w-2xl text-lg text-muted-foreground">Every important action is recorded here and never edited.</p>
       </div>
       <AdminNav current="/admin/activity" />
       <Suspense fallback={<TableSkeleton rows={8} />}>
