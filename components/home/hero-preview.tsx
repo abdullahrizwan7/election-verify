@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "motion/react";
-import { BarChart3, Check, ClipboardCheck, FileSearch, Inbox, Library, Plus, Sparkles, Timer } from "lucide-react";
+import { BarChart3, Check, UserCheck, ClipboardCheck, FileSearch, Inbox, Library, Plus, Sparkles, Timer } from "lucide-react";
 import { CountUp } from "@/components/motion/reveal";
 import { VerdictBadge } from "@/components/verdict-badge";
 import { cn } from "@/lib/utils";
@@ -101,7 +101,7 @@ export function HeroPreview({ data }: { data: PreviewData }) {
 
             <div>
               <p className="text-[11px] font-medium text-muted-foreground">Reviewer workspace</p>
-              <p className="text-2xl leading-tight font-bold tracking-tight md:text-4xl">Welcome back, Uday</p>
+              <p className="text-2xl leading-tight font-bold tracking-tight md:text-4xl">Today's review queue</p>
             </div>
 
             <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4">
@@ -157,13 +157,10 @@ export function HeroPreview({ data }: { data: PreviewData }) {
       </FloatingChip>
 
       <FloatingChip className="top-52 -right-3 hidden md:flex lg:-right-12" delay={0.85} drift={10}>
-        <span className="flex -space-x-2">
-          {["abdullah", "uday", "sandeep"].map((name) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img key={name} src={`/team/${name}.png`} alt="" className="size-7 rounded-full bg-tint-sky object-cover ring-2 ring-card" />
-          ))}
+        <span className="flex size-7 items-center justify-center rounded-full bg-tint-sky text-tint-sky-foreground">
+          <UserCheck className="size-3.5" />
         </span>
-        <span className="text-xs font-semibold">Uday is reviewing</span>
+        <span className="text-xs font-semibold">A reviewer is checking</span>
       </FloatingChip>
 
       <FloatingChip className="inset-x-0 -bottom-5 mx-auto w-fit md:bottom-6" delay={1} drift={-6} dark>

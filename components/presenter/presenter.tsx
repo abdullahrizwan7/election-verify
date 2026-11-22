@@ -218,7 +218,7 @@ export function StartTourButton({ className }: { className?: string }) {
           className="aspect-video w-full bg-black"
         />
         <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
-          <p className="text-sm text-muted-foreground">Meet Veri, Sandeep, Uday and Abdullah Rizwan.</p>
+          <p className="text-sm text-muted-foreground">A short walkthrough with Veri, your fact-check guide.</p>
           <Button
             variant="outline"
             size="sm"

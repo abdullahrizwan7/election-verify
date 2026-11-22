@@ -26,10 +26,10 @@ const COLUMNS = [
   },
 ];
 
-const TEAM = [
-  { name: "Abdullah Rizwan", role: "Admin", tone: "bg-tint-lime text-tint-lime-foreground" },
-  { name: "Uday", role: "Reviewer", tone: "bg-tint-sky text-tint-sky-foreground" },
-  { name: "Sandeep", role: "Citizen", tone: "bg-tint-coral text-tint-coral-foreground" },
+const BADGES = [
+  { label: "Human-reviewed", tone: "bg-tint-lime text-tint-lime-foreground" },
+  { label: "Free to use", tone: "bg-tint-sky text-tint-sky-foreground" },
+  { label: "English · हिन्दी · اردو", tone: "bg-tint-coral text-tint-coral-foreground" },
 ];
 
 /** A big rounded card at the bottom of every page. */
@@ -47,9 +47,9 @@ export function SiteFooter() {
               <T k="footer.about" />
             </p>
             <div className="flex flex-wrap items-center gap-2">
-              {TEAM.map((person) => (
-                <span key={person.name} className={`rounded-full px-3.5 py-1.5 text-xs font-bold ${person.tone}`}>
-                  {person.name} · <span className="opacity-70">{person.role}</span>
+              {BADGES.map((badge) => (
+                <span key={badge.label} className={`rounded-full px-3.5 py-1.5 text-xs font-bold ${badge.tone}`}>
+                  {badge.label}
                 </span>
               ))}
             </div>
@@ -70,7 +70,7 @@ export function SiteFooter() {
           ))}
         </div>
         <div className="flex flex-col items-center justify-between gap-4 border-t border-foreground/[0.08] pt-8 md:flex-row">
-          <p className="text-sm text-muted-foreground">Made in India for the 2026 class showcase. Free to read, search and share.</p>
+          <p className="text-sm text-muted-foreground">© 2026 ElectionVerify · Made in India. Free to read, search and share.</p>
           <div className="flex items-center gap-2">
             {[
               { href: "https://github.com/abdullahrizwan7/election-verify", label: "Source code on GitHub", Icon: FolderGit2 },

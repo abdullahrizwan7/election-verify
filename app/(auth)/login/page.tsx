@@ -42,7 +42,6 @@ export default function LoginPage({ searchParams }: { searchParams: SearchParams
 }
 
 const ROLE_TONES = ["bg-tint-coral text-tint-coral-foreground", "bg-tint-sky text-tint-sky-foreground", "bg-tint-lime text-tint-lime-foreground"];
-const ROLE_PEOPLE = ["sandeep", "uday", "abdullah"];
 
 /** The left side on large screens: a dark card with the three roles. Hidden on phones. */
 function BrandPanel() {
@@ -65,12 +64,11 @@ function BrandPanel() {
       <ul className="relative mt-10 grid max-w-lg gap-3">
         {ROLES.map(({ icon: Icon, title, text }, i) => (
           <li key={title} className="flex items-center gap-4 rounded-[1.5rem] bg-white/[0.06] p-3.5 pr-5 ring-1 ring-white/10 backdrop-blur">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`/team/${ROLE_PEOPLE[i]}.png`} alt="" className={`size-12 shrink-0 rounded-2xl object-cover ${ROLE_TONES[i]}`} />
+            <span className={`flex size-12 shrink-0 items-center justify-center rounded-2xl ${ROLE_TONES[i]}`}>
+              <Icon className="size-5" aria-hidden />
+            </span>
             <div className="min-w-0">
-              <p className="flex items-center gap-2 font-bold">
-                <Icon className="size-4 text-brand" aria-hidden /> {title}
-              </p>
+              <p className="font-bold">{title}</p>
               <p className="text-sm text-white/60">{text}</p>
             </div>
           </li>

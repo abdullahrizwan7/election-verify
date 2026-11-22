@@ -37,9 +37,10 @@ export function HowItWorks() {
             </p>
             <div className="mt-8 flex items-center gap-3 text-sm text-white/60">
               <span className="flex -space-x-2">
-                {["sandeep", "uday", "abdullah"].map((name) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img key={name} src={`/team/${name}.png`} alt="" className="size-9 rounded-full bg-white/10 object-cover ring-2 ring-tint-ink" />
+                {[Send, Bot, UserCheck].map((Icon, i) => (
+                  <span key={i} className={cn("flex size-9 items-center justify-center rounded-full ring-2 ring-tint-ink", STEPS[i].tone)}>
+                    <Icon className="size-4" aria-hidden />
+                  </span>
                 ))}
               </span>
               Citizen → AI → Reviewer → Everyone
