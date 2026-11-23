@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { FileText, ImageIcon, Link2, Loader2, Send } from "lucide-react";
 import { createSubmissionAction, type SubmitState } from "@/app/(public)/submit/actions";
@@ -30,6 +30,17 @@ export function SubmitForm() {
   const defaultText = state.values?.text ?? (prefill ? DEMO_MESSAGE : undefined);
   const [textLength, setTextLength] = useState(defaultText?.length ?? 0);
   const errors = state.errors ?? {};
+
+  // If sending takes unusually long (a weak or upload-blocking connection), say so instead of spinning silently.
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    if (!pending) return;
+    const timer = setTimeout(() => setSlow(true), 20000);
+    return () => {
+      clearTimeout(timer);
+      setSlow(false);
+    };
+  }, [pending]);
 
   return (
     <form action={formAction} className="space-y-6">
@@ -113,6 +124,12 @@ export function SubmitForm() {
       </Tabs>
 
       <FieldError message={errors.form ?? errors.type} />
+      {pending && slow && (
+        <p className="rounded-2xl bg-tint-sky p-3 text-sm text-tint-sky-foreground" role="status">
+          Still sending… your connection is slow or may be blocking uploads. You can wait, or try again on Wi-Fi. A screenshot
+          uploads faster than a full photo.
+        </p>
+      )}
 
       <div className="flex flex-col-reverse gap-3 border-t border-foreground/[0.07] pt-5 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-muted-foreground">

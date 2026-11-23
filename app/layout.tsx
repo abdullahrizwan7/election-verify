@@ -13,7 +13,7 @@ import {
   Urbanist,
 } from "next/font/google";
 import { ThemeProvider } from "next-themes";
-import { Suspense, ViewTransition } from "react";
+import { Suspense } from "react";
 import { DemoBanner } from "@/components/layout/demo-banner";
 import { LanguageSync } from "@/components/i18n";
 import { Presenter } from "@/components/presenter/presenter";
@@ -69,8 +69,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <DemoBanner />
             <SiteHeader />
             <div className="flex-1">
-              {/* Pages fade and lift in when you navigate (see globals.css) */}
-              <ViewTransition default="page-fade">{children}</ViewTransition>
+              {/* No browser view transitions: on phones their screen snapshot could freeze taps.
+                  Pages use a light CSS entrance instead (.page-enter in globals.css). */}
+              {children}
             </div>
             <SiteFooter />
             <Toaster richColors position="top-center" />

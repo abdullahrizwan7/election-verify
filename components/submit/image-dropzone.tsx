@@ -7,15 +7,19 @@ import { cn } from "@/lib/utils";
 
 /** Largest photo people can pick. Bigger photos are shrunk before upload. */
 const MAX_PICK_MB = 25;
-/** Photos above this are resized in the browser, so the upload stays under the 4.5 MB hosting limit and is quick on phones. */
-const RESIZE_ABOVE_BYTES = 3.5 * 1024 * 1024;
-const MAX_EDGE = 2560;
+/**
+ * Photos above this are resized in the browser: the upload stays well under the
+ * 4.5 MB hosting limit and goes through on slow or unreliable mobile connections.
+ * Smaller files are sent untouched, so their photo details stay available for checks.
+ */
+const RESIZE_ABOVE_BYTES = 1.5 * 1024 * 1024;
+const MAX_EDGE = 2048;
 const ALLOWED = ["image/jpeg", "image/png", "image/webp"];
 
 const formatSize = (bytes: number) => (bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`);
 
 /**
- * Re-encodes a photo as a smaller JPEG (longest side at most 2560 px), lowering the
+ * Re-encodes a photo as a smaller JPEG (longest side at most 2048 px), lowering the
  * quality step by step until it fits. Returns null if the browser can't read the image.
  */
 async function shrinkImage(file: File): Promise<File | null> {
@@ -27,9 +31,9 @@ async function shrinkImage(file: File): Promise<File | null> {
     canvas.height = Math.round(bitmap.height * scale);
     canvas.getContext("2d")?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
     bitmap.close();
-    for (const quality of [0.86, 0.76, 0.66, 0.56]) {
+    for (const quality of [0.82, 0.72, 0.62, 0.52]) {
       const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
-      if (blob && (blob.size <= RESIZE_ABOVE_BYTES || quality === 0.56)) {
+      if (blob && (blob.size <= RESIZE_ABOVE_BYTES || quality === 0.52)) {
         const name = file.name.replace(/\.[^.]+$/, "") + ".jpg";
         return new File([blob], name, { type: "image/jpeg", lastModified: Date.now() });
       }
