@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ImageUp, X } from "lucide-react";
+import { T } from "@/components/i18n";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -124,8 +125,10 @@ export function ImageDropzone({ invalid }: { invalid?: boolean }) {
         )}
       >
         <ImageUp className="size-8 text-muted-foreground" aria-hidden />
-        <span className="font-medium">Drop an image here or click to choose</span>
-        <span className="text-sm text-muted-foreground">{working ? "Preparing your image…" : "JPG, PNG or WebP. Large photos are resized automatically."}</span>
+        <span className="font-medium">
+          <T k="submit.drop" />
+        </span>
+        <span className="text-sm text-muted-foreground">{working ? <T k="submit.drop.preparing" /> : <T k="submit.drop.hint" />}</span>
       </label>
       <input
         ref={inputRef}
@@ -151,7 +154,7 @@ export function ImageDropzone({ invalid }: { invalid?: boolean }) {
               </span>
             </span>
             <Button type="button" variant="ghost" size="sm" onClick={clear}>
-              <X aria-hidden /> Remove
+              <X aria-hidden /> <T k="submit.remove" />
             </Button>
           </div>
         </div>

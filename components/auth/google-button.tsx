@@ -2,6 +2,7 @@
 
 import { useFormStatus } from "react-dom";
 import { Loader2 } from "lucide-react";
+import { T } from "@/components/i18n";
 import { cn } from "@/lib/utils";
 
 /** Google's four-colour "G" mark, drawn inline so it needs no image request. */
@@ -34,7 +35,7 @@ export function GoogleButton({ className }: { className?: string }) {
       )}
     >
       {pending ? <Loader2 className="size-5 animate-spin text-neutral-500" aria-hidden /> : <GoogleMark className="size-5" />}
-      {pending ? "Opening Google…" : "Continue with Google"}
+      {pending ? "Opening Google…" : <T k="login.google" />}
     </button>
   );
 }

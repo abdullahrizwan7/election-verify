@@ -49,7 +49,7 @@ export default function ResultPage({ params, searchParams }: Props) {
     <main className="page-enter mx-auto max-w-7xl px-4 pt-8 pb-16 sm:px-6">
       <Button variant="outline" size="sm" asChild className="mb-6 h-10 rounded-full px-4">
         <Link href="/verified">
-          <ArrowLeft aria-hidden /> All verified claims
+          <ArrowLeft aria-hidden /> <T k="result.back" />
         </Link>
       </Button>
       <Suspense fallback={<DetailSkeleton />}>
@@ -71,8 +71,12 @@ async function Result({ params, searchParams }: Props) {
       {notice === "submitted" && (
         <Alert>
           <Info aria-hidden />
-          <AlertTitle>Thanks, we received it.</AlertTitle>
-          <AlertDescription>Keep this page open or bookmark it. It updates as each step finishes.</AlertDescription>
+          <AlertTitle>
+            <T k="result.received" />
+          </AlertTitle>
+          <AlertDescription>
+            <T k="result.receivedText" />
+          </AlertDescription>
         </Alert>
       )}
       {notice === "reported" && (
@@ -155,16 +159,18 @@ function VerdictPanel({ submission }: { submission: SubmissionDetail }) {
   const meta = VERDICTS[verdict];
   const sources = new Set(submission.evidence.map((e) => e.publisher ?? e.url).filter(Boolean)).size;
   const facts = [
-    { label: "Claims checked", value: submission.claims.length },
-    { label: "Pieces of evidence", value: submission.evidence.length },
-    { label: "Sources consulted", value: sources },
-    { label: "Times reported", value: submission.reportCount },
-  ];
+    { label: "result.fact.claims", value: submission.claims.length },
+    { label: "result.fact.evidence", value: submission.evidence.length },
+    { label: "result.fact.sources", value: sources },
+    { label: "result.fact.reports", value: submission.reportCount },
+  ] as const;
   return (
     <section data-tour="verdict-panel" className="stagger grid gap-4 lg:grid-cols-[1.6fr_1fr] [&>*]:min-w-0">
       <div className={cn("sheen relative overflow-hidden rounded-[2.5rem] p-7 md:p-10", meta.tone)}>
         <span aria-hidden className="pointer-events-none absolute -right-16 -bottom-20 size-72 rounded-full bg-current/10" />
-        <p className="relative text-xs font-bold tracking-[0.2em] uppercase opacity-70">Our verdict</p>
+        <p className="relative text-xs font-bold tracking-[0.2em] uppercase opacity-70">
+          <T k="result.verdict" />
+        </p>
         <p className="relative mt-2 text-6xl leading-none font-bold tracking-tight md:text-8xl">
           <T k={`verdict.${verdict}` as MessageKey} />
         </p>
@@ -180,12 +186,14 @@ function VerdictPanel({ submission }: { submission: SubmissionDetail }) {
           {facts.map((fact, i) => (
             <div key={fact.label} className={cn("rounded-[1.75rem] p-5", i === 0 ? "bg-tint-ink text-tint-ink-foreground" : "glass bg-card ring-1 ring-foreground/[0.07]")}>
               <p className="text-4xl font-bold tracking-tight tabular-nums">{fact.value}</p>
-              <p className={cn("mt-1 text-xs font-semibold", i === 0 ? "text-white/60" : "text-muted-foreground")}>{fact.label}</p>
+              <p className={cn("mt-1 text-xs font-semibold", i === 0 ? "text-white/60" : "text-muted-foreground")}><T k={fact.label} /></p>
             </div>
           ))}
         </div>
         <div className="glass flex-1 rounded-[1.75rem] bg-card p-5 ring-1 ring-foreground/[0.07]">
-          <p className="mb-3 text-sm font-bold">Share the answer</p>
+          <p className="mb-3 text-sm font-bold">
+            <T k="result.share" />
+          </p>
           <ShareButtons
             path={`/s/${submission.id}`}
             downloadPath={`/s/${submission.id}/card`}

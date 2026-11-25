@@ -43,7 +43,7 @@ export function HowItWorks() {
                   </span>
                 ))}
               </span>
-              Citizen → AI → Reviewer → Everyone
+              <T k="how.flow" />
             </div>
           </div>
 

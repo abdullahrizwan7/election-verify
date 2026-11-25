@@ -131,6 +131,7 @@ export const ACTIONS: Record<string, string> = {
   "submission.reported_again": "Sent content that was already submitted",
   "source.saved": "Saved a trusted source",
   "user.role_changed": "Changed a person's role",
+  "submission.failed": "A submission failed (see details)",
   "user.signed_in": "Signed in",
 };
 

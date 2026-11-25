@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { ArrowRight, Loader2, Mail, MailCheck } from "lucide-react";
 import { sendMagicLink, type MagicLinkState } from "@/app/(auth)/actions";
+import { T } from "@/components/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,7 +29,9 @@ export function MagicLinkForm({ next }: { next: string }) {
     <form action={formAction} className="space-y-3">
       <input type="hidden" name="next" value={next} />
       <div className="space-y-1.5">
-        <Label htmlFor="email">Email address</Label>
+        <Label htmlFor="email">
+          <T k="login.email" />
+        </Label>
         <div className="relative">
           <Mail className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
           <Input
@@ -46,7 +49,7 @@ export function MagicLinkForm({ next }: { next: string }) {
       </div>
       <Button type="submit" className="group h-13 w-full rounded-full text-[15px]" disabled={pending}>
         {pending ? <Loader2 className="animate-spin" aria-hidden /> : null}
-        {pending ? "Sending link…" : "Email me a sign-in link"}
+        {pending ? "Sending link…" : <T k="login.emailButton" />}
         {!pending && <ArrowRight className="transition-transform group-hover:translate-x-0.5" aria-hidden />}
       </Button>
     </form>

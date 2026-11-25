@@ -2,35 +2,36 @@ import Link from "next/link";
 import { FolderGit2, Mail } from "lucide-react";
 import { T } from "@/components/i18n";
 import { Logo } from "@/components/layout/logo";
+import type { MessageKey } from "@/lib/i18n/dictionaries";
 
 const linkClass = "inline-block text-muted-foreground transition-[color,transform] duration-300 hover:translate-x-1 hover:text-foreground";
 
 const COLUMNS = [
   {
-    title: "Explore",
+    title: "footer.explore",
     links: [
-      { href: "/verified", label: "Verified claims" },
-      { href: "/submit", label: "Submit a claim" },
-      { href: "/about", label: "Our method" },
-      { href: "/#ratings", label: "How we rate claims" },
+      { href: "/verified", key: "nav.verified" },
+      { href: "/submit", key: "nav.submit" },
+      { href: "/about", key: "nav.method" },
+      { href: "/#ratings", key: "ratings.title" },
     ],
   },
   {
-    title: "Workspace",
+    title: "footer.workspace",
     links: [
-      { href: "/review", label: "Review queue" },
-      { href: "/review/analytics", label: "Analytics" },
-      { href: "/admin/sources", label: "Trusted sources" },
-      { href: "/my", label: "My submissions" },
+      { href: "/review", key: "footer.reviewQueue" },
+      { href: "/review/analytics", key: "footer.analytics" },
+      { href: "/admin/sources", key: "footer.sources" },
+      { href: "/my", key: "footer.mine" },
     ],
   },
-];
+] as const satisfies readonly { title: MessageKey; links: readonly { href: string; key: MessageKey }[] }[];
 
 const BADGES = [
-  { label: "Human-reviewed", tone: "bg-tint-lime text-tint-lime-foreground" },
-  { label: "Free to use", tone: "bg-tint-sky text-tint-sky-foreground" },
-  { label: "English · हिन्दी · اردو", tone: "bg-tint-coral text-tint-coral-foreground" },
-];
+  { key: "footer.badgeHuman", tone: "bg-tint-lime text-tint-lime-foreground" },
+  { key: "footer.badgeFree", tone: "bg-tint-sky text-tint-sky-foreground" },
+  { key: "features.languages.title", tone: "bg-tint-coral text-tint-coral-foreground" },
+] as const;
 
 /** A big rounded card at the bottom of every page. */
 export function SiteFooter() {
@@ -48,20 +49,22 @@ export function SiteFooter() {
             </p>
             <div className="flex flex-wrap items-center gap-2">
               {BADGES.map((badge) => (
-                <span key={badge.label} className={`rounded-full px-3.5 py-1.5 text-xs font-bold ${badge.tone}`}>
-                  {badge.label}
+                <span key={badge.key} className={`rounded-full px-3.5 py-1.5 text-xs font-bold ${badge.tone}`}>
+                  <T k={badge.key} />
                 </span>
               ))}
             </div>
           </div>
           {COLUMNS.map((column) => (
             <div key={column.title}>
-              <h4 className="mb-6 text-xs font-bold tracking-widest text-muted-foreground uppercase">{column.title}</h4>
+              <h4 className="mb-6 text-xs font-bold tracking-widest text-muted-foreground uppercase">
+                <T k={column.title} />
+              </h4>
               <ul className="space-y-3.5">
                 {column.links.map((link) => (
                   <li key={link.href}>
                     <Link href={link.href} className={linkClass}>
-                      {link.label}
+                      <T k={link.key} />
                     </Link>
                   </li>
                 ))}
@@ -70,7 +73,9 @@ export function SiteFooter() {
           ))}
         </div>
         <div className="flex flex-col items-center justify-between gap-4 border-t border-foreground/[0.08] pt-8 md:flex-row">
-          <p className="text-sm text-muted-foreground">© 2026 ElectionVerify · Made in India. Free to read, search and share.</p>
+          <p className="text-sm text-muted-foreground">
+            © 2026 ElectionVerify · <T k="footer.bottom" />
+          </p>
           <div className="flex items-center gap-2">
             {[
               { href: "https://github.com/abdullahrizwan7/election-verify", label: "Source code on GitHub", Icon: FolderGit2 },

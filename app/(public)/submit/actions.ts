@@ -1,6 +1,6 @@
 "use server";
 
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { SUBMISSIONS_PER_HOUR } from "@/lib/config";
 import { hashFile, hashText, normalizeText, normalizeUrl } from "@/lib/content-hash";
@@ -26,7 +26,39 @@ export type SubmitState = {
 
 const shorten = (value: string, max = 90) => (value.length > max ? `${value.slice(0, max - 1)}…` : value);
 
-export async function createSubmissionAction(_prev: SubmitState, formData: FormData): Promise<SubmitState> {
+/**
+ * Receives a claim from the submit form. Unexpected failures are recorded in the activity
+ * log (with the real error, so they can be diagnosed) and shown as a clear message on the
+ * form instead of an error page.
+ */
+export async function createSubmissionAction(prev: SubmitState, formData: FormData): Promise<SubmitState> {
+  try {
+    return await submitClaim(prev, formData);
+  } catch (error) {
+    unstable_rethrow(error); // redirects to the result page are not errors
+    const ref = crypto.randomUUID().slice(0, 8);
+    const image = formData.get("image");
+    const detail = {
+      ref,
+      type: String(formData.get("type") ?? ""),
+      message: error instanceof Error ? error.message.slice(0, 300) : String(error).slice(0, 300),
+      where: error instanceof Error ? (error.stack ?? "").split("\n").slice(1, 4).join(" | ").slice(0, 300) : "",
+      image: image instanceof File ? `${image.type} ${Math.round(image.size / 1024)} KB` : null,
+    };
+    console.error("Submitting a claim failed", detail, error);
+    await logAction({ actorId: null, action: "submission.failed", meta: detail }).catch(() => {});
+    return {
+      errors: { form: `Something went wrong while sending this (reference ${ref}). Please try again in a moment.` },
+      values: {
+        url: String(formData.get("url") ?? ""),
+        text: String(formData.get("text") ?? ""),
+        caption: String(formData.get("caption") ?? ""),
+      },
+    };
+  }
+}
+
+async function submitClaim(_prev: SubmitState, formData: FormData): Promise<SubmitState> {
   // 1. Only signed-in people can submit (simple protection against spam).
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/submit");

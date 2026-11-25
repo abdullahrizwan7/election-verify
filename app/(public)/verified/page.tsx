@@ -6,10 +6,12 @@ import { PageHeader } from "@/components/layout/page-header";
 import { CardGridSkeleton } from "@/components/skeletons";
 import { SubmissionCard } from "@/components/submission-card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { T } from "@/components/i18n";
+import { SearchInput } from "@/components/verified/search-input";
 import { listPublished } from "@/lib/data";
 import { VERDICT_ORDER, VERDICTS } from "@/lib/labels";
 import { cn } from "@/lib/utils";
+import type { MessageKey } from "@/lib/i18n/dictionaries";
 import type { Verdict } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Verified claims" };
@@ -20,11 +22,11 @@ export default function VerifiedPage({ searchParams }: { searchParams: SearchPar
   return (
     <main className="page-enter mx-auto max-w-7xl space-y-10 px-4 pt-10 pb-16 sm:px-6 md:pt-16">
       <PageHeader
-        eyebrow="Library"
+        eyebrow={<T k="verified.eyebrow" />}
         icon={BadgeCheck}
-        title="Verified"
-        muted="claims."
-        description="Election claims our reviewers have checked, newest first. Search, filter by rating and share."
+        title={<T k="verified.title" />}
+        muted={<T k="verified.muted" />}
+        description={<T k="verified.description" />}
       />
       <Suspense fallback={<CardGridSkeleton count={6} />}>
         <FilteredResults searchParams={searchParams} />
@@ -55,26 +57,26 @@ async function FilteredResults({ searchParams }: { searchParams: SearchParams })
         {verdict && <input type="hidden" name="verdict" value={verdict} />}
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-          <Input name="q" defaultValue={query} placeholder="Search, e.g. polling hours, voter ID, ballots" className="h-12 rounded-full pl-11" aria-label="Search verified claims" />
+          <SearchInput defaultValue={query} />
         </div>
         <Button type="submit" className="h-12 rounded-full px-6">
-          Search
+          <T k="verified.search" />
         </Button>
       </form>
 
       <nav className="no-scrollbar flex gap-1 overflow-x-auto px-1 pb-1 lg:pb-0" aria-label="Filter by rating">
-        <FilterChip href={hrefFor(undefined, query)} active={!verdict} label="All" />
+        <FilterChip href={hrefFor(undefined, query)} active={!verdict} label={<T k="verified.all" />} />
         {VERDICT_ORDER.map((v) => (
-          <FilterChip key={v} href={hrefFor(v, query)} active={verdict === v} label={VERDICTS[v].label} dot={VERDICTS[v].dotClassName} />
+          <FilterChip key={v} href={hrefFor(v, query)} active={verdict === v} label={<T k={`verdict.${v}` as MessageKey} />} dot={VERDICTS[v].dotClassName} />
         ))}
       </nav>
       </div>
 
       {items.length === 0 ? (
         <p className="glass rounded-[2rem] border border-dashed border-foreground/15 bg-card/50 p-14 text-center text-muted-foreground">
-          {query ? `No published claims match “${query}”.` : "No published claims with this rating yet."}{" "}
-          <Link href="/submit" className="text-primary hover:underline">
-            Send it to us to check.
+          <T k="verified.empty" />{" "}
+          <Link href="/submit" className="font-semibold text-foreground underline-offset-4 hover:underline">
+            <T k="verified.sendIt" />
           </Link>
         </p>
       ) : (
@@ -95,7 +97,7 @@ async function FilteredResults({ searchParams }: { searchParams: SearchParams })
   );
 }
 
-function FilterChip({ href, active, label, dot }: { href: string; active: boolean; label: string; dot?: string }) {
+function FilterChip({ href, active, label, dot }: { href: string; active: boolean; label: React.ReactNode; dot?: string }) {
   return (
     <Link
       href={href}

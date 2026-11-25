@@ -100,7 +100,9 @@ export function LanguageSwitcher() {
           <LangItem key={option.code} option={option} current={lang} />
         ))}
         <DropdownMenuSeparator />
-        <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">More languages</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+          <T k="lang.more" />
+        </DropdownMenuLabel>
         {LANGS.filter((l) => !l.main).map((option) => (
           <LangItem key={option.code} option={option} current={lang} />
         ))}

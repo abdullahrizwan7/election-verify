@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { AlertCircle, ClipboardCheck, LockKeyhole, UserRound, UsersRound } from "lucide-react";
+import { T } from "@/components/i18n";
 import { Logo } from "@/components/layout/logo";
 import { DemoLoginPanel } from "@/components/auth/demo-login-panel";
 import { GoogleButton } from "@/components/auth/google-button";
@@ -21,9 +22,9 @@ const ERRORS: Record<string, { title: string; text: string }> = {
 };
 
 const ROLES = [
-  { icon: UserRound, title: "Citizens", text: "Send a link, message or screenshot and follow the check live." },
-  { icon: ClipboardCheck, title: "Reviewers", text: "Read the evidence, decide the verdict and publish it." },
-  { icon: UsersRound, title: "Admins", text: "Choose reviewers and manage the trusted sources." },
+  { icon: UserRound, key: "citizen" },
+  { icon: ClipboardCheck, key: "reviewer" },
+  { icon: UsersRound, key: "admin" },
 ] as const;
 
 type SearchParams = Promise<{ next?: string; error?: string }>;
@@ -55,21 +56,32 @@ function BrandPanel() {
         <Globe className="absolute inset-0" />
       </div>
 
-      <p className="relative text-xs font-bold tracking-[0.2em] text-brand uppercase">Welcome</p>
+      <p className="relative text-xs font-bold tracking-[0.2em] text-brand uppercase">
+        <T k="login.welcome" />
+      </p>
       <h2 className="relative mt-4 max-w-md text-5xl leading-[1.02] font-bold tracking-tight xl:text-6xl">
-        Check before <span className="text-white/45">you forward.</span>
+        <T k="login.heading1" />{" "}
+        <span className="text-white/45">
+          <T k="login.heading2" />
+        </span>
       </h2>
-      <p className="relative mt-5 max-w-sm text-lg text-white/65">AI gathers the evidence in about a minute. A trained human reviewer always makes the final call.</p>
+      <p className="relative mt-5 max-w-sm text-lg text-white/65">
+        <T k="login.body" />
+      </p>
 
       <ul className="relative mt-10 grid max-w-lg gap-3">
-        {ROLES.map(({ icon: Icon, title, text }, i) => (
-          <li key={title} className="flex items-center gap-4 rounded-[1.5rem] bg-white/[0.06] p-3.5 pr-5 ring-1 ring-white/10 backdrop-blur">
+        {ROLES.map(({ icon: Icon, key }, i) => (
+          <li key={key} className="flex items-center gap-4 rounded-[1.5rem] bg-white/[0.06] p-3.5 pr-5 ring-1 ring-white/10 backdrop-blur">
             <span className={`flex size-12 shrink-0 items-center justify-center rounded-2xl ${ROLE_TONES[i]}`}>
               <Icon className="size-5" aria-hidden />
             </span>
             <div className="min-w-0">
-              <p className="font-bold">{title}</p>
-              <p className="text-sm text-white/60">{text}</p>
+              <p className="font-bold">
+                <T k={`roles.${key}.title`} />
+              </p>
+              <p className="text-sm text-white/60">
+                <T k={`roles.${key}.text`} />
+              </p>
             </div>
           </li>
         ))}
@@ -99,8 +111,12 @@ async function LoginContent({ searchParams }: { searchParams: SearchParams }) {
     <div className="glass relative mx-auto w-full max-w-md overflow-hidden rounded-[2.5rem] bg-card p-7 shadow-[0_40px_100px_-40px_rgba(10,14,12,0.5)] ring-1 ring-foreground/10 sm:p-10">
       <div className="relative">
         <Logo className="size-12" />
-        <h1 className="mt-7 text-4xl leading-[1.05] font-bold tracking-tight">Sign in</h1>
-        <p className="mt-2 text-muted-foreground">Submit claims and follow every check. No passwords needed.</p>
+        <h1 className="mt-7 text-4xl leading-[1.05] font-bold tracking-tight">
+          <T k="login.title" />
+        </h1>
+        <p className="mt-2 text-muted-foreground">
+          <T k="login.subtitle" />
+        </p>
 
         {errorInfo && (
           <div className="mt-6">
@@ -115,7 +131,7 @@ async function LoginContent({ searchParams }: { searchParams: SearchParams }) {
 
         <div className="my-6 flex items-center gap-3 text-xs font-semibold text-muted-foreground">
           <span className="h-px flex-1 bg-border" />
-          or use your email
+          <T k="login.or" />
           <span className="h-px flex-1 bg-border" />
         </div>
 

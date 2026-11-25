@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { FileText, ImageIcon, Link2, Loader2, Send } from "lucide-react";
 import { createSubmissionAction, type SubmitState } from "@/app/(public)/submit/actions";
 import { ImageDropzone } from "@/components/submit/image-dropzone";
-import { T } from "@/components/i18n";
+import { T, useT } from "@/components/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,6 +30,7 @@ export function SubmitForm() {
   const defaultText = state.values?.text ?? (prefill ? DEMO_MESSAGE : undefined);
   const [textLength, setTextLength] = useState(defaultText?.length ?? 0);
   const errors = state.errors ?? {};
+  const t = useT();
 
   // If sending takes unusually long (a weak or upload-blocking connection), say so instead of spinning silently.
   const [slow, setSlow] = useState(false);
@@ -61,7 +62,9 @@ export function SubmitForm() {
         </TabsList>
 
         <TabsContent value="URL" className="space-y-2 pt-4">
-          <Label htmlFor="url">News article or web page link</Label>
+          <Label htmlFor="url">
+            <T k="submit.url.label" />
+          </Label>
           <Input
             id="url"
             name="url"
@@ -74,13 +77,15 @@ export function SubmitForm() {
           />
           <FieldError message={errors.url} />
           <p className="text-sm text-muted-foreground">
-            Social media posts often can’t be read automatically. For those, paste the text or upload a screenshot.
+            <T k="submit.url.hint" />
           </p>
         </TabsContent>
 
         <TabsContent value="TEXT" className="space-y-2 pt-4">
           <div className="flex items-baseline justify-between">
-            <Label htmlFor="text">Message or post text</Label>
+            <Label htmlFor="text">
+              <T k="submit.text.label" />
+            </Label>
             <span className="text-xs text-muted-foreground tabular-nums">
               {textLength.toLocaleString()} / {TEXT_LIMIT.toLocaleString()}
             </span>
@@ -91,7 +96,7 @@ export function SubmitForm() {
             rows={7}
             maxLength={TEXT_LIMIT}
             minLength={20}
-            placeholder="Paste the forwarded message or post exactly as you received it."
+            placeholder={t("submit.text.placeholder")}
             defaultValue={defaultText}
             onChange={(event) => setTextLength(event.target.value.length)}
             aria-invalid={Boolean(errors.text)}
@@ -102,13 +107,18 @@ export function SubmitForm() {
 
         <TabsContent value="IMAGE" className="space-y-4 pt-4">
           <div className="space-y-2">
-            <Label htmlFor="image">Photo or screenshot</Label>
+            <Label htmlFor="image">
+              <T k="submit.image.label" />
+            </Label>
             <ImageDropzone invalid={Boolean(errors.image)} />
             <FieldError message={errors.image} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="caption">
-              What did the message with this image say? <span className="font-normal text-muted-foreground">(optional)</span>
+              <T k="submit.caption.label" />{" "}
+              <span className="font-normal text-muted-foreground">
+                <T k="submit.optional" />
+              </span>
             </Label>
             <Textarea
               id="caption"
@@ -126,18 +136,17 @@ export function SubmitForm() {
       <FieldError message={errors.form ?? errors.type} />
       {pending && slow && (
         <p className="rounded-2xl bg-tint-sky p-3 text-sm text-tint-sky-foreground" role="status">
-          Still sending… your connection is slow or may be blocking uploads. You can wait, or try again on Wi-Fi. A screenshot
-          uploads faster than a full photo.
+          <T k="submit.slow" />
         </p>
       )}
 
       <div className="flex flex-col-reverse gap-3 border-t border-foreground/[0.07] pt-5 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-muted-foreground">
-          Don’t include personal details such as phone numbers or home addresses.
+          <T k="submit.privacy" />
         </p>
         <Button type="submit" variant="brand" disabled={pending} className="h-12 px-6 text-[15px]">
           {pending ? <Loader2 className="animate-spin" aria-hidden /> : <Send aria-hidden />}
-          {pending ? "Sending…" : <T k="submit.button" />}
+          {pending ? <T k="submit.sending" /> : <T k="submit.button" />}
         </Button>
       </div>
     </form>

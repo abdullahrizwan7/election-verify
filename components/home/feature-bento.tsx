@@ -2,56 +2,58 @@
 
 import { motion } from "motion/react";
 import { Bot, Globe2, ImageIcon, Layers, UserCheck } from "lucide-react";
+import { T, useLang, useT } from "@/components/i18n";
 import { InView, SplitReveal, Stagger, StaggerItem } from "@/components/motion/reveal";
+import type { MessageKey } from "@/lib/i18n/dictionaries";
 import { EASE_OUT } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 const FEATURES = [
   {
-    title: "Smart claim checks",
-    text: "Every link, message or screenshot is read, split into separate claims and matched against trusted sources.",
+    title: "features.claims.title",
+    text: "features.claims.text",
     icon: Layers,
     tone: "bg-tint-lime text-tint-lime-foreground",
     span: "md:col-span-2",
     visual: "chips",
   },
   {
-    title: "AI with citations",
-    text: "Gemini suggests a verdict and cites every piece of evidence. It never publishes on its own.",
+    title: "features.ai.title",
+    text: "features.ai.text",
     icon: Bot,
     tone: "bg-tint-sky text-tint-sky-foreground",
     span: "",
     visual: "lines",
   },
   {
-    title: "Image forensics",
-    text: "Reads the text in screenshots, checks photo details and looks for older copies of the image.",
+    title: "features.images.title",
+    text: "features.images.text",
     icon: ImageIcon,
     tone: "bg-tint-coral text-tint-coral-foreground",
     span: "",
     visual: "bars",
   },
   {
-    title: "A human makes the call",
-    text: "Trained reviewers read the evidence, choose the verdict and explain it in plain words. Every action is logged.",
+    title: "features.human.title",
+    text: "features.human.text",
     icon: UserCheck,
     tone: "bg-tint-ink text-tint-ink-foreground",
     span: "md:col-span-2",
     visual: "nodes",
   },
-] as const;
+] as const satisfies readonly { title: MessageKey; text: MessageKey; icon: unknown; tone: string; span: string; visual: string }[];
 
 function Visual({ kind }: { kind: (typeof FEATURES)[number]["visual"] }) {
   if (kind === "chips") {
     return (
       <div className="mt-8 flex flex-wrap gap-2">
-        {["Source reputation", "Domain age", "Claims", "Fact-checks", "Web evidence"].map((chip, i) => (
+        {(["features.chip.reputation", "features.chip.age", "features.chip.claims", "features.chip.factchecks", "features.chip.web"] as const).map((chip, i) => (
           <span
             key={chip}
             className={cn("rounded-full bg-current/10 px-3.5 py-1.5 text-xs font-bold transition-transform duration-500 ease-(--ease-pop) group-hover:-translate-y-1", i % 2 && "group-hover:translate-y-0")}
             style={{ transitionDelay: `${i * 40}ms` }}
           >
-            {chip}
+            <T k={chip} />
           </span>
         ))}
       </div>
@@ -87,14 +89,16 @@ function Visual({ kind }: { kind: (typeof FEATURES)[number]["visual"] }) {
 
 /** "Engineered for answers you can trust": tinted feature cards that pop in and lift on hover. */
 export function FeatureBento() {
+  const t = useT();
+  const lang = useLang();
   return (
     <section id="features" className="relative scroll-mt-24 py-20 md:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mx-auto mb-14 max-w-4xl text-center md:mb-20">
-          <h2 className="text-4xl leading-[1] font-bold tracking-tight md:text-7xl">
-            <SplitReveal inView text="Engineered for" />
+          <h2 className="text-4xl leading-[1] font-bold tracking-tight md:text-7xl" key={lang}>
+            <SplitReveal inView text={t("features.title1")} />
             <br />
-            <SplitReveal inView text="answers you can trust." delay={0.12} className="text-muted-foreground/70" />
+            <SplitReveal inView text={t("features.title2")} delay={0.12} className="text-muted-foreground/70" />
           </h2>
         </div>
 
@@ -109,8 +113,12 @@ export function FeatureBento() {
                   <div className="mb-6 flex size-14 items-center justify-center rounded-2xl bg-current/10 transition-transform duration-500 ease-(--ease-pop) group-hover:scale-110 group-hover:rotate-6">
                     <feature.icon className="size-7" aria-hidden />
                   </div>
-                  <h3 className="mb-2 text-2xl font-bold tracking-tight md:text-3xl">{feature.title}</h3>
-                  <p className="max-w-sm text-base leading-relaxed font-medium opacity-75">{feature.text}</p>
+                  <h3 className="mb-2 text-2xl font-bold tracking-tight md:text-3xl">
+                    <T k={feature.title} />
+                  </h3>
+                  <p className="max-w-sm text-base leading-relaxed font-medium opacity-75">
+                    <T k={feature.text} />
+                  </p>
                 </div>
                 <Visual kind={feature.visual} />
               </motion.div>
@@ -124,7 +132,10 @@ export function FeatureBento() {
               <Globe2 className="size-5" aria-hidden />
             </span>
             <p className="text-base text-muted-foreground md:text-lg">
-              <span className="font-bold text-foreground">English, हिन्दी and اردو.</span> Results are free to read, search and share, on any phone.
+              <span className="font-bold text-foreground">
+                <T k="features.languages.title" />
+              </span>{" "}
+              <T k="features.languages.text" />
             </p>
           </div>
         </InView>
