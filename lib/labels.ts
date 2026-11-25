@@ -132,6 +132,8 @@ export const ACTIONS: Record<string, string> = {
   "source.saved": "Saved a trusted source",
   "user.role_changed": "Changed a person's role",
   "submission.failed": "A submission failed (see details)",
+  "submission.assigned": "Took a claim to review",
+  "submission.released": "Gave a claim back to the queue",
   "user.signed_in": "Signed in",
 };
 

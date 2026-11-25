@@ -24,7 +24,7 @@ const globalForDemo = globalThis as unknown as { demoState?: DemoState };
 function state(): DemoState {
   if (!globalForDemo.demoState) {
     globalForDemo.demoState = {
-      submissions: structuredClone(DEMO_SUBMISSIONS),
+      submissions: structuredClone(DEMO_SUBMISSIONS).map((s) => ({ ...s, assigneeId: null, assigneeName: null })),
       sources: structuredClone(DEMO_SOURCES),
       profiles: structuredClone(Object.values(DEMO_USERS)),
       activity: [],
@@ -42,6 +42,12 @@ function find(id: string): StoredSubmission {
 const newId = (prefix: string) => `${prefix}-${crypto.randomUUID().slice(0, 8)}`;
 const OPEN_STATUSES = new Set(["QUEUED", "PROCESSING", "NEEDS_REVIEW"]);
 
+/** Name to show for a person (demo profiles). */
+function nameOf(id: string): string | null {
+  const person = state().profiles.find((p) => p.id === id);
+  return person ? (person.name ?? person.email) : null;
+}
+
 function toSummary(s: StoredSubmission): SubmissionSummary {
   return {
     id: s.id,
@@ -56,6 +62,8 @@ function toSummary(s: StoredSubmission): SubmissionSummary {
     reportCount: s.reportCount,
     createdAt: s.createdAt,
     publishedAt: s.publishedAt,
+    assigneeId: s.assigneeId ?? null,
+    assigneeName: s.assigneeId ? nameOf(s.assigneeId) : null,
   };
 }
 
@@ -144,6 +152,8 @@ export const demoStore: Repository = {
     const id = newId("sub");
     state().submissions.push({
       id,
+      assigneeId: null,
+      assigneeName: null,
       type: input.type,
       title: input.title,
       url: input.url ?? null,
@@ -268,6 +278,12 @@ export const demoStore: Repository = {
     if (existing) return existing;
     profiles.push(user);
     return user;
+  },
+
+  async assign(id, reviewerId) {
+    const submission = find(id);
+    submission.assigneeId = reviewerId;
+    submission.assigneeName = reviewerId ? nameOf(reviewerId) : null;
   },
 
   async listProfiles() {

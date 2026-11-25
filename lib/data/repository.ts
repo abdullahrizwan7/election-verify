@@ -50,6 +50,8 @@ export interface Repository {
   createSubmission(input: NewSubmission): Promise<{ id: string }>;
   publishReview(input: NewReview): Promise<void>;
   addEvidence(id: string, item: NewEvidence): Promise<Evidence>;
+  /** Gives a claim to a reviewer, or releases it (null). */
+  assign(id: string, reviewerId: string | null): Promise<void>;
 
   // Verification pipeline
   getPipelineInput(id: string): Promise<PipelineInput | null>;

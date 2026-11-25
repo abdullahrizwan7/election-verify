@@ -21,6 +21,8 @@ const summarySelect = {
   reportCount: true,
   createdAt: true,
   publishedAt: true,
+  assigneeId: true,
+  assignee: { select: { name: true, email: true } },
 } satisfies Prisma.SubmissionSelect;
 
 type SummaryRow = Prisma.SubmissionGetPayload<{ select: typeof summarySelect }>;
@@ -39,6 +41,8 @@ function toSummary(row: SummaryRow): SubmissionSummary {
     reportCount: row.reportCount,
     createdAt: row.createdAt,
     publishedAt: row.publishedAt,
+    assigneeId: row.assigneeId,
+    assigneeName: row.assignee ? (row.assignee.name ?? row.assignee.email) : null,
   };
 }
 
@@ -120,6 +124,7 @@ export const prismaStore: Repository = {
         claims: { orderBy: { position: "asc" } },
         evidence: { orderBy: { createdAt: "asc" } },
         reviews: { orderBy: { createdAt: "desc" }, include: { reviewer: true } },
+        assignee: { select: { name: true, email: true } },
       },
     });
     if (!row) return null;
@@ -357,6 +362,13 @@ export const prismaStore: Repository = {
       create: user,
       update: {},
       select: { id: true, email: true, name: true, role: true },
+    });
+  },
+
+  async assign(id, reviewerId) {
+    await getPrisma().submission.update({
+      where: { id },
+      data: { assigneeId: reviewerId, assignedAt: reviewerId ? new Date() : null },
     });
   },
 

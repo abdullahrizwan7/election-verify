@@ -74,7 +74,8 @@ model Profile {
   name        String?
   role        Role         @default(USER)
   createdAt   DateTime     @default(now())
-  submissions Submission[]
+  submissions Submission[] @relation("SubmittedBy")
+  assigned    Submission[] @relation("AssignedTo")
   reviews     Review[]
 }
 
@@ -98,7 +99,11 @@ model Submission {
   finalVerdict Verdict? /// set by a human reviewer
   publicNote   String?
   userId       String?    @db.Uuid
-  user         Profile?   @relation(fields: [userId], references: [id])
+  user         Profile?   @relation("SubmittedBy", fields: [userId], references: [id])
+  /// The reviewer working on it (set by dragging it to "In review" on the board)
+  assigneeId   String?    @db.Uuid
+  assignee     Profile?   @relation("AssignedTo", fields: [assigneeId], references: [id], onDelete: SetNull)
+  assignedAt   DateTime?
   claims       Claim[]
   evidence     Evidence[]
   reviews      Review[]
@@ -107,6 +112,7 @@ model Submission {
 
   @@index([status, createdAt])
   @@index([contentHash])
+  @@index([assigneeId])
 }
 
 /// A single checkable statement found in a submission.

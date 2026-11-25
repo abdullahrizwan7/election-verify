@@ -46,7 +46,7 @@ async function shrinkImage(file: File): Promise<File | null> {
 }
 
 /** File picker with drag-and-drop, a preview, and automatic resizing of large photos. */
-export function ImageDropzone({ invalid }: { invalid?: boolean }) {
+export function ImageDropzone({ invalid, incoming }: { invalid?: boolean; incoming?: File | null }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<{ url: string; name: string; size: number; note?: string } | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -66,7 +66,15 @@ export function ImageDropzone({ invalid }: { invalid?: boolean }) {
     }
   }
 
-  async function showFile(file: File | undefined) {
+  // A photo dropped or pasted elsewhere arrives here: show it and put it in the form.
+  useEffect(() => {
+    if (!incoming) return;
+    const timer = setTimeout(() => void showFile(incoming, true), 0);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once per new file
+  }, [incoming]);
+
+  async function showFile(file: File | undefined, fromOutside = false) {
     setError(null);
     if (!file) return setPreview(null);
     if (file.size > MAX_PICK_MB * 1024 * 1024) {
@@ -91,6 +99,7 @@ export function ImageDropzone({ invalid }: { invalid?: boolean }) {
       putInForm(smaller);
       note = `Resized from ${formatSize(file.size)} so it uploads quickly.`;
     }
+    if (fromOutside && chosen === file) putInForm(file);
     setPreview({ url: URL.createObjectURL(chosen), name: chosen.name, size: chosen.size, note });
   }
 
@@ -102,6 +111,7 @@ export function ImageDropzone({ invalid }: { invalid?: boolean }) {
   return (
     <div>
       <label
+        data-dropzone
         htmlFor="image"
         onDragOver={(event) => {
           event.preventDefault();

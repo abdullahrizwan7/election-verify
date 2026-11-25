@@ -15,6 +15,7 @@ import {
 import { ThemeProvider } from "next-themes";
 import { Suspense } from "react";
 import { DemoBanner } from "@/components/layout/demo-banner";
+import { QuickCapture } from "@/components/capture/quick-capture";
 import { LanguageSync } from "@/components/i18n";
 import { Presenter } from "@/components/presenter/presenter";
 import { ServiceWorker } from "@/components/service-worker";
@@ -81,6 +82,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Presenter />
             </Suspense>
             <LanguageSync />
+            {/* Drop or paste a claim on any public page (reads the address, so it loads on its own) */}
+            <Suspense fallback={null}>
+              <QuickCapture />
+            </Suspense>
           </TooltipProvider>
         </ThemeProvider>
       </body>

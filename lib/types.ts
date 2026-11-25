@@ -113,6 +113,9 @@ export interface SubmissionSummary {
   reportCount: number;
   createdAt: Date;
   publishedAt: Date | null;
+  /** The reviewer working on it, if someone took it on the review board. */
+  assigneeId: string | null;
+  assigneeName: string | null;
 }
 
 /** Everything about one submission, used on the result and review pages. */

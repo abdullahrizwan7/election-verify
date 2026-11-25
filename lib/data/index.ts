@@ -88,3 +88,4 @@ export const getProfile: Repository["getProfile"] = (id) => store.getProfile(id)
 export const saveProfile: Repository["saveProfile"] = (user) => store.saveProfile(user);
 export const logAction: Repository["logAction"] = (entry) => store.logAction(entry);
 export const setRole: Repository["setRole"] = (id, role) => store.setRole(id, role);
+export const assignClaim: Repository["assign"] = (id, reviewerId) => store.assign(id, reviewerId);

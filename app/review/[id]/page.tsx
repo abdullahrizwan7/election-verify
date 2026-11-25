@@ -14,6 +14,7 @@ import { ForensicsViewer } from "@/components/evidence/forensics-viewer";
 import { PipelineMap } from "@/components/pipeline-map";
 import { PipelineProgress } from "@/components/pipeline-progress";
 import { AiSuggestion } from "@/components/review/ai-suggestion";
+import { ClaimAssignment } from "@/components/review/claim-assignment";
 import { VerdictForm } from "@/components/review/verdict-form";
 import { DetailSkeleton } from "@/components/skeletons";
 import { StatusBadge } from "@/components/status-badge";
@@ -21,7 +22,7 @@ import { SubmittedContent } from "@/components/submitted-content";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { VerdictBadge } from "@/components/verdict-badge";
-import { requireRole } from "@/lib/auth";
+import { hasRole, requireRole } from "@/lib/auth";
 import { getSubmission } from "@/lib/data";
 import { formatDateTime } from "@/lib/format";
 
@@ -46,7 +47,7 @@ export default function ReviewSubmissionPage({ params }: { params: Params }) {
 
 async function Workspace({ params }: { params: Params }) {
   const { id } = await params;
-  await requireRole("REVIEWER", `/review/${id}`);
+  const user = await requireRole("REVIEWER", `/review/${id}`);
   const submission = await getSubmission(id);
   if (!submission) notFound();
 
@@ -63,6 +64,15 @@ async function Workspace({ params }: { params: Params }) {
             Submitted {formatDateTime(submission.createdAt)}
             {submission.reportCount > 1 && ` · sent to us ${submission.reportCount} times`}
           </p>
+          {submission.status === "NEEDS_REVIEW" && (
+            <ClaimAssignment
+              id={submission.id}
+              assigneeId={submission.assigneeId}
+              assigneeName={submission.assigneeName}
+              userId={user.id}
+              isAdmin={hasRole(user, "ADMIN")}
+            />
+          )}
         </div>
         {submission.status === "PUBLISHED" && (
           <Button variant="outline" asChild>

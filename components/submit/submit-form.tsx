@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { FileText, ImageIcon, Link2, Loader2, Send } from "lucide-react";
 import { createSubmissionAction, type SubmitState } from "@/app/(public)/submit/actions";
 import { ImageDropzone } from "@/components/submit/image-dropzone";
+import { onCapture, takeCapture, type Capture } from "@/lib/capture";
 import { T, useT } from "@/components/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +32,24 @@ export function SubmitForm() {
   const [textLength, setTextLength] = useState(defaultText?.length ?? 0);
   const errors = state.errors ?? {};
   const t = useT();
+
+  // A photo, link or text dropped or pasted on any page fills the form (see components/capture).
+  const [captured, setCaptured] = useState<(Capture & { n: number }) | null>(null);
+  useEffect(() => {
+    function apply() {
+      const next = takeCapture();
+      if (!next) return;
+      setCaptured({ ...next, n: Date.now() });
+      setType(next.kind);
+      if (next.kind === "TEXT") setTextLength(next.text.length);
+    }
+    const timer = setTimeout(apply, 0); // one that arrived before this page opened
+    const stop = onCapture(apply);
+    return () => {
+      clearTimeout(timer);
+      stop();
+    };
+  }, []);
 
   // If sending takes unusually long (a weak or upload-blocking connection), say so instead of spinning silently.
   const [slow, setSlow] = useState(false);
@@ -71,7 +90,8 @@ export function SubmitForm() {
             type="url"
             inputMode="url"
             placeholder="https://news-site.com/article"
-            defaultValue={state.values?.url}
+            key={captured?.kind === "URL" ? `url-${captured.n}` : "url"}
+            defaultValue={captured?.kind === "URL" ? captured.url : state.values?.url}
             aria-invalid={Boolean(errors.url)}
             required
           />
@@ -97,7 +117,8 @@ export function SubmitForm() {
             maxLength={TEXT_LIMIT}
             minLength={20}
             placeholder={t("submit.text.placeholder")}
-            defaultValue={defaultText}
+            key={captured?.kind === "TEXT" ? `text-${captured.n}` : "text"}
+            defaultValue={captured?.kind === "TEXT" ? captured.text : defaultText}
             onChange={(event) => setTextLength(event.target.value.length)}
             aria-invalid={Boolean(errors.text)}
             required
@@ -110,7 +131,7 @@ export function SubmitForm() {
             <Label htmlFor="image">
               <T k="submit.image.label" />
             </Label>
-            <ImageDropzone invalid={Boolean(errors.image)} />
+            <ImageDropzone invalid={Boolean(errors.image)} incoming={captured?.kind === "IMAGE" ? captured.file : null} />
             <FieldError message={errors.image} />
           </div>
           <div className="space-y-2">

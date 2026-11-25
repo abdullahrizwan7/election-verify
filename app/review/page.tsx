@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { AlertTriangle, BarChart3, CheckCircle2, ClipboardCheck, Loader2 } from "lucide-react";
+import { AlertTriangle, BarChart3, CheckCircle2, ClipboardCheck, Columns3, List, Loader2 } from "lucide-react";
 import { CountUp } from "@/components/fx/count-up";
 import { QueueKeys } from "@/components/review/queue-keys";
+import { ReviewBoard } from "@/components/review/review-board";
 import { ReviewQueueTable } from "@/components/review/review-queue-table";
 import { TableSkeleton } from "@/components/skeletons";
 import { PageHeader } from "@/components/layout/page-header";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { requireRole } from "@/lib/auth";
+import { hasRole, requireRole } from "@/lib/auth";
 import { getStats, listForReview } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import type { ReviewSort, Status } from "@/lib/types";
@@ -32,7 +33,7 @@ const SORTS: { label: string; value: ReviewSort }[] = [
   { label: "Most reported", value: "reports" },
 ];
 
-type SearchParams = Promise<{ status?: string; sort?: string; notice?: string }>;
+type SearchParams = Promise<{ status?: string; sort?: string; notice?: string; view?: string }>;
 
 /** Builds a queue link that keeps the other filter. */
 function queueHref(status: Status | undefined, sort: ReviewSort) {
@@ -77,11 +78,16 @@ export default function ReviewPage({ searchParams }: { searchParams: SearchParam
 }
 
 async function ReviewDashboard({ searchParams }: { searchParams: SearchParams }) {
-  await requireRole("REVIEWER", "/review");
-  const { status: raw, sort: rawSort, notice } = await searchParams;
+  const user = await requireRole("REVIEWER", "/review");
+  const { status: raw, sort: rawSort, notice, view: rawView } = await searchParams;
+  const view = rawView === "board" ? "board" : "list";
   const status = FILTERS.find((f) => f.status === raw)?.status;
   const sort = SORTS.find((s) => s.value === rawSort)?.value ?? "newest";
-  const [stats, items] = await Promise.all([getStats(), listForReview({ status, sort })]);
+  const [stats, items, published] = await Promise.all([
+    getStats(),
+    listForReview(view === "board" ? {} : { status, sort }),
+    view === "board" ? listForReview({ status: "PUBLISHED" }) : Promise.resolve([]),
+  ]);
 
   // Tinted stat tiles (same style as the home page dashboard preview).
   const cards = [
@@ -117,6 +123,12 @@ async function ReviewDashboard({ searchParams }: { searchParams: SearchParams })
         ))}
       </div>
 
+      <ViewSwitch view={view} />
+
+      {view === "board" ? (
+        <ReviewBoard items={[...items, ...published.slice(0, 12)]} userId={user.id} isAdmin={hasRole(user, "ADMIN")} />
+      ) : (
+      <>
       <div className="glass flex flex-wrap items-center justify-between gap-3 rounded-[2rem] bg-card p-2 ring-1 ring-foreground/[0.07]">
         <nav className="no-scrollbar flex gap-1 overflow-x-auto" aria-label="Filter by status">
           {FILTERS.map((filter) => {
@@ -155,6 +167,8 @@ async function ReviewDashboard({ searchParams }: { searchParams: SearchParams })
       </div>
 
       <ReviewQueueTable items={items} />
+      </>
+      )}
       <QueueKeys />
       <p className="text-xs text-muted-foreground">
         Tip: press <kbd className="rounded border bg-muted px-1 font-mono">J</kbd> /{" "}
@@ -162,6 +176,31 @@ async function ReviewDashboard({ searchParams }: { searchParams: SearchParams })
         <kbd className="rounded border bg-muted px-1 font-mono">Enter</kbd> to open. Press{" "}
         <kbd className="rounded border bg-muted px-1 font-mono">?</kbd> for all shortcuts.
       </p>
+    </div>
+  );
+}
+
+/** Switch between the table and the drag-and-drop board. */
+function ViewSwitch({ view }: { view: "list" | "board" }) {
+  const option = (value: "list" | "board", label: string, Icon: typeof List) => (
+    <Link
+      href={value === "board" ? "/review?view=board" : "/review"}
+      aria-current={view === value ? "page" : undefined}
+      className={cn(
+        "inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors",
+        view === value ? "bg-foreground text-background shadow-[0_6px_16px_-6px_rgba(0,0,0,0.45)]" : "text-muted-foreground hover:text-foreground",
+      )}
+    >
+      <Icon className="size-4" aria-hidden /> {label}
+    </Link>
+  );
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <nav className="glass inline-flex gap-1 rounded-full bg-card p-1 ring-1 ring-foreground/[0.07]" aria-label="View">
+        {option("list", "List", List)}
+        {option("board", "Board", Columns3)}
+      </nav>
+      {view === "board" && <p className="text-sm text-muted-foreground">Drag claims between columns (press and hold on a phone), or use the buttons on each card.</p>}
     </div>
   );
 }

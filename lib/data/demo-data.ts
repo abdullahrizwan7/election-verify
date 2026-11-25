@@ -81,7 +81,7 @@ function evidence(item: Partial<Evidence> & Pick<Evidence, "id" | "kind" | "titl
   };
 }
 
-export const DEMO_SUBMISSIONS: (SubmissionDetail & { userId: string | null; contentHash: string })[] = [
+export const DEMO_SUBMISSIONS: (Omit<SubmissionDetail, "assigneeId" | "assigneeName"> & { userId: string | null; contentHash: string })[] = [
   {
     id: "polling-hours-message",
     type: "TEXT",

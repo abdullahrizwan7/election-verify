@@ -63,6 +63,7 @@ export function ReviewQueueTable({ items }: { items: SubmissionSummary[] }) {
               </TableCell>
               <TableCell className="hidden sm:table-cell">
                 <StatusBadge status={item.status} />
+                {item.assigneeName && <p className="mt-1 text-xs font-semibold text-muted-foreground">{item.assigneeName} is reviewing</p>}
               </TableCell>
               <TableCell className="pr-4 text-right">
                 <Button size="sm" variant={item.status === "NEEDS_REVIEW" ? "brand" : "outline"} className="h-9 rounded-full px-4" asChild>

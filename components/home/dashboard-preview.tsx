@@ -4,6 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getStats, listPublished, listSources } from "@/lib/data";
 import { domainOf } from "@/lib/format";
 import type { MessageKey } from "@/lib/i18n/dictionaries";
+import type { Verdict } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 /**
@@ -37,11 +38,19 @@ export async function DashboardPreview() {
             waiting: stats.needsReview,
             sources: sources.length,
             latest: published.slice(0, 4).map((item) => ({ id: item.id, title: item.title, verdict: item.finalVerdict, domain: domainOf(item.url) })),
+            verdictMix: verdictMix(published),
           }}
         />
       </div>
     </>
   );
+}
+
+/** How many published verdicts have each rating, most common first. */
+function verdictMix(items: { finalVerdict: Verdict | null }[]) {
+  const counts = new Map<Verdict, number>();
+  for (const item of items) if (item.finalVerdict) counts.set(item.finalVerdict, (counts.get(item.finalVerdict) ?? 0) + 1);
+  return [...counts].map(([verdict, count]) => ({ verdict, count })).sort((a, b) => b.count - a.count);
 }
 
 export function DashboardPreviewSkeleton() {

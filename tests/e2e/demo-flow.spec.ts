@@ -121,3 +121,23 @@ test("an admin can make someone a reviewer, and the change is logged", async ({ 
   await page.goto("/admin/activity");
   await expect(page.getByText("Changed a person's role").first()).toBeVisible();
 });
+
+test("a reviewer drags a claim onto the board to take it, then releases it", async ({ page }) => {
+  await signInAs(page, "Reviewer", "/review?view=board");
+  const card = page.locator("[data-column='open'] li").filter({ hasText: /\w/ }).first();
+  const title = (await card.locator("p").first().innerText()).trim().slice(0, 20);
+  await page.locator("[data-tour='board']").scrollIntoViewIfNeeded();
+  await card.scrollIntoViewIfNeeded();
+  const from = (await card.boundingBox())!;
+  const to = (await page.locator("[data-column='review'] header").boundingBox())!;
+  await page.mouse.move(from.x + 40, from.y + 30);
+  await page.mouse.down();
+  await page.mouse.move(from.x + 60, from.y + 40, { steps: 3 });
+  await page.mouse.move(to.x + to.width / 2, to.y + to.height + 30, { steps: 12 });
+  await page.mouse.up();
+  const review = page.locator("[data-column='review']");
+  await expect(review).toContainText(title);
+  await expect(review).toContainText("You’re reviewing");
+  await review.locator("li").filter({ hasText: title }).getByRole("button", { name: /Release/ }).click();
+  await expect(page.locator("[data-column='open']")).toContainText(title);
+});

@@ -52,7 +52,7 @@ export function VerdictForm({
   }, [disabled]);
 
   return (
-    <Card data-tour="verdict-form">
+    <Card id="verdict" data-tour="verdict-form" className="scroll-mt-24">
       <CardHeader>
         <CardTitle className="text-base">{current ? "Update the verdict" : "Your verdict"}</CardTitle>
         <CardDescription>
