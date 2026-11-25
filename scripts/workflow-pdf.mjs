@@ -43,6 +43,7 @@ async function main() {
   await shot("/s/polling-hours-message", "result.png");
   await page.goto(`${BASE}/demo/start?as=reviewer&next=/`);
   await shot("/review", "queue.png");
+  await shot("/review?view=board", "review-board.png", "[data-tour=\"board\"]");
   await shot("/review/ballots-in-river", "board.png", '[data-tour="evidence-board"]');
   await shot("/review/ballots-in-river", "ai.png", '[data-tour="ai-suggestion"]');
   await shot("/review/ballots-in-river", "forensics.png", '[data-tour="forensics"]');

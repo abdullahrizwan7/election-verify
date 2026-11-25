@@ -49,7 +49,7 @@ const shots = {
   submit: await img("private/shots/submit.png"),
   login: await img("private/shots/login.png"),
   result: await img("private/shots/result.png", { height: 1200 }),
-  queue: await img("docs/screenshots/queue.png"),
+  queue: await img("docs/screenshots/review-board.png"),
   board: await img("docs/screenshots/board.png"),
   ai: await img("docs/screenshots/ai.png", { width: 600 }),
   analytics: await img("docs/screenshots/analytics.png"),
@@ -83,7 +83,7 @@ const STACK = [
   ["Background jobs", "Inngest (optional)", v("inngest"), "Runs the checking pipeline outside the request when enabled."],
   ["Charts & diagrams", "Recharts, React Flow, cobe", v("recharts"), "Analytics charts, evidence board, 3D globe."],
   ["Validation", "Zod", v("zod"), "Every form and API input is checked on the server."],
-  ["Testing", "Vitest + Playwright", `${v("vitest")} / ${v("@playwright/test")}`, "72 unit tests and 8 browser tests; run on GitHub on every push."],
+  ["Testing", "Vitest + Playwright", `${v("vitest")} / ${v("@playwright/test")}`, "85 unit tests and 9 browser tests; run on GitHub on every push."],
   ["Hosting", "Vercel (Hobby)", "—", "Free hosting with HTTPS at election-verify.vercel.app."],
   ["Video", "HTML + Playwright + ffmpeg, edge-tts", "—", "The 94-second intro video, rendered frame by frame with neural voices."],
 ];
@@ -118,7 +118,7 @@ const ROUTES = [
   ["/my", "My submissions and their status", "Signed in"],
   ["/review, /review/[id]", "Review queue; evidence, AI suggestion, publish verdict", "Reviewer"],
   ["/review/analytics", "Trends, verdict mix, review speed", "Reviewer"],
-  ["/admin/sources, /activity, /setup", "Trusted sources, audit log, service status", "Admin"],
+  ["/admin/users, /sources, /activity, /setup", "People and roles, trusted sources, audit log, service status", "Admin"],
   ["/api/search, /api/inngest, /auth/callback", "Search API, background jobs, sign-in callback", "System"],
 ];
 
@@ -244,7 +244,7 @@ const html = `<!doctype html><html><head><meta charset="utf-8" />
     <div class="card rust"><h3>Image forensics</h3><p>OCR with word boxes, EXIF metadata, perceptual hash to find earlier copies, reverse image search links, AI observations marked as "not proof".</p></div>
     <div class="card ink"><h3>Trust & accountability</h3><p>Roles checked on the server for every action, audit log of every step, hourly limits, safe link fetching, security headers, shareable result cards.</p></div>
   </div>
-  <p style="margin-top:4mm">Also: English / Hindi / Urdu interface, search across verified claims, analytics for reviewers, presenter mode for demos, offline page (PWA), ⌘K command palette, dark and light themes, and a 94-second narrated intro video.</p>
+  <p style="margin-top:4mm">Also: a drag-and-drop review board (reviewers take claims so nobody checks the same one twice), drop or paste a screenshot or link on any page to submit it, 11 Indian languages (English and Hindi first, plus Bengali, Marathi, Telugu, Tamil, Gujarati, Kannada, Malayalam, Punjabi and Urdu), a lighter fast layout on phones, an admin page to manage people and roles, search across verified claims, analytics for reviewers, presenter mode for demos, offline page (PWA), ⌘K command palette, dark and light themes, and a 94-second narrated intro video.</p>
   <div class="foot"><span>ElectionVerify · Project report</span><span>3</span></div>
 </section>
 
@@ -258,8 +258,8 @@ const html = `<!doctype html><html><head><meta charset="utf-8" />
 <section class="page">
   <h2><span class="num">04</span>Architecture</h2>
   <div class="arch">
-    <div class="box"><b>Browser</b><ul><li>Next.js pages (React 19)</li><li>Sign in with Google / email</li><li>Live progress, evidence board</li><li>Hindi / Urdu, dark / light</li></ul></div>
-    <div class="box mid"><b>Next.js 16 on Vercel</b><ul><li><b>proxy.ts</b>: sign-in gate, error redirects</li><li><b>Server Actions</b>: submit, publish, add evidence, sources</li><li><b>Pipeline</b> (lib/pipeline): 7 steps via <code>after()</code> or Inngest</li><li><b>Data layer</b> (lib/data): Prisma store, or in-memory demo store without keys</li><li>Role checks with <code>requireRole()</code> on the server</li></ul></div>
+    <div class="box"><b>Browser</b><ul><li>Next.js pages (React 19)</li><li>Sign in with Google / email</li><li>Live progress, evidence board</li><li>11 languages, dark / light, light mode for phones</li></ul></div>
+    <div class="box mid"><b>Next.js 16 on Vercel (Seoul, next to the database)</b><ul><li><b>proxy.ts</b>: sign-in gate, error redirects</li><li><b>Server Actions</b>: submit, publish, add evidence, sources</li><li><b>Pipeline</b> (lib/pipeline): 7 steps via <code>after()</code> or Inngest</li><li><b>Data layer</b> (lib/data): Prisma store, or in-memory demo store without keys</li><li>Role checks with <code>requireRole()</code> on the server</li></ul></div>
     <div class="box"><b>Services</b><ul><li><b>Supabase</b>: Postgres, Auth, Storage</li><li><b>Gemini</b>: claims, image notes, suggestion</li><li><b>Google Fact Check</b></li><li><b>Tavily</b> web search</li><li><b>RDAP</b> domain age</li><li>Inngest (optional)</li></ul></div>
   </div>
   <h3>Database (Prisma models)</h3>
@@ -282,7 +282,7 @@ lib/
   ai/                 Gemini client and prompts (with citations)
   data/               Repository: Prisma store + demo store, Indian sources
   supabase/  auth.ts  Login sessions and role checks
-  i18n/               English, Hindi and Urdu text
+  i18n/               Text in 11 Indian languages
 prisma/               schema.prisma, migrations, seed
 scripts/              check:services, setup:supabase, video, video:audio, PDFs
 video/                Intro video source (HTML timeline, characters, narration)
@@ -297,14 +297,14 @@ proxy.ts              Runs before every request (Next.js 16 middleware)</code></
     <li><b>Server-side permissions:</b> every action re-checks the role (submit needs sign-in, publish needs Reviewer, sources need Admin). Restricted pages redirect to login.</li>
     <li><b>Safe link fetching:</b> blocks private and internal network addresses (SSRF protection), size and time limits.</li>
     <li><b>Spam limits:</b> 10 submissions per person per hour; duplicates are merged and counted.</li>
-    <li><b>Private uploads:</b> images live in a private Supabase bucket and are shown through short-lived signed links.</li>
-    <li><b>Audit log:</b> sign-ins, submissions, re-runs and published verdicts are recorded.</li>
+    <li><b>Private uploads:</b> images live in a private Supabase bucket and are shown through short-lived signed links. Large photos are resized in the browser first, so uploads stay small.</li>
+    <li><b>Audit log:</b> sign-ins, submissions, failed submissions (with the error), role changes, re-runs and published verdicts are recorded.</li>
     <li><b>Security headers:</b> HSTS, no-sniff, frame-deny, referrer and permissions policies.</li>
     <li><b>No secrets in code:</b> keys live only in <code>.env</code> (git-ignored) and in Vercel's environment settings.</li>
   </ul>
   ${table(["Check", "Tool", "Result"], [
-    ["Unit tests", "Vitest", "72 passing (pipeline rules, validation, image hash, sources, safe fetch…)"],
-    ["Browser tests", "Playwright", "8 end-to-end flows (submit → review → publish, permissions, search…)"],
+    ["Unit tests", "Vitest", "85 passing (pipeline rules, validation, image hash, sources, safe fetch, all 11 translations…)"],
+    ["Browser tests", "Playwright", "9 end-to-end flows (submit → review → publish, permissions, search, role changes…)"],
     ["Types and lint", "TypeScript, ESLint", "Clean"],
     ["CI", "GitHub Actions", "Lint, types, tests, build and browser tests on every push"],
     ["Service check", "npm run check:services", "Tests every API key with one real request"],
@@ -350,7 +350,7 @@ npm run check:services      # verify every key works</code></pre>
 
 <section class="page">
   <h2><span class="num">09</span>Reviewer tools</h2>
-  ${figure(shots.queue, "Review queue: claims waiting, sorted by urgency or reports.", "", 78)}
+  ${figure(shots.queue, "Review board: drag a claim to “In review” to take it (press and hold on a phone), then write the verdict.", "", 78)}
   <div class="grid2">
     ${figure(shots.board, "Evidence board: how evidence relates to the claims.", "", 48)}
     ${figure(shots.forensics, "Image forensics: OCR boxes and photo details.", "", 48)}
@@ -366,9 +366,8 @@ npm run check:services      # verify every key works</code></pre>
   <h3>Ideas for next steps</h3>
   <ul class="tight">
     <li>WhatsApp / Telegram bot so people can forward a message directly.</li>
-    <li>Admin → Users page to promote reviewers inside the app.</li>
     <li>Publish the Google sign-in app so anyone (not just test users) can use Google login.</li>
-    <li>Regional languages (Tamil, Telugu, Bengali) and state election office sources.</li>
+    <li>State election office sources, and a native-speaker review of each translation.</li>
     <li>Email or push notifications when a submitted claim gets its verdict.</li>
   </ul>
   <div class="note">Questions about the code or keys: ask Abdullah Rizwan. Keys are never shared in documents or chat.</div>
