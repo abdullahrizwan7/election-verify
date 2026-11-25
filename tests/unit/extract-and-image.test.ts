@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildMetadataEvidence, cleanOcrText } from "@/lib/pipeline/analyze-image";
 import { StepError } from "@/lib/pipeline/errors";
-import { parseArticle } from "@/lib/pipeline/extract-article";
+import { basicArticle, parseArticle } from "@/lib/pipeline/extract-article";
 
 const paragraph =
   "The National Election Commission said on Monday that voter registration will stay open until 30 November so that first-time voters have more time to register online or at district offices.";
@@ -42,5 +42,25 @@ describe("buildMetadataEvidence", () => {
     const e = buildMetadataEvidence({ camera: "Phone X", takenAt: null, software: null, hasGps: true });
     expect(e.snippet).toContain("GPS location present (hidden from the public page)");
     expect(e.snippet).not.toMatch(/\d+\.\d{3,}/); // no coordinates
+  });
+});
+
+describe("basicArticle (fallback reader)", () => {
+  it("pulls out the title, date and paragraph text without scripts or menus", () => {
+    const html = `<html><head><title>Fallback title</title><meta property="article:published_time" content="2026-11-01T10:00:00Z"></head>
+      <body><nav><p>Home · About · Contact us today please</p></nav><script>alert("x")</script>
+      <p>The election commission said polling stations will stay open from 7 am until 6 pm on voting day.</p>
+      <p>Voters should carry an approved identity document &amp; their voter slip to the booth.</p></body></html>`;
+    const article = basicArticle(html, "https://news.example.com/a");
+    expect(article.title).toBe("Fallback title");
+    expect(article.text).toContain("polling stations will stay open");
+    expect(article.text).toContain("identity document & their voter slip");
+    expect(article.text).not.toContain("alert");
+    expect(article.text).not.toContain("Contact us");
+    expect(article.publishedAt?.toISOString()).toBe("2026-11-01T10:00:00.000Z");
+  });
+
+  it("fails clearly when there is no article text", () => {
+    expect(() => basicArticle("<html><body><p>Login</p></body></html>", "https://example.com")).toThrow(StepError);
   });
 });
