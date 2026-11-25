@@ -1,5 +1,6 @@
 import "server-only";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { DEMO_COOKIE, ROLE_RANK } from "@/lib/auth-constants";
@@ -15,6 +16,9 @@ import type { AppUser, Role } from "@/lib/types";
  * components ask for it.
  */
 export const getCurrentUser = cache(async (): Promise<AppUser | null> => {
+  // Sign-in depends on the visitor's cookies, so it is never pre-rendered (also stops
+  // Next.js warning about the time-based session check inside the Supabase client).
+  await connection();
   if (!hasSupabase) {
     const key = (await cookies()).get(DEMO_COOKIE)?.value;
     return key && key in DEMO_USERS ? DEMO_USERS[key as keyof typeof DEMO_USERS] : null;

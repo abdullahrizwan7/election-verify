@@ -1,5 +1,3 @@
-import { Readability } from "@mozilla/readability";
-import { JSDOM, VirtualConsole } from "jsdom";
 import { StepError } from "@/lib/pipeline/errors";
 import { safeFetchPage } from "@/lib/pipeline/safe-fetch";
 
@@ -24,7 +22,10 @@ export async function extractArticle(url: string): Promise<Article> {
 }
 
 /** Separate from the fetch so it can be tested with saved HTML. */
-export function parseArticle(html: string, url: string): Article {
+export async function parseArticle(html: string, url: string): Promise<Article> {
+  // Loaded only when a link is actually read, so a problem with these libraries can
+  // never break other pages or the submit form (they load nothing from here).
+  const [{ JSDOM, VirtualConsole }, { Readability }] = await Promise.all([import("jsdom"), import("@mozilla/readability")]);
   // Scripts are not run and images are not loaded. The empty console hides CSS warnings.
   const dom = new JSDOM(html, { url, virtualConsole: new VirtualConsole() });
   const doc = dom.window.document;

@@ -7,7 +7,7 @@ const paragraph =
   "The National Election Commission said on Monday that voter registration will stay open until 30 November so that first-time voters have more time to register online or at district offices.";
 
 describe("parseArticle", () => {
-  it("pulls out the title, text and publish date, and ignores scripts", () => {
+  it("pulls out the title, text and publish date, and ignores scripts", async () => {
     const html = `<!doctype html><html><head>
       <title>Registration extended | Daily News</title>
       <meta property="article:published_time" content="2026-11-09T08:00:00Z">
@@ -15,15 +15,15 @@ describe("parseArticle", () => {
       <p>${paragraph}</p><p>${paragraph}</p><p>${paragraph}</p></article>
       <script>document.body.innerHTML = "hacked"</script></body></html>`;
 
-    const article = parseArticle(html, "https://news.example.com/registration");
+    const article = await parseArticle(html, "https://news.example.com/registration");
     expect(article.title).toContain("Registration extended");
     expect(article.text).toContain("30 November");
     expect(article.text).not.toContain("hacked");
     expect(article.publishedAt?.toISOString()).toBe("2026-11-09T08:00:00.000Z");
   });
 
-  it("fails clearly when the page has no article text", () => {
-    expect(() => parseArticle("<html><body><p>Login</p></body></html>", "https://example.com")).toThrow(StepError);
+  it("fails clearly when the page has no article text", async () => {
+    await expect(parseArticle("<html><body><p>Login</p></body></html>", "https://example.com")).rejects.toThrow(StepError);
   });
 });
 
