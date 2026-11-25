@@ -270,6 +270,20 @@ export const demoStore: Repository = {
     return user;
   },
 
+  async listProfiles() {
+    const { profiles, submissions } = state();
+    return profiles.map((p) => ({
+      ...p,
+      createdAt: new Date(0),
+      submissionCount: submissions.filter((s) => s.userId === p.id).length,
+    }));
+  },
+
+  async setRole(id, role) {
+    const profile = state().profiles.find((p) => p.id === id);
+    if (profile) profile.role = role;
+  },
+
   async logAction(entry) {
     state().activity.unshift({
       id: newId("log"),

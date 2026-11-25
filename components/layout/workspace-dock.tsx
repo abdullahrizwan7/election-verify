@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, History, Home, Inbox, Library, Plus, Settings2 } from "lucide-react";
+import { BarChart3, History, Home, Inbox, Library, Plus, Settings2, Users } from "lucide-react";
 import { Magnetic } from "@/components/motion/reveal";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,7 @@ const ITEMS = [
   { href: "/review", label: "Review queue", icon: Inbox, exact: true },
   { href: "/review/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/admin/sources", label: "Trusted sources", icon: Library },
+  { href: "/admin/users", label: "People and roles", icon: Users },
   { href: "/admin/activity", label: "Activity log", icon: History },
 ];
 

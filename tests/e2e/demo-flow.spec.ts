@@ -109,3 +109,15 @@ test("the method page explains the process", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "How we check election claims" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "How we use AI" })).toBeVisible();
 });
+
+test("an admin can make someone a reviewer, and the change is logged", async ({ page }) => {
+  await signInAs(page, "Admin", "/admin/users");
+  const row = page.getByRole("row").filter({ hasText: "citizen@demo.local" });
+  await row.getByLabel("Role").selectOption("REVIEWER");
+  await row.getByRole("button", { name: "Save" }).click();
+  await expect(row.getByText("Saved")).toBeVisible();
+  // The admin's own role can't be changed from here.
+  await expect(page.getByRole("row").filter({ hasText: "admin@demo.local" }).getByLabel("Role")).toBeDisabled();
+  await page.goto("/admin/activity");
+  await expect(page.getByText("Changed a person's role").first()).toBeVisible();
+});

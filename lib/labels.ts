@@ -130,6 +130,7 @@ export const ACTIONS: Record<string, string> = {
   "evidence.added": "Added evidence",
   "submission.reported_again": "Sent content that was already submitted",
   "source.saved": "Saved a trusted source",
+  "user.role_changed": "Changed a person's role",
   "user.signed_in": "Signed in",
 };
 

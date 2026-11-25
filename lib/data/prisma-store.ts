@@ -360,6 +360,18 @@ export const prismaStore: Repository = {
     });
   },
 
+  async listProfiles() {
+    const rows = await getPrisma().profile.findMany({
+      orderBy: { createdAt: "desc" },
+      select: { id: true, email: true, name: true, role: true, createdAt: true, _count: { select: { submissions: true } } },
+    });
+    return rows.map(({ _count, ...profile }) => ({ ...profile, submissionCount: _count.submissions }));
+  },
+
+  async setRole(id, role) {
+    await getPrisma().profile.update({ where: { id }, data: { role } });
+  },
+
   async logAction(entry) {
     await getPrisma().auditLog.create({
       data: {

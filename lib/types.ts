@@ -45,6 +45,12 @@ export interface AppUser {
   role: Role;
 }
 
+/** A person in the admin's user list. */
+export interface ProfileSummary extends AppUser {
+  createdAt: Date;
+  submissionCount: number;
+}
+
 export interface Claim {
   id: string;
   text: string;

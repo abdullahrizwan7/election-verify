@@ -303,6 +303,7 @@
 .dock-rail > *:nth-child(5) { animation-delay: 0.25s; }
 .dock-rail > *:nth-child(6) { animation-delay: 0.3s; }
 .dock-rail > *:nth-child(7) { animation-delay: 0.35s; }
+.dock-rail > *:nth-child(n+8) { animation-delay: 0.4s; }
 
 /* Meters and bars grow in. */
 @keyframes meter-in { from { transform: scaleX(0.04); opacity: 0.45; } to { transform: none; opacity: 1; } }

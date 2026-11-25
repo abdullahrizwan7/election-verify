@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
+  { href: "/admin/users", label: "People and roles" },
   { href: "/admin/sources", label: "Trusted sources" },
   { href: "/review/analytics", label: "Analytics" },
   { href: "/admin/activity", label: "Activity log" },

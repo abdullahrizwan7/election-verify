@@ -11,7 +11,9 @@ import type {
   NewReview,
   NewSubmission,
   PipelineInput,
+  ProfileSummary,
   ReviewSort,
+  Role,
   Source,
   Status,
   SubmissionDetail,
@@ -67,6 +69,9 @@ export interface Repository {
   // People and activity
   getProfile(id: string): Promise<AppUser | null>;
   saveProfile(user: AppUser): Promise<AppUser>;
+  /** Everyone who has signed in, newest first. */
+  listProfiles(): Promise<ProfileSummary[]>;
+  setRole(id: string, role: Role): Promise<void>;
   logAction(entry: { actorId: string | null; action: string; submissionId?: string; meta?: Record<string, unknown> }): Promise<void>;
   listActivity(limit: number): Promise<ActivityEntry[]>;
 }

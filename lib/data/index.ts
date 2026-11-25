@@ -51,6 +51,11 @@ export async function listSources() {
   return store.listSources();
 }
 
+export async function listProfiles() {
+  await connection();
+  return store.listProfiles();
+}
+
 export async function listActivity(limit = 100) {
   await connection();
   return store.listActivity(limit);
@@ -82,3 +87,4 @@ export const saveSource: Repository["saveSource"] = (source) => store.saveSource
 export const getProfile: Repository["getProfile"] = (id) => store.getProfile(id);
 export const saveProfile: Repository["saveProfile"] = (user) => store.saveProfile(user);
 export const logAction: Repository["logAction"] = (entry) => store.logAction(entry);
+export const setRole: Repository["setRole"] = (id, role) => store.setRole(id, role);
