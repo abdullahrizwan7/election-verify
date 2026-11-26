@@ -26,6 +26,9 @@ import { hasRole, requireRole } from "@/lib/auth";
 import { getSubmission } from "@/lib/data";
 import { formatDateTime } from "@/lib/format";
 
+/** Checking a claim runs after the response is sent; give it up to a minute on the server. */
+export const maxDuration = 60;
+
 export const metadata: Metadata = { title: "Review submission" };
 
 type Params = Promise<{ id: string }>;

@@ -38,17 +38,24 @@ ${wrap(text)}`,
   return (result.claims ?? []).map((c) => c.trim()).filter(Boolean).slice(0, 5);
 }
 
-export async function aiDescribeImage(image: { bytes: Buffer; mimeType: string }, caption: string | null): Promise<string> {
-  const result = await generateJson<{ notes: string }>({
+/**
+ * Reads an image in one request: every piece of visible text (any language), plus short
+ * observations for the reviewer. Much faster and lighter than running OCR on the server.
+ */
+export async function aiReadImage(image: { bytes: Buffer; mimeType: string }, caption: string | null): Promise<{ text: string; notes: string }> {
+  const result = await generateJson<{ text: string; notes: string }>({
     system: SYSTEM,
     image,
-    prompt: `Describe what this image shows in 2-4 short sentences for a fact-checker.
-Point out anything that looks edited, out of place, AI-generated, or inconsistent with the caption.
-Do not try to identify people by name.
+    prompt: `1. "text": copy out all readable text in the image exactly as written, line by line, in its original language. Use "" if there is none.
+2. "notes": in 2-4 short sentences for a fact-checker, describe what the image shows and point out anything that looks edited, out of place, AI-generated, or inconsistent with the caption. Do not identify people by name.
 ${caption ? `The image was shared with this caption:\n${wrap(caption)}` : "There was no caption."}`,
-    schema: { type: "OBJECT", properties: { notes: { type: "STRING" } }, required: ["notes"] },
+    schema: {
+      type: "OBJECT",
+      properties: { text: { type: "STRING" }, notes: { type: "STRING" } },
+      required: ["text", "notes"],
+    },
   });
-  return result.notes?.trim() ?? "";
+  return { text: (result.text ?? "").trim(), notes: (result.notes ?? "").trim() };
 }
 
 export async function aiClassifyStances(claim: string, sources: { title: string; snippet: string }[]): Promise<Stance[]> {

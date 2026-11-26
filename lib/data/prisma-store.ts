@@ -1,4 +1,5 @@
 import "server-only";
+import { isStale, STALE_MESSAGE, stoppedSteps } from "@/lib/pipeline/stale";
 import { computeAnalytics } from "@/lib/analytics";
 import { getPrisma } from "@/lib/db";
 import type { Repository } from "@/lib/data/repository";
@@ -20,6 +21,7 @@ const summarySelect = {
   publicNote: true,
   reportCount: true,
   createdAt: true,
+  updatedAt: true,
   publishedAt: true,
   assigneeId: true,
   assignee: { select: { name: true, email: true } },
@@ -33,7 +35,7 @@ function toSummary(row: SummaryRow): SubmissionSummary {
     type: row.type,
     title: row.title ?? row.url ?? row.text?.slice(0, 80) ?? "Untitled submission",
     url: row.url,
-    status: row.status,
+    status: isStale(row.status, row.updatedAt) ? "FAILED" : row.status,
     aiVerdict: row.aiVerdict,
     aiConfidence: row.aiConfidence,
     finalVerdict: row.finalVerdict,
@@ -128,13 +130,14 @@ export const prismaStore: Repository = {
       },
     });
     if (!row) return null;
+    const stale = isStale(row.status, row.updatedAt);
 
     const detail: SubmissionDetail = {
       ...toSummary(row),
       text: row.text,
       imageUrl: row.imagePath ? await getImageUrl(row.imagePath) : null,
-      steps: (row.steps ?? {}) as PipelineSteps,
-      error: row.error,
+      steps: stale ? stoppedSteps((row.steps ?? {}) as PipelineSteps) : ((row.steps ?? {}) as PipelineSteps),
+      error: stale ? STALE_MESSAGE : row.error,
       aiSummary: row.aiSummary,
       claims: row.claims.map((c) => ({ id: c.id, text: c.text })),
       evidence: row.evidence.map((e) => ({

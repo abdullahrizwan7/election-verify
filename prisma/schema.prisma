@@ -108,6 +108,7 @@ model Submission {
   evidence     Evidence[]
   reviews      Review[]
   createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @default(now()) @updatedAt
   publishedAt  DateTime?
 
   @@index([status, createdAt])

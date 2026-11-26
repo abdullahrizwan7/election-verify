@@ -1,5 +1,5 @@
 import "server-only";
-import { aiDescribeImage, aiExtractClaims, aiSynthesize } from "@/lib/ai/tasks";
+import { aiExtractClaims, aiReadImage, aiSynthesize } from "@/lib/ai/tasks";
 import { isAiConfigured } from "@/lib/ai/gemini";
 import { services } from "@/lib/config";
 import {
@@ -16,8 +16,10 @@ import {
   ANALYZABLE_TYPES,
   buildMetadataEvidence,
   buildOcrEvidence,
+  cleanOcrText,
   readMetadata,
   readTextInImage,
+  type OcrResult,
 } from "@/lib/pipeline/analyze-image";
 import { StepError } from "@/lib/pipeline/errors";
 import { extractArticle } from "@/lib/pipeline/extract-article";
@@ -107,27 +109,38 @@ export const PIPELINE: PipelineStep[] = [
         items.push(...buildSimilarImageEvidence(findSimilarImages(fingerprint, await listImageFingerprints(id))));
       }
 
-      const ocr = await readTextInImage(image.bytes).catch((error) => {
-        console.error("[pipeline] OCR failed", error);
-        return { text: "", words: [], width: 0, height: 0 };
-      });
-      items.push(buildOcrEvidence(ocr));
-
+      // Read the text in the picture. With Gemini this is one quick request (text and
+      // observations together); without an AI key, Tesseract runs on the server instead.
+      let notes = "";
+      let ocr: OcrResult = { text: "", words: [], width: 0, height: 0 };
       if (isAiConfigured()) {
-        const notes = await aiDescribeImage(image, input.text).catch(() => "");
-        if (notes) {
-          items.push({
-            claimId: null,
-            kind: "AI_IMAGE_NOTES",
-            title: "AI observations (not proof)",
-            url: null,
-            publisher: null,
-            rating: null,
-            stance: null,
-            snippet: notes,
-            publishedAt: null,
-          });
+        const read = await aiReadImage(image, input.text).catch((error) => {
+          console.error("[pipeline] AI image reading failed", error);
+          return null;
+        });
+        if (read) {
+          ocr = { text: cleanOcrText(read.text), words: [], width: 0, height: 0 };
+          notes = read.notes;
         }
+      } else {
+        ocr = await readTextInImage(image.bytes).catch((error) => {
+          console.error("[pipeline] OCR failed", error);
+          return ocr;
+        });
+      }
+      items.push(buildOcrEvidence(ocr));
+      if (notes) {
+        items.push({
+          claimId: null,
+          kind: "AI_IMAGE_NOTES",
+          title: "AI observations (not proof)",
+          url: null,
+          publisher: null,
+          rating: null,
+          stance: null,
+          snippet: notes,
+          publishedAt: null,
+        });
       }
 
       await replaceEvidence(id, ["IMAGE_METADATA", "OCR_TEXT", "AI_IMAGE_NOTES", "IMAGE_MATCH"], items);

@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getCurrentUser } from "@/lib/auth";
 
+/** Checking a claim runs after the response is sent; give it up to a minute on the server. */
+export const maxDuration = 60;
+
 export const metadata: Metadata = { title: "Submit a claim" };
 
 const TIPS = ["submit.tip1", "submit.tip2", "submit.tip3", "submit.tip4"] as const;
