@@ -134,7 +134,8 @@ async function smoothScroll(to, ms = 1800) {
         const step = (now) => {
           const k = Math.min(1, (now - start) / ms);
           window.scrollTo(0, from + (target - from) * (0.5 - Math.cos(Math.PI * k) / 2));
-          k < 1 ? requestAnimationFrame(step) : done();
+          if (k < 1) requestAnimationFrame(step);
+          else done();
         };
         requestAnimationFrame(step);
       }),
