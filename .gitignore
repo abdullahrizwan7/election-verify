@@ -63,3 +63,8 @@ next-env.d.ts
 /video/voice/
 /video/characters/raw/
 /.venv-tts/
+
+# Walkthrough video: working files and the rendered MP4 (shared separately)
+video/walkthrough/raw/
+video/walkthrough/voice/
+docs/ElectionVerify-Walkthrough.mp4

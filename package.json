@@ -21,7 +21,8 @@
     "docs:pdf": "node scripts/workflow-pdf.mjs",
     "docs:report": "node scripts/project-report.mjs",
     "video": "node scripts/render-video.mjs",
-    "video:audio": "node scripts/make-narration.mjs"
+    "video:audio": "node scripts/make-narration.mjs",
+    "video:walkthrough": "node scripts/walkthrough.mjs"
   },
   "dependencies": {
     "@mozilla/readability": "^0.6.0",

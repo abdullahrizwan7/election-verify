@@ -4,14 +4,32 @@
     {
       "name": "prod",
       "runtimeExecutable": "sh",
-      "runtimeArgs": ["-c", "NEXT_TELEMETRY_DISABLED=1 npm run build && npm run start -- -p 3100"],
+      "runtimeArgs": [
+        "-c",
+        "NEXT_TELEMETRY_DISABLED=1 npm run build && npm run start -- -p 3100"
+      ],
       "port": 3100
     },
     {
       "name": "dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--", "-p", "3101"],
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--",
+        "-p",
+        "3101"
+      ],
       "port": 3101
+    },
+    {
+      "name": "demo",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "DATABASE_URL= NEXT_PUBLIC_SUPABASE_URL= NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY= SUPABASE_SECRET_KEY= ADMIN_EMAILS= GEMINI_API_KEY= GOOGLE_FACT_CHECK_API_KEY= TAVILY_API_KEY= NEXT_TELEMETRY_DISABLED=1 npm run build && DATABASE_URL= NEXT_PUBLIC_SUPABASE_URL= NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY= SUPABASE_SECRET_KEY= ADMIN_EMAILS= GEMINI_API_KEY= GOOGLE_FACT_CHECK_API_KEY= TAVILY_API_KEY= npm run start -- -p 3300"
+      ],
+      "port": 3300
     }
   ]
 }
