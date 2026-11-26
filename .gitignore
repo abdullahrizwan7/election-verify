@@ -68,3 +68,9 @@ next-env.d.ts
 video/walkthrough/raw/
 video/walkthrough/voice/
 docs/ElectionVerify-Walkthrough.mp4
+video/walkthrough/presenter-model/
+video/walkthrough/presenter/
+video/walkthrough/voice.wav
+video/walkthrough/timeline.json
+docs/ElectionVerify-Walkthrough-Presenter.mp4
+video/walkthrough/presenter-run.log

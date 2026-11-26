@@ -8,12 +8,16 @@
  *    (".claude/launch.json" has this as the "demo" configuration.)
  * 2. npm run video:walkthrough   → docs/ElectionVerify-Walkthrough.mp4
  *
+ * With a 3D presenter character (needs Blender; see scripts/presenter.py):
+ *      PRESENTER_BLEND=path/to/character.blend npm run video:walkthrough
+ *    → docs/ElectionVerify-Walkthrough-Presenter.mp4, with the character talking in the corner.
+ *
  * Needs ffmpeg, Playwright's Chromium, and edge-tts for the voice
  * (python3 -m venv .venv-tts && .venv-tts/bin/pip install edge-tts).
  * The demo server keeps its data in memory, so restart it before recording again.
  */
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
@@ -26,7 +30,10 @@ const VOICE = "en-IN-NeerjaNeural";
 const RATE = "+6%";
 const dir = resolve(root, "video/walkthrough");
 const voiceDir = resolve(dir, "voice");
-const output = resolve(root, "docs/ElectionVerify-Walkthrough.mp4");
+const PRESENTER = process.env.PRESENTER_BLEND ? resolve(process.env.PRESENTER_BLEND) : null;
+const BLENDER = process.env.BLENDER ?? "/Applications/Blender.app/Contents/MacOS/Blender";
+const FPS = 25;
+const output = resolve(root, PRESENTER ? "docs/ElectionVerify-Walkthrough-Presenter.mp4" : "docs/ElectionVerify-Walkthrough.mp4");
 
 /** Everything the narrator says, in order. `role` colours the caption. */
 const LINES = {
@@ -87,7 +94,7 @@ const context = await browser.newContext({
   recordVideo: { dir: rawDir, size: { width: W, height: H } },
   colorScheme: "light",
 });
-await context.addInitScript(overlayScript);
+await context.addInitScript(overlayScript, { presenter: Boolean(PRESENTER) });
 const page = await context.newPage();
 const t0 = Date.now();
 const spoken = []; // { id, at } seconds into the video
@@ -320,27 +327,102 @@ try {
 
 // ── 3. Put it together: video + voice-over at the right moments ──────────────
 const raw = execFileSync("ls", [rawDir]).toString().trim().split("\n").find((f) => f.endsWith(".webm"));
-const inputs = ["-i", resolve(rawDir, raw)];
-const filters = [];
+const rawVideo = resolve(rawDir, raw);
+const duration = Number(execFileSync("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", rawVideo]).toString());
+
+// The voice track on its own.
+const voiceTrack = resolve(dir, "voice.wav");
+const voiceInputs = [];
+const voiceFilters = [];
 spoken.forEach((s, i) => {
-  inputs.push("-i", resolve(voiceDir, `${s.id}.mp3`));
+  voiceInputs.push("-i", resolve(voiceDir, `${s.id}.mp3`));
   const ms = Math.round(s.at * 1000);
-  filters.push(`[${i + 1}:a]adelay=${ms}|${ms},apad[a${i}]`);
+  voiceFilters.push(`[${i}:a]adelay=${ms}|${ms},apad[a${i}]`);
 });
-filters.push(`${spoken.map((_, i) => `[a${i}]`).join("")}amix=inputs=${spoken.length}:normalize=0:duration=longest[voice]`);
-filters.push(`[0:v]scale=1920:1080:flags=lanczos,format=yuv420p[v]`);
+voiceFilters.push(`${spoken.map((_, i) => `[a${i}]`).join("")}amix=inputs=${spoken.length}:normalize=0:duration=longest,atrim=0:${duration.toFixed(2)}[voice]`);
+execFileSync("ffmpeg", ["-y", "-loglevel", "error", ...voiceInputs, "-filter_complex", voiceFilters.join(";"), "-map", "[voice]", "-ar", "24000", "-ac", "1", voiceTrack]);
+
+// When each line is spoken, and how loud the voice is in every video frame (it moves the presenter's mouth).
+const pcm = execFileSync("ffmpeg", ["-loglevel", "error", "-i", voiceTrack, "-f", "s16le", "-ac", "1", "-ar", "8000", "-"], { maxBuffer: 1 << 28 });
+const samples = new Int16Array(pcm.buffer, pcm.byteOffset, pcm.length / 2);
+const per = 8000 / FPS;
+const rms = [];
+for (let f = 0; f * per < samples.length; f++) {
+  let sum = 0;
+  const end = Math.min(samples.length, (f + 1) * per);
+  for (let i = f * per; i < end; i++) sum += samples[i] * samples[i];
+  rms.push(Math.sqrt(sum / Math.max(1, end - f * per)));
+}
+const loudest = [...rms].sort((a, b) => a - b)[Math.floor(rms.length * 0.97)] || 1;
+const loudness = rms.map((v) => (v < loudest * 0.06 ? 0 : Math.round(Math.min(1, (v / loudest) ** 0.8) * 1000) / 1000));
+const cards = new Set(["intro", "citizenCard", "reviewerCard", "adminCard", "outro"]);
+const lines = spoken.map((s) => ({ id: s.id, at: s.at, dur: durations[s.id] + 0.45, card: cards.has(s.id) }));
+const timelineFile = resolve(dir, "timeline.json");
+writeFileSync(timelineFile, JSON.stringify({ fps: FPS, duration, lines, loudness }));
+
+// The presenter: rendered by Blender as transparent frames.
+const presenterDir = resolve(dir, "presenter");
+if (PRESENTER) {
+  rmSync(presenterDir, { recursive: true, force: true });
+  console.log("Rendering the presenter in Blender (this takes a while)…");
+  execFileSync(BLENDER, ["-b", "--disable-autoexec", PRESENTER, "--python", resolve(root, "scripts/presenter.py"), "--",
+    "--timeline", timelineFile, "--out", presenterDir], { stdio: ["ignore", "ignore", "inherit"] });
+}
+
+const filters = [`[0:v]scale=1920:1080:flags=lanczos,fps=${FPS}[base]`];
+const inputs = ["-i", rawVideo, "-i", voiceTrack];
+if (PRESENTER) {
+  inputs.push("-framerate", String(FPS), "-start_number", "1", "-i", resolve(presenterDir, "f%04d.png"));
+  // Small in the bottom-right corner, big on the left during the title cards.
+  const onCard = lines.filter((l) => l.card).map((l) => `between(t,${(l.at - 0.3).toFixed(2)},${(l.at + l.dur + 0.5).toFixed(2)})`).join("+");
+  filters.push(`[2:v]split[p1][p2]`);
+  filters.push(`[p1]scale=-1:420[small]`);
+  filters.push(`[p2]scale=-1:860[big]`);
+  filters.push(`[base][small]overlay=x=W-w-6:y=H-h+24:enable='not(${onCard})'[s1]`);
+  filters.push(`[s1][big]overlay=x=150:y=(H-h)/2+40:enable='${onCard}',format=yuv420p[v]`);
+} else {
+  filters.push(`[base]format=yuv420p[v]`);
+}
 mkdirSync(dirname(output), { recursive: true });
 execFileSync("ffmpeg", [
   "-y", "-loglevel", "error", ...inputs,
   "-filter_complex", filters.join(";"),
-  "-map", "[v]", "-map", "[voice]", "-shortest",
-  "-c:v", "libx264", "-preset", "slow", "-crf", "21", "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart",
+  "-map", "[v]", "-map", "1:a", "-t", duration.toFixed(2),
+  "-c:v", "libx264", "-preset", "slow", "-crf", "20", "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart",
   output,
 ], { stdio: "inherit" });
+// Long silent waits (for example while a photo is being checked) are cut down to a few seconds.
+const KEEP = 2;
+const cuts = [];
+for (let i = 1; i < lines.length; i++) {
+  const end = lines[i - 1].at + lines[i - 1].dur;
+  if (lines[i].at - end > 3 * KEEP) cuts.push([end + KEEP, lines[i].at - KEEP]);
+}
+if (cuts.length) {
+  const keep = [];
+  let from = 0;
+  for (const [a, b] of cuts) {
+    keep.push([from, a]);
+    from = b;
+  }
+  keep.push([from, duration]);
+  const parts = keep.map(([a, b], i) =>
+    `[0:v]trim=${a.toFixed(2)}:${b.toFixed(2)},setpts=PTS-STARTPTS[v${i}];[0:a]atrim=${a.toFixed(2)}:${b.toFixed(2)},asetpts=PTS-STARTPTS[a${i}]`);
+  const trimmed = output.replace(/\.mp4$/, ".trimmed.mp4");
+  execFileSync("ffmpeg", [
+    "-y", "-loglevel", "error", "-i", output,
+    "-filter_complex", `${parts.join(";")};${keep.map((_, i) => `[v${i}][a${i}]`).join("")}concat=n=${keep.length}:v=1:a=1[v][a]`,
+    "-map", "[v]", "-map", "[a]", "-c:v", "libx264", "-preset", "slow", "-crf", "20", "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart",
+    trimmed,
+  ], { stdio: "inherit" });
+  renameSync(trimmed, output);
+  console.log(`Cut ${cuts.map(([a, b]) => `${(b - a).toFixed(0)} s`).join(", ")} of waiting.`);
+}
 console.log(`Saved ${output}`);
 
 // ── The caption bar, title cards, and a visible mouse pointer ────────────────
-function overlayScript() {
+function overlayScript(options) {
+  const presenter = Boolean(options?.presenter);
   const COLORS = { citizen: "#c8f169", reviewer: "#ff9b7a", admin: "#8fd3ff" };
   const NAMES = { citizen: "Citizen", reviewer: "Reviewer", admin: "Admin" };
   function mount() {
@@ -367,13 +449,17 @@ function overlayScript() {
       @keyframes wtring{from{opacity:1;transform:scale(.4)}to{opacity:0;transform:scale(1.4)}}
       #__wt .file{position:absolute;width:150px;transform:translate(-30px,-40px) rotate(-6deg);border-radius:12px;overflow:hidden;
         box-shadow:0 20px 40px -10px rgba(0,0,0,.5);border:3px solid #fff;display:none}
-      #__wt .file.on{display:block}`;
+      #__wt .file.on{display:block}
+      #__wt.with-presenter .cap{left:calc(50% - 140px);max-width:1040px}
+      #__wt.with-presenter .card{padding-left:660px;padding-right:70px}
+      #__wt.with-presenter .card p{max-width:820px}`;
     const host = document.createElement("div");
     host.id = "__wt";
     host.innerHTML = `<div class="card hide"></div><div class="cap hide"></div><div class="file"><img src="data:image/svg+xml;utf8,${encodeURIComponent(
       '<svg xmlns="http://www.w3.org/2000/svg" width="150" height="120"><rect width="150" height="120" fill="#e5ddd5"/><rect width="150" height="22" fill="#075e54"/><rect x="10" y="32" width="130" height="78" rx="8" fill="#fff"/><rect x="18" y="44" width="100" height="6" fill="#999"/><rect x="18" y="58" width="114" height="6" fill="#b00"/><rect x="18" y="72" width="90" height="6" fill="#999"/><rect x="18" y="86" width="108" height="6" fill="#999"/></svg>',
     )}" width="150"></div><div class="ring"></div><div class="ptr"><svg width="26" height="26" viewBox="0 0 24 24"><path d="M4 2l16 10-7 1.5L9.5 21z" fill="#111" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg></div>`;
     document.documentElement.append(style, host);
+    if (presenter) host.classList.add("with-presenter");
     const ptr = host.querySelector(".ptr");
     const ring = host.querySelector(".ring");
     const file = host.querySelector(".file");
