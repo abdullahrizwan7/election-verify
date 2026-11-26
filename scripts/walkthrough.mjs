@@ -37,7 +37,7 @@ const CARTOON = Boolean(PRESENTER) && process.env.VOICE_STYLE !== "plain";
 const VOICE = CARTOON ? "en-US-GuyNeural" : "en-IN-NeerjaNeural";
 const RATE = CARTOON ? "+12%" : "+6%";
 const PITCH = CARTOON ? "+30Hz" : "+0Hz";
-const VOICE_FILTER = CARTOON ? "asetrate=24000*1.55,aresample=24000,atempo=0.72,equalizer=f=3000:t=q:w=1:g=3,volume=1.4,alimiter=limit=0.89" : null;
+const VOICE_FILTER = CARTOON ? "asetrate=24000*1.55,aresample=24000,atempo=0.72,equalizer=f=3000:t=q:w=1:g=3,volume=1.4,alimiter=limit=0.89:level=false" : null;
 const output = resolve(root, PRESENTER ? "docs/ElectionVerify-Walkthrough-Presenter.mp4" : "docs/ElectionVerify-Walkthrough.mp4");
 
 /** Everything the narrator says, in order. `role` colours the caption. */
