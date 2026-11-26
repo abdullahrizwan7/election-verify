@@ -26,13 +26,18 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const BASE = process.env.BASE_URL ?? "http://localhost:3300";
 const W = 1600;
 const H = 900;
-const VOICE = "en-IN-NeerjaNeural";
-const RATE = "+6%";
 const dir = resolve(root, "video/walkthrough");
 const voiceDir = resolve(dir, "voice");
 const PRESENTER = process.env.PRESENTER_BLEND ? resolve(process.env.PRESENTER_BLEND) : null;
 const BLENDER = process.env.BLENDER ?? "/Applications/Blender.app/Contents/MacOS/Blender";
 const FPS = 25;
+// With the cartoon presenter the narrator gets a squeaky, fast cartoon voice and funnier lines
+// (VOICE_STYLE=plain keeps the normal voice).
+const CARTOON = Boolean(PRESENTER) && process.env.VOICE_STYLE !== "plain";
+const VOICE = CARTOON ? "en-US-GuyNeural" : "en-IN-NeerjaNeural";
+const RATE = CARTOON ? "+12%" : "+6%";
+const PITCH = CARTOON ? "+30Hz" : "+0Hz";
+const VOICE_FILTER = CARTOON ? "asetrate=24000*1.55,aresample=24000,atempo=0.72,equalizer=f=3000:t=q:w=1:g=3,volume=1.4,alimiter=limit=0.89" : null;
 const output = resolve(root, PRESENTER ? "docs/ElectionVerify-Walkthrough-Presenter.mp4" : "docs/ElectionVerify-Walkthrough.mp4");
 
 /** Everything the narrator says, in order. `role` colours the caption. */
@@ -60,6 +65,32 @@ const LINES = {
   outro: { role: null, text: "That's ElectionVerify. Citizens report, the system gathers evidence, humans decide, and everyone can check before they share." },
 };
 
+/** The same story in the cartoon presenter's voice: playful, but still explains every step. */
+const CARTOON_LINES = {
+  intro: "Bello! I'm your little yellow guide. During elections, fake news spreads super fast on WhatsApp. Ooh, dangerous! With ElectionVerify, anyone can send a suspicious claim, the system gathers the evidence, and a real human reviewer gives the verdict. Let's go see the citizen, the reviewer, and the admin!",
+  citizenCard: "Part one. The citizen! Hee hee.",
+  home: "This is the home page. Real, live numbers: claims sent in, verdicts published, and claims waiting for a reviewer. Click any tile, and it opens the real page!",
+  verified: "Anyone can search the verdicts that are already published. No sign-in. Easy peasy!",
+  signin: "To send a new claim, the citizen signs in with Google or an email link. No passwords! I always forget them anyway.",
+  drop: "Uh oh. Somebody forwarded this message in the family WhatsApp group. Very suspicious! The citizen just drags the screenshot onto the page.",
+  submit: "The form opens with the photo already attached. Add where you saw it, and press submit. Boop!",
+  progress: "Now the machines do the boring work! They read the text in the photo, find the claims, and search fact-checkers and trusted sources. The citizen can watch every step, live.",
+  waiting: "Evidence ready! Now a human reviewer will decide. The verdict appears right here, and all your claims are listed under My claims.",
+  reviewerCard: "Part two. The reviewer!",
+  board: "Reviewers work on a board. New claims are still being checked, then they need review, then someone reviews them, and then, ta-da, published!",
+  drag: "The reviewer drags the new claim into In review. Now it's theirs, so two reviewers never fight over the same claim. No fighting!",
+  evidence: "The claim page shows everything the system found: the text from the photo, image checks, fact-checks, trusted sources, and an AI suggestion. But the AI only gives a hint!",
+  verdict: "The human makes the final call. This claim is false! Polling hours did not change, and everyone in the queue at closing time can still vote. Write a short explanation, and publish!",
+  published: "Now the verdict is public! Anyone can read it, see the evidence, and share the link right back into that WhatsApp group. Ha ha!",
+  adminCard: "Part three. The admin, the big boss!",
+  people: "The admin manages people. Everyone starts as a citizen, and the boss makes trusted people reviewers, right here.",
+  sources: "The admin also keeps the list of trusted sources. It decides how much each website's evidence counts.",
+  analytics: "Analytics show how many claims come in, how fast they're reviewed, and which verdicts are most common. Ooh, charts!",
+  activity: "And every important action is written in the activity log, so everybody stays honest.",
+  outro: "That's ElectionVerify! Citizens report, the system gathers evidence, humans decide, and everyone checks before they share. Poopaye!",
+};
+if (CARTOON) for (const [id, text] of Object.entries(CARTOON_LINES)) LINES[id].text = text;
+
 // ── 1. Voice-over: one clip per line (cached until the text changes) ──────────
 mkdirSync(voiceDir, { recursive: true });
 const EDGE_TTS = resolve(root, ".venv-tts/bin/edge-tts");
@@ -68,11 +99,13 @@ const cache = existsSync(cacheFile) ? JSON.parse(readFileSync(cacheFile, "utf8")
 const durations = {};
 for (const [id, line] of Object.entries(LINES)) {
   const mp3 = resolve(voiceDir, `${id}.mp3`);
-  const key = `${VOICE}|${RATE}|${line.text}`;
+  const key = `${VOICE}|${RATE}|${PITCH}|${VOICE_FILTER}|${line.text}`;
   if (cache[id] !== key || !existsSync(mp3)) {
     for (let attempt = 1; ; attempt++) {
       try {
-        execFileSync(EDGE_TTS, ["--voice", VOICE, `--rate=${RATE}`, "--text", line.text, "--write-media", mp3], { stdio: "ignore" });
+        const spoken = VOICE_FILTER ? mp3.replace(/\.mp3$/, ".raw.mp3") : mp3;
+        execFileSync(EDGE_TTS, ["--voice", VOICE, `--rate=${RATE}`, `--pitch=${PITCH}`, "--text", line.text, "--write-media", spoken], { stdio: "ignore" });
+        if (VOICE_FILTER) execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", spoken, "-af", VOICE_FILTER, mp3]);
         break;
       } catch (error) {
         if (attempt >= 5) throw error;
